@@ -208,6 +208,12 @@
   will-change: transform;
 }
 
+@media (pointer: coarse) {
+  .usp-marquee {
+    will-change: auto;
+  }
+}
+
 /* ── MOBILE NAVIGATION ITEMS ──────────────────────────────────────────── */
 .mobile-nav-item {
   display: flex;

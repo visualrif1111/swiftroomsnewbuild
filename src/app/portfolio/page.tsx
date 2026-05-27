@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,11 @@ const allTags = ["All", "Villa", "Apartment", "Townhouse", "Commercial", "Garden
 export default function PortfolioPage() {
   const [activeTag, setActiveTag] = useState("All");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
 
   const filtered =
     activeTag === "All"
@@ -100,13 +105,8 @@ export default function PortfolioPage() {
               transition={{ duration: 0.3 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             >
-              {filtered.map((project, i) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.04 }}
-                >
+              {filtered.map((project, i) => {
+                const cardInner = (
                   <Link
                     href={`/portfolio/${project.slug}`}
                     className="group block overflow-hidden border border-gray-100 hover:border-[#007969]/30 transition-all duration-300 bg-white active:scale-[0.98]"
@@ -164,8 +164,20 @@ export default function PortfolioPage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
-              ))}
+                );
+                return isTouch ? (
+                  <div key={project.id}>{cardInner}</div>
+                ) : (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.04 }}
+                  >
+                    {cardInner}
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </AnimatePresence>
 
