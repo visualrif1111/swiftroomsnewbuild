@@ -133,7 +133,7 @@ export default function Home() {
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section ref={heroRef} className="relative h-[100dvh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transform: "translateZ(0)" }}>
           <div
             className="absolute top-1/2 left-1/2"
             style={{
@@ -242,7 +242,7 @@ export default function Home() {
           </div>
         </div>
         {/* Mobile: auto-scrolling marquee */}
-        <div className="md:hidden py-4">
+        <div className="md:hidden py-4 overflow-hidden">
           <div className="flex usp-marquee">
             {[...usps, ...usps].map((u, i) => (
               <div key={i} className="flex items-center gap-2 text-white flex-shrink-0 px-6">
@@ -365,16 +365,12 @@ export default function Home() {
                 </Link>
               </div>
               <div className="relative h-[300px] sm:h-[340px] md:h-[420px] lg:h-[560px]">
-                <ScrollReveal delay={0.1}>
-                  <div className="absolute top-0 right-0 w-[75%] h-[55%] overflow-hidden rounded-2xl shadow-2xl">
-                    <Image src="/brand/hero-villa-dubai.png" alt="Modern Dubai villa with bi-fold doors" fill className="object-cover" />
-                  </div>
-                </ScrollReveal>
-                <ScrollReveal delay={0.2}>
-                  <div className="absolute bottom-0 left-0 w-[65%] h-[50%] overflow-hidden rounded-2xl shadow-2xl border-4 border-white">
-                    <Image src="/brand/product-bedroom-doors.png" alt="Bedroom with casement doors" fill className="object-cover" />
-                  </div>
-                </ScrollReveal>
+                <div className="absolute top-0 right-0 w-[75%] h-[55%] overflow-hidden rounded-2xl shadow-2xl">
+                  <Image src="/brand/hero-villa-dubai.png" alt="Modern Dubai villa with bi-fold doors" fill className="object-cover" />
+                </div>
+                <div className="absolute bottom-0 left-0 w-[65%] h-[50%] overflow-hidden rounded-2xl shadow-2xl border-4 border-white">
+                  <Image src="/brand/product-bedroom-doors.png" alt="Bedroom with casement doors" fill className="object-cover" />
+                </div>
                 <div className="absolute top-[50%] left-[35%] w-16 h-16 bg-[#007969] rounded-2xl flex items-center justify-center shadow-xl z-10">
                   <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -504,7 +500,7 @@ export default function Home() {
 
           {/* ── Mobile: 2-per-view snap carousel ── */}
           <div className="md:hidden">
-            <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-5 px-5 gap-3 pb-2">
+            <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-3 pb-2">
               {brands.map((brand, i) => (
                 <Link
                   key={brand.name}
