@@ -1,0 +1,9 @@
+{
+  "buildCommand": "",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/pages/:page", "destination": "/pages/:page.html" }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

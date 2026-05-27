@@ -1,0 +1,13 @@
+{
+  "name": "swiftrooms-clone",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "serve dist -l 8080",
+    "build": "node rebuild.js"
+  },
+  "devDependencies": {
+    "serve": "^14.2.6",
+    "vercel": "^54.5.0"
+  }
+}

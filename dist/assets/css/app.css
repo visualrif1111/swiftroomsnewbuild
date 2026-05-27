@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js" translate="no">
+  <head>
+    <title>NPS</title>
+    <meta name="robots" content="noindex">
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" href="https://d2nce6johdc51d.cloudfront.net/img/trustmary-favicon.png" sizes="72x72" />
+    <link href="https://d6kkbl5noya5t.cloudfront.net/build/53ff067/app.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <script>
+      window.dataLayer = window.dataLayer || []
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://d6kkbl5noya5t.cloudfront.net/build/53ff067/runtime.js"></script>
+    <script src="https://d6kkbl5noya5t.cloudfront.net/build/53ff067/app.js"></script>
+  </body>
+</html>
