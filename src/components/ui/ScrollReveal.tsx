@@ -22,8 +22,8 @@ export default function ScrollReveal({
 
   const initial = {
     opacity: 0,
-    y: direction === "up" ? 40 : 0,
-    x: direction === "left" ? -40 : direction === "right" ? 40 : 0,
+    y: direction === "up" ? 20 : 0,
+    x: direction === "left" ? -20 : direction === "right" ? 20 : 0,
   };
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function ScrollReveal({
       initial={initial}
       animate={controls}
       transition={{
-        duration: 0.9,
+        duration: 0.6,
         delay,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
