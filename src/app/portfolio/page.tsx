@@ -123,7 +123,7 @@ export default function PortfolioPage() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       <div className="absolute top-4 left-4">
-                        <span className="text-[0.55rem] tracking-widest uppercase text-white bg-black/40 backdrop-blur-sm px-2 py-1">
+                        <span className="text-[0.55rem] tracking-widest uppercase text-white bg-black/40 px-2 py-1">
                           {project.type}
                         </span>
                       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -50,6 +50,10 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
 
   /* carousel refs & active-slide state */
   const productCarouselRef = useRef<HTMLDivElement>(null);
@@ -157,7 +161,7 @@ export default function Home() {
         />
         <motion.div
           className="relative z-10 w-full max-w-screen-xl mx-auto px-5 md:px-8 pb-24 md:pb-28"
-          style={{ opacity: heroOpacity }}
+          style={isTouch ? undefined : { opacity: heroOpacity }}
         >
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -576,7 +580,7 @@ export default function Home() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute top-3 left-3">
-                    <span className="text-[0.55rem] tracking-widest uppercase text-white bg-black/40 backdrop-blur-sm px-2 py-1">
+                    <span className="text-[0.55rem] tracking-widest uppercase text-white bg-black/40 px-2 py-1">
                       {card.badge}
                     </span>
                   </div>
