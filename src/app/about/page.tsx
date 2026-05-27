@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export const metadata: Metadata = {
@@ -42,43 +43,36 @@ export default function AboutPage() {
       <section className="pt-40 pb-24 md:pt-52 md:pb-32">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#c4a55f] mb-6">About Swiftrooms</p>
+            <p className="text-label text-[#007969] mb-6">About Swiftrooms</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <h1 className="text-headline text-white mb-8 max-w-4xl">
-              The UAE&apos;s trusted authority
-              <br />
-              <span
-                className="text-white/40 italic font-light"
-                style={{ fontFamily: "var(--font-dm-serif)" }}
-              >
-                in premium glazing.
-              </span>
+            <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-4xl">
+              The UAE&apos;s trusted authority in premium glazing.
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-body-lg text-white/50 max-w-2xl">
+            <p className="text-body-lg text-[#6b7280] max-w-2xl">
               Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain
-              wall systems across the UAE since 2009. We are authorised partners for Cortizo, Gulf
-              Extrusion and Vetromax — three of the world&apos;s leading aluminium and glazing
+              wall systems across the UAE since 2009. We are authorised partners for Cortizo,
+              Vetromax and Deceuninck — three of the world&apos;s leading aluminium and glazing
               systems manufacturers.
             </p>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* Rule */}
+      {/* Divider */}
       <div className="max-w-screen-xl mx-auto px-6 md:px-10">
-        <div className="rule-gold" />
+        <div className="divider-brand" />
       </div>
 
       {/* Story */}
       <section className="py-24 md:py-32">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        <div className="max-w-screen-xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24">
           <ScrollReveal>
             <div>
-              <p className="text-label text-[#c4a55f] mb-6">Our Story</p>
-              <div className="space-y-5 text-white/50 leading-relaxed">
+              <p className="text-label text-[#007969] mb-6">Our Story</p>
+              <div className="space-y-5 text-[#6b7280] leading-relaxed">
                 <p>
                   Swiftrooms was founded with a single purpose: to bring European-grade aluminium
                   window and door systems to the UAE market, installed to European standards.
@@ -104,22 +98,32 @@ export default function AboutPage() {
           </ScrollReveal>
 
           <div className="space-y-6">
+            <ScrollReveal delay={0.1}>
+              <div className="relative h-48 sm:h-64 lg:h-72 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+                  alt="Luxury UAE villa with premium glazing"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </ScrollReveal>
             <ScrollReveal delay={0.15}>
-              <div className="bg-[#0d0d0d] border border-white/10 p-8">
-                <div className="text-4xl font-bold text-white mb-2">500+</div>
-                <div className="text-label text-[#c4a55f]">Projects completed</div>
+              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
+                <div className="text-4xl font-bold text-[#007969] mb-2">500+</div>
+                <div className="text-label text-[#6b7280]">Projects completed</div>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
-              <div className="bg-[#0d0d0d] border border-white/10 p-8">
-                <div className="text-4xl font-bold text-white mb-2">15+</div>
-                <div className="text-label text-[#c4a55f]">Years in the UAE</div>
+              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
+                <div className="text-4xl font-bold text-[#007969] mb-2">15+</div>
+                <div className="text-label text-[#6b7280]">Years in the UAE</div>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={0.25}>
-              <div className="bg-[#0d0d0d] border border-white/10 p-8">
-                <div className="text-4xl font-bold text-white mb-2">7</div>
-                <div className="text-label text-[#c4a55f]">Emirates served</div>
+              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
+                <div className="text-4xl font-bold text-[#007969] mb-2">7</div>
+                <div className="text-label text-[#6b7280]">Emirates served</div>
               </div>
             </ScrollReveal>
           </div>
@@ -127,29 +131,22 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-[#0d0d0d] border-y border-white/10">
+      <section className="py-20 bg-[#f8f9fa] border-y border-gray-100">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#c4a55f] mb-4">What We Stand For</p>
-            <h2 className="text-title text-white mb-14 max-w-xl">
-              Our values shape
-              <br />
-              <span
-                className="text-white/40 italic font-light"
-                style={{ fontFamily: "var(--font-dm-serif)" }}
-              >
-                every project.
-              </span>
+            <p className="text-label text-[#007969] mb-4">What We Stand For</p>
+            <h2 className="text-title text-[#1c1c1e] mb-14 max-w-xl">
+              Our values shape every project.
             </h2>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
             {values.map((v, i) => (
               <ScrollReveal key={v.number} delay={i * 0.1}>
-                <div className="bg-[#0d0d0d] p-8 md:p-10">
-                  <span className="text-label text-[#c4a55f] mb-4 block">{v.number}</span>
-                  <h3 className="text-white text-xl font-semibold mb-3">{v.title}</h3>
-                  <p className="text-white/40 leading-relaxed">{v.description}</p>
+                <div className="bg-white p-6 md:p-10">
+                  <span className="text-label text-[#007969] mb-4 block">{v.number}</span>
+                  <h3 className="text-[#1c1c1e] text-xl font-semibold mb-3">{v.title}</h3>
+                  <p className="text-[#6b7280] leading-relaxed">{v.description}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -158,28 +155,22 @@ export default function AboutPage() {
       </section>
 
       {/* Showroom CTA */}
-      <section className="py-28 md:py-40">
+      <section className="py-16 md:py-40">
         <ScrollReveal>
           <div className="max-w-screen-xl mx-auto px-6 md:px-10 text-center">
-            <p className="text-label text-[#c4a55f] mb-6">Experience it in person</p>
-            <h2 className="text-title text-white mb-6 max-w-2xl mx-auto">
+            <p className="text-label text-[#007969] mb-6">Experience it in person</p>
+            <h2 className="text-title text-[#1c1c1e] mb-6 max-w-2xl mx-auto">
               Visit our Jebel Ali showroom
             </h2>
-            <p className="text-white/40 max-w-lg mx-auto mb-10 leading-relaxed">
+            <p className="text-[#6b7280] max-w-lg mx-auto mb-10 leading-relaxed">
               See our full product range at full scale, meet our specification team and discuss your
               project in person.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/showroom"
-                className="inline-flex items-center justify-center gap-3 bg-[#c4a55f] text-black px-10 py-4 text-[0.75rem] tracking-widest uppercase font-medium hover:bg-[#d4b87a] transition-colors"
-              >
+              <Link href="/showroom" className="btn-brand">
                 Book a Showroom Visit
               </Link>
-              <Link
-                href="/enquire"
-                className="inline-flex items-center justify-center gap-3 border border-white/20 text-white px-10 py-4 text-[0.75rem] tracking-widest uppercase hover:border-white/50 transition-all"
-              >
+              <Link href="/enquire" className="btn-outline">
                 Get a Quote
               </Link>
             </div>

@@ -51,19 +51,15 @@ export default function ResourcesPage() {
       <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#c4a55f] mb-6">Technical</p>
+            <p className="text-label text-[#007969] mb-6">Technical</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <h1 className="text-headline text-white mb-8">
-              Technical
-              <br />
-              <span className="text-white/40 italic font-light" style={{ fontFamily: "var(--font-dm-serif)" }}>
-                resources.
-              </span>
+            <h1 className="text-headline text-[#1c1c1e] mb-8">
+              Technical resources.
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-body-lg text-white/50 max-w-2xl">
+            <p className="text-body-lg text-[#6b7280] max-w-2xl">
               Data sheets, installation guides, performance certifications and maintenance documentation.
               Contact us to request specific documents.
             </p>
@@ -72,7 +68,7 @@ export default function ResourcesPage() {
       </section>
 
       <div className="max-w-screen-xl mx-auto px-6 md:px-10">
-        <div className="rule-gold" />
+        <div className="divider-brand" />
       </div>
 
       <section className="py-20">
@@ -80,26 +76,26 @@ export default function ResourcesPage() {
           {resources.map((section, si) => (
             <ScrollReveal key={section.category} delay={si * 0.1}>
               <div>
-                <p className="text-label text-[#c4a55f] mb-6">{section.category}</p>
+                <p className="text-label text-[#007969] mb-6">{section.category}</p>
                 <div className="space-y-0">
-                  {section.items.map((item, i) => (
+                  {section.items.map((item) => (
                     <div
                       key={item.name}
-                      className="flex items-center justify-between py-4 border-b border-white/10 group hover:bg-white/[0.02] px-2 -mx-2 transition-colors"
+                      className="flex items-center justify-between py-4 border-b border-gray-100 group hover:bg-[#f8f9fa] px-2 -mx-2 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 border border-white/10 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="w-8 h-8 border border-gray-200 flex items-center justify-center flex-shrink-0 bg-white">
+                          <svg className="w-3.5 h-3.5 text-[#007969]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <span className="text-white/60 text-sm">{item.name}</span>
+                        <span className="text-[#3a3a3c] text-sm">{item.name}</span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-[0.6rem] tracking-widest uppercase text-white/20 border border-white/10 px-2 py-1">
+                        <span className="text-[0.6rem] tracking-widests uppercase text-gray-400 border border-gray-200 px-2 py-1">
                           {item.type}
                         </span>
-                        <button className="text-[0.65rem] tracking-widest uppercase text-white/20 hover:text-[#c4a55f] transition-colors">
+                        <button className="text-[0.65rem] tracking-widests uppercase text-gray-400 hover:text-[#007969] transition-colors">
                           Request
                         </button>
                       </div>
@@ -111,21 +107,23 @@ export default function ResourcesPage() {
           ))}
         </div>
 
-        <ScrollReveal>
-          <div className="max-w-screen-xl mx-auto px-6 md:px-10 mt-16 p-8 border border-[#c4a55f]/20 bg-[#c4a55f]/5">
-            <p className="text-label text-[#c4a55f] mb-3">Can&apos;t find what you need?</p>
-            <p className="text-white/40 mb-4">
-              Contact our technical team for specific documentation, BIM objects, CAD files or
-              custom specification data.
-            </p>
-            <a
-              href="mailto:info@swiftrooms.ae"
-              className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#c4a55f] hover:text-white transition-colors"
-            >
-              info@swiftrooms.ae →
-            </a>
-          </div>
-        </ScrollReveal>
+        <div className="max-w-screen-xl mx-auto px-6 md:px-10 mt-16">
+          <ScrollReveal>
+            <div className="p-8 border border-[#007969]/20 bg-[#f0fdf4]">
+              <p className="text-label text-[#007969] mb-3">Can&apos;t find what you need?</p>
+              <p className="text-[#6b7280] mb-4">
+                Contact our technical team for specific documentation, BIM objects, CAD files or
+                custom specification data.
+              </p>
+              <a
+                href="mailto:info@swiftrooms.ae"
+                className="inline-flex items-center gap-2 text-[0.7rem] tracking-widests uppercase text-[#007969] hover:text-[#005a50] transition-colors"
+              >
+                info@swiftrooms.ae →
+              </a>
+            </div>
+          </ScrollReveal>
+        </div>
       </section>
     </>
   );

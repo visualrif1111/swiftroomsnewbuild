@@ -15,20 +15,20 @@ export default function GalleryPage() {
       <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-white/30 mb-8">
-              <Link href="/catalogue" className="hover:text-white transition-colors">Catalogue</Link>
+            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widests uppercase text-gray-400 mb-8">
+              <Link href="/catalogue" className="hover:text-[#007969] transition-colors">Catalogue</Link>
               <span>/</span>
-              <span className="text-white/60">Gallery</span>
+              <span className="text-[#6b7280]">Gallery</span>
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#c4a55f] mb-4">Inspiration</p>
-            <h1 className="text-headline text-white mb-8">
+            <p className="text-label text-[#007969] mb-4">Inspiration</p>
+            <h1 className="text-headline text-[#1c1c1e] mb-8">
               Gallery
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-body-lg text-white/50 max-w-2xl">
+            <p className="text-body-lg text-[#6b7280] max-w-2xl">
               Photography from completed Swiftrooms installations across Dubai, Abu Dhabi and the wider UAE.
             </p>
           </ScrollReveal>
@@ -36,7 +36,7 @@ export default function GalleryPage() {
       </section>
 
       <div className="max-w-screen-xl mx-auto px-6 md:px-10">
-        <div className="rule-gold" />
+        <div className="divider-brand" />
       </div>
 
       <section className="py-20">
@@ -50,16 +50,13 @@ export default function GalleryPage() {
                   className="group block break-inside-avoid"
                 >
                   <div
-                    className="w-full relative overflow-hidden"
-                    style={{
-                      height: `${280 + (i % 3) * 80}px`,
-                      background: `linear-gradient(${135 + i * 20}deg, hsl(${i * 25}, 10%, 12%) 0%, hsl(${i * 25 + 40}, 6%, 8%) 100%)`,
-                    }}
+                    className="w-full relative overflow-hidden bg-[#f0fdf4]"
+                    style={{ height: `${280 + (i % 3) * 80}px` }}
                   >
-                    {/* Decorative geometric element */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                    {/* Decorative element */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
                       <div
-                        className="border border-white/20"
+                        className="border border-[#007969]/30"
                         style={{
                           width: `${60 + (i % 4) * 20}px`,
                           height: `${60 + (i % 4) * 20}px`,
@@ -69,12 +66,12 @@ export default function GalleryPage() {
                     </div>
 
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                      <p className="text-[0.6rem] tracking-widest uppercase text-[#c4a55f] mb-1">
+                    <div className="absolute inset-0 bg-[#007969]/85 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                      <p className="text-[0.6rem] tracking-widests uppercase text-white/80 mb-1">
                         {project.type}
                       </p>
                       <p className="text-white font-semibold">{project.name}</p>
-                      <p className="text-white/50 text-xs">{project.location}</p>
+                      <p className="text-white/70 text-xs">{project.location}</p>
                     </div>
                   </div>
                 </Link>

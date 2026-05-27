@@ -21,53 +21,68 @@ const companyLinks = [
   { label: "FAQ", href: "/technical/faq" },
 ];
 
-const contactLinks = [
-  { label: "Get a Quote", href: "/enquire" },
-  { label: "Showroom Visit", href: "/showroom" },
-  { label: "Contact Us", href: "/contact" },
-];
-
 export default function Footer() {
   return (
-    <footer className="bg-[#0d0d0d] border-t border-white/10">
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-20">
-        {/* Top */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-          {/* Brand column */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="inline-block mb-6">
-              <span className="text-white font-bold text-xl tracking-widest uppercase">
-                Swift<span className="text-[#c4a55f]">rooms</span>
-              </span>
-            </Link>
-            <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-8">
-              Premium aluminium windows, doors and glazing systems for UAE residential and commercial projects.
-              Authorised partners for Cortizo, Gulf Extrusion and Vetromax.
+    <footer className="bg-[#030213] text-white">
+      {/* CTA strip */}
+      <div className="bg-[#007969]">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="font-heading text-xl font-bold text-white mb-1">
+              Free quote &amp; site visit within 24 hours
             </p>
-            <div className="space-y-2">
-              <p className="text-label text-[#c4a55f]">Showroom</p>
-              <p className="text-white/50 text-sm">
-                Jebel Ali Industrial Area 1<br />
-                Dubai, UAE
-              </p>
-              <a
-                href="tel:+971000000000"
-                className="block text-white/50 text-sm hover:text-white transition-colors mt-3"
-              >
+            <p className="text-white/70 text-sm">No obligation. Professional survey. Written specification.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-shrink-0">
+            <Link
+              href="/enquire"
+              className="bg-white text-[#007969] font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-gray-50 transition-colors text-center"
+            >
+              Get a Quote
+            </Link>
+            <Link
+              href="/showroom"
+              className="border border-white/40 text-white font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-white/10 transition-colors text-center"
+            >
+              Visit Showroom
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main footer */}
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-10 mb-10 md:mb-14">
+          {/* Brand */}
+          <div className="lg:col-span-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo.svg"
+              alt="Swiftrooms"
+              className="h-10 w-auto mb-6 opacity-90"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+            <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-7">
+              Performance windows, doors and glazing systems for UAE residential and commercial
+              projects. Engineered to perform. Built to outlast.
+            </p>
+            <div className="space-y-1.5 text-sm">
+              <p className="text-label text-[#007969] mb-3">Contact</p>
+              <a href="tel:+971000000000" className="block text-white/50 hover:text-white transition-colors">
                 +971 (0) 00 000 0000
               </a>
-              <a
-                href="mailto:info@swiftrooms.ae"
-                className="block text-white/50 text-sm hover:text-white transition-colors"
-              >
+              <a href="mailto:info@swiftrooms.ae" className="block text-white/50 hover:text-white transition-colors">
                 info@swiftrooms.ae
               </a>
+              <p className="text-white/30 mt-3">
+                Jebel Ali Industrial Area 1<br />Dubai, UAE
+              </p>
             </div>
           </div>
 
           {/* Products */}
           <div>
-            <p className="text-label text-[#c4a55f] mb-5">Products</p>
+            <p className="text-label text-[#007969] mb-5">Products</p>
             <ul className="space-y-2.5">
               {productLinks.map((l) => (
                 <li key={l.href}>
@@ -81,7 +96,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <p className="text-label text-[#c4a55f] mb-5">Company</p>
+            <p className="text-label text-[#007969] mb-5">Company</p>
             <ul className="space-y-2.5">
               {companyLinks.map((l) => (
                 <li key={l.href}>
@@ -93,37 +108,39 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Hours */}
           <div>
-            <p className="text-label text-[#c4a55f] mb-5">Contact</p>
-            <ul className="space-y-2.5">
-              {contactLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-white/40 text-sm hover:text-white transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
+            <p className="text-label text-[#007969] mb-5">Showroom Hours</p>
+            <div className="space-y-2 text-sm text-white/40">
+              <div className="flex justify-between gap-4">
+                <span>Sun – Thu</span><span>9:00 – 18:00</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span>Saturday</span><span>10:00 – 15:00</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span>Friday</span><span>Closed</span>
+              </div>
+            </div>
             <div className="mt-8">
-              <p className="text-label text-[#c4a55f] mb-4">Business Hours</p>
-              <p className="text-white/40 text-sm">Sun – Thu: 9:00 – 18:00</p>
-              <p className="text-white/40 text-sm">Sat: 10:00 – 15:00</p>
+              <p className="text-label text-[#007969] mb-3">Brand Partners</p>
+              <div className="space-y-1.5 text-sm text-white/30">
+                <p>Cortizo</p>
+                <p>Vetromax</p>
+                <p>Deceuninck</p>
+                <p>Gulf Extrusion</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Rule */}
-        <div className="rule-gold mb-8" />
-
-        {/* Bottom */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <p className="text-white/30 text-xs">
+        {/* Bottom bar */}
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <p className="text-white/20 text-xs">
             © {new Date().getFullYear()} Swiftrooms. All rights reserved.
           </p>
-          <p className="text-white/20 text-xs">
-            Authorised partners for Cortizo · Gulf Extrusion · Vetromax
+          <p className="text-white/15 text-xs">
+            Authorised partners for Cortizo · Vetromax · Deceuninck · Gulf Extrusion
           </p>
         </div>
       </div>

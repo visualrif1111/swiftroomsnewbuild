@@ -13,6 +13,7 @@ export type ProductCategory = {
   slug: string;
   description: string;
   tagline: string;
+  image?: string;
   products: Product[];
 };
 
@@ -38,6 +39,7 @@ export type PortfolioProject = {
   description: string;
   products: string[];
   tags: string[];
+  image?: string;
 };
 
 export type TeamMember = {
@@ -74,13 +76,13 @@ export const brands: Brand[] = [
     speciality: ["Tilt & Turn", "Sliding Systems", "Curtain Wall", "TB600 Series"],
   },
   {
-    id: "al-ghurair",
-    name: "Al Ghurair",
-    country: "UAE",
+    id: "deceuninck",
+    name: "Deceuninck",
+    country: "Belgium",
     description:
-      "Part of the Al Ghurair Group, one of the UAE's largest diversified conglomerates. Their aluminium profiles are trusted for commercial and residential projects across the GCC.",
-    tagline: "UAE heritage. Global standards.",
-    speciality: ["Curtain Wall", "Facade Systems", "Commercial Projects"],
+      "A world-leading Belgian manufacturer of uPVC and composite window and door systems. Deceuninck profiles are recognised across Europe for outstanding thermal performance, design versatility and long-term durability in demanding climates.",
+    tagline: "Belgian engineering. Global performance.",
+    speciality: ["uPVC Windows", "uPVC Doors", "Sliding Systems", "Tilt & Turn"],
   },
   {
     id: "vetromax",
@@ -101,6 +103,7 @@ export const productCategories: ProductCategory[] = [
     name: "Aluminium Doors",
     slug: "aluminium-doors",
     tagline: "Threshold-defining precision.",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
     description:
       "From statement entrance doors to expansive sliding walls of glass, our aluminium door collection redefines the boundary between inside and out.",
     products: [
@@ -228,6 +231,7 @@ export const productCategories: ProductCategory[] = [
     name: "Aluminium Windows",
     slug: "aluminium-windows",
     tagline: "Light. Framed perfectly.",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
     description:
       "Our aluminium window collection covers every architectural requirement — from slim-sash casements to large-format tilt-and-turn, all precision-engineered for Gulf climates.",
     products: [
@@ -332,6 +336,7 @@ export const productCategories: ProductCategory[] = [
     name: "Curtain Wall & Facade",
     slug: "curtain-wall",
     tagline: "Architecture expressed in glass.",
+    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80",
     description:
       "Our curtain wall and facade systems transform commercial and residential buildings into architectural landmarks, delivering thermal performance and visual impact at scale.",
     products: [
@@ -407,6 +412,7 @@ export const productCategories: ProductCategory[] = [
     name: "Bi-Fold Doors",
     slug: "bi-fold",
     tagline: "Open everything.",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
     description:
       "Our bi-folding door systems transform walls into open vistas, connecting living spaces to gardens, terraces and pools with theatrical effect.",
     products: [
@@ -436,17 +442,18 @@ export const productCategories: ProductCategory[] = [
     name: "uPVC Windows & Doors",
     slug: "upvc",
     tagline: "Low maintenance. High performance.",
+    image: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=800&q=80",
     description:
       "Our uPVC/PVCu range delivers outstanding thermal and acoustic performance with minimal maintenance requirements — ideal for residential applications.",
     products: [
       {
         id: "upvc-casement",
-        name: "uPVC Casement Suite",
+        name: "Deceuninck uPVC Casement Suite",
         slug: "upvc-casement",
-        brand: "Gulf Extrusion",
+        brand: "Deceuninck",
         category: "upvc",
         description:
-          "A comprehensive uPVC window and door suite covering casement, tilt-turn, sliding and door systems in a fully coordinated range.",
+          "A comprehensive Deceuninck uPVC window and door suite covering casement, tilt-turn, sliding and door systems in a fully coordinated range.",
         features: [
           "5-chamber profile",
           "Steel reinforcement",
@@ -456,12 +463,12 @@ export const productCategories: ProductCategory[] = [
       },
       {
         id: "upvc-sliding",
-        name: "uPVC Sliding Window & Door",
+        name: "Deceuninck uPVC Sliding Window & Door",
         slug: "upvc-sliding",
-        brand: "Gulf Extrusion",
+        brand: "Deceuninck",
         category: "upvc",
         description:
-          "High-performance uPVC sliding system designed for UAE climate conditions, with enhanced seals and corrosion-resistant hardware.",
+          "High-performance Deceuninck uPVC sliding system designed for UAE climate conditions, with enhanced seals and corrosion-resistant hardware.",
         features: [
           "Anti-UV profile",
           "Multi-roller carrier",
@@ -476,6 +483,7 @@ export const productCategories: ProductCategory[] = [
     name: "Garden Rooms",
     slug: "garden-rooms",
     tagline: "Outdoor living, elevated.",
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
     description:
       "Our premium glass garden rooms and conservatories create year-round outdoor living spaces that seamlessly integrate with UAE architecture.",
     products: [
@@ -516,6 +524,7 @@ export const productCategories: ProductCategory[] = [
     name: "Skylights & Rooflights",
     slug: "skylights",
     tagline: "Bring the sky inside.",
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
     description:
       "From fixed pyramid rooflights to motorised opening skylights, our range brings natural light deep into interiors while maintaining weathertight performance.",
     products: [
@@ -556,6 +565,7 @@ export const productCategories: ProductCategory[] = [
     name: "Insect Screens",
     slug: "insect-screens",
     tagline: "Open without compromise.",
+    image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
     description:
       "Our insect screen range integrates invisibly with window and door systems, allowing full ventilation without unwanted guests.",
     products: [
@@ -593,6 +603,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A complete fenestration package for a premium Al Barari villa, featuring floor-to-ceiling Cor Vision Plus lift-and-slide doors opening onto a private lagoon pool, and Cortizo Cor 70 hidden sash windows throughout all upper floors.",
     products: ["Cor Vision Plus", "Cortizo Cor 70 Hidden Sash", "Premium Rooflight"],
     tags: ["Villa", "Cortizo", "Dubai", "Residential"],
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "brookfields-damac-hills",
@@ -606,6 +617,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A complete renovation of a Damac Hills villa featuring Cor Vision 4700 lift-and-slide doors, Cortizo casement windows and a bespoke garden room addition facing the golf course.",
     products: ["Cor Vision 4700", "Cortizo Casement", "Garden Room"],
     tags: ["Villa", "Renovation", "Damac Hills", "Cortizo"],
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "phoenix-damac-hills",
@@ -619,6 +631,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A full window and door replacement project in the Phoenix cluster, using Gulf Extrusion TB600 series windows throughout the property for enhanced thermal performance.",
     products: ["Gulf Extrusion TB600 Window", "Gulf Extrusion TB600 Door"],
     tags: ["Villa", "Gulf Extrusion", "Damac Hills"],
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "emirates-hills",
@@ -632,6 +645,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "One of our most prestigious residential commissions — a complete glazing overhaul of an Emirates Hills mansion featuring Cor Vision 4700 sliding doors on every elevation, a floor-to-ceiling curtain wall entrance hall and motorised skylights.",
     products: ["Cor Vision 4700", "Cortizo TP52 Curtain Wall", "Motorised Skylight"],
     tags: ["Luxury Villa", "Cortizo", "Emirates Hills", "Curtain Wall"],
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "palm-jumeirah",
@@ -645,6 +659,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A high-floor Palm Jumeirah apartment featuring floor-to-ceiling Cor Vision Plus doors opening onto a private sea-view terrace, with slimline Cortizo casement windows providing natural ventilation.",
     products: ["Cor Vision Plus", "Cortizo Casement"],
     tags: ["Apartment", "Palm Jumeirah", "Cortizo"],
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "jumeirah-village-triangle",
@@ -658,6 +673,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A contemporary townhouse in Jumeirah Village Triangle receiving Cor Vision 4600 lift-and-slide doors to the ground floor, and Gulf Extrusion TB600 tilt-and-turn windows to all upper levels.",
     products: ["Cor Vision 4600", "Gulf Extrusion TB600 Window"],
     tags: ["Townhouse", "JVT", "Cortizo", "Gulf Extrusion"],
+    image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "centro-the-villas",
@@ -671,6 +687,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "Bi-fold and sliding door installation across a newly built Centro villa, creating open-plan living with wide garden access via Cortizo bi-fold doors and Cor Vision Plus sliding systems.",
     products: ["Cortizo Bi-fold", "Cor Vision Plus"],
     tags: ["Villa", "Dubai", "Cortizo", "Bi-fold"],
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "montys-golf-course",
@@ -684,6 +701,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A large-scale commercial curtain wall and window project for the Monty's Golf Course clubhouse, featuring Gulf Extrusion CW50 curtain wall facade and TB600 commercial windows throughout the facility.",
     products: ["Gulf Extrusion CW 50mm", "Gulf Extrusion TB600 Window"],
     tags: ["Commercial", "Curtain Wall", "Golf Course", "Gulf Extrusion"],
+    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "padel-x",
@@ -697,6 +715,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "Specialist glazing installation for a premier Dubai padel tennis facility, with toughened safety glass panels and aluminium framing throughout the playing courts.",
     products: ["Cortizo TP52", "Aluminium Framing"],
     tags: ["Commercial", "Sports", "Dubai"],
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "the-springs",
@@ -710,6 +729,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A sensitive window replacement project in The Springs community, retaining the architectural character while upgrading to thermally broken aluminium systems.",
     products: ["Cortizo Casement", "uPVC Casement"],
     tags: ["Villa", "The Springs", "Dubai", "Renovation"],
+    image: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "victory-heights",
@@ -723,6 +743,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "Complete window and door package for a Sports City villa, with Cortizo Cor 70 hidden sash windows and Gulf Extrusion TB600 entrance doors delivering a clean contemporary aesthetic.",
     products: ["Cortizo Cor 70 Hidden Sash", "Gulf Extrusion TB600 Door"],
     tags: ["Villa", "Sports City", "Cortizo", "Gulf Extrusion"],
+    image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "arabian-ranches",
@@ -736,6 +757,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "Full fenestration replacement for a Palmara 2 villa in Arabian Ranches, featuring Cor Vision 4600 doors, Cortizo casement windows and a bespoke rooflight installation.",
     products: ["Cor Vision 4600", "Cortizo Casement", "Fixed Rooflight"],
     tags: ["Villa", "Arabian Ranches", "Cortizo"],
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "glass-room-abu-dhabi",
@@ -749,6 +771,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A bespoke glass garden room and conservatory addition to an Abu Dhabi villa, creating a year-round outdoor living space with integrated ventilation and solar glass.",
     products: ["Premium Garden Room", "Glass Conservatory"],
     tags: ["Garden Room", "Abu Dhabi", "Conservatory"],
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "4900-gallery",
@@ -762,6 +785,7 @@ export const portfolioProjects: PortfolioProject[] = [
       "A curated showcase of the Swiftrooms product range in a gallery setting, demonstrating the full Cortizo Cor Vision and curtain wall product lines at full scale.",
     products: ["Cor Vision 4600", "Cor Vision Plus", "Cortizo TP52"],
     tags: ["Gallery", "Showroom", "Cortizo"],
+    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
