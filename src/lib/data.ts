@@ -26,6 +26,7 @@ export type Product = {
   description: string;
   features: string[];
   specs?: Record<string, string>;
+  image?: string;
 };
 
 export type PortfolioProject = {
@@ -128,6 +129,7 @@ export const productCategories: ProductCategory[] = [
           "Thermal Transmittance": "Uf 2.4 W/m²K",
           "Air Permeability": "Class 4",
         },
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cor-vision-4700",
@@ -148,6 +150,7 @@ export const productCategories: ProductCategory[] = [
           "Max Panel Width": "4,000mm",
           "Max Panel Height": "3,500mm",
         },
+        image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cor-vision-plus",
@@ -163,6 +166,7 @@ export const productCategories: ProductCategory[] = [
           "Integrated insect screen channel",
           "180° opening capability",
         ],
+        image: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cortizo-cor-70-door",
@@ -178,6 +182,7 @@ export const productCategories: ProductCategory[] = [
           "Low threshold option",
           "RC2 burglar resistance",
         ],
+        image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "front-entrance-aluminium",
@@ -193,6 +198,7 @@ export const productCategories: ProductCategory[] = [
           "3-point security locking",
           "Custom RAL powder coat finishes",
         ],
+        image: "https://images.unsplash.com/photo-1561958595-c74b59cf48a0?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "gulf-extrusion-tb600-door",
@@ -208,6 +214,7 @@ export const productCategories: ProductCategory[] = [
           "Corrosion-resistant hardware",
           "Wide colour range",
         ],
+        image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "vetro-pivot",
@@ -223,6 +230,7 @@ export const productCategories: ProductCategory[] = [
           "Concealed hydraulic pivot mechanism",
           "Full-glass and panel variants",
         ],
+        image: "https://images.unsplash.com/photo-1618220048045-10a6dbdf83e0?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -253,6 +261,7 @@ export const productCategories: ProductCategory[] = [
           "Frame Depth": "70mm",
           "Thermal Transmittance": "Uf 2.0 W/m²K",
         },
+        image: "https://images.unsplash.com/photo-1531971589569-0d9370cbe1e5?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cortizo-cor-70-industrial",
@@ -268,6 +277,7 @@ export const productCategories: ProductCategory[] = [
           "Concealed drainage",
           "Lift-out option for cleaning",
         ],
+        image: "https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cortizo-casement",
@@ -283,6 +293,7 @@ export const productCategories: ProductCategory[] = [
           "Full colour customisation",
           "Double and triple glazed",
         ],
+        image: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "gulf-extrusion-tb600-window",
@@ -298,6 +309,7 @@ export const productCategories: ProductCategory[] = [
           "Anti-corrosion finish",
           "Acoustic glass compatible",
         ],
+        image: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "aluminium-sliding-window",
@@ -313,6 +325,7 @@ export const productCategories: ProductCategory[] = [
           "Integrated fly screen",
           "Powder coated finishes",
         ],
+        image: "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "vetro-casement",
@@ -328,6 +341,7 @@ export const productCategories: ProductCategory[] = [
           "RAL and anodised finishes",
           "Triple glazing ready",
         ],
+        image: "https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -359,6 +373,7 @@ export const productCategories: ProductCategory[] = [
           "Wind Load Resistance": "+/-4.0 kPa",
           "Water Tightness": "750 Pa",
         },
+        image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "cortizo-tp52-equity",
@@ -374,6 +389,7 @@ export const productCategories: ProductCategory[] = [
           "Unitised and stick build options",
           "Custom profile finishes",
         ],
+        image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "gulf-extrusion-cw50",
@@ -389,6 +405,7 @@ export const productCategories: ProductCategory[] = [
           "Natural drainage system",
           "Compatible with structural glazing",
         ],
+        image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "vetromax-vf35",
@@ -404,6 +421,7 @@ export const productCategories: ProductCategory[] = [
           "Flush external surface",
           "Opaque band decoration",
         ],
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -434,6 +452,7 @@ export const productCategories: ProductCategory[] = [
           "Max Opening Width": "8,000mm",
           "Max Leaf Height": "3,000mm",
         },
+        image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -460,6 +479,7 @@ export const productCategories: ProductCategory[] = [
           "Multi-point locking",
           "White and colour foils",
         ],
+        image: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "upvc-sliding",
@@ -475,6 +495,7 @@ export const productCategories: ProductCategory[] = [
           "Fly screen channels",
           "Weather-rated hardware",
         ],
+        image: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -501,6 +522,7 @@ export const productCategories: ProductCategory[] = [
           "Integrated ventilation",
           "Insulated glazing",
         ],
+        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "glass-conservatory",
@@ -516,6 +538,7 @@ export const productCategories: ProductCategory[] = [
           "Thermally broken frames",
           "Integrated blinds",
         ],
+        image: "https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -542,6 +565,7 @@ export const productCategories: ProductCategory[] = [
           "Up to 8m² clear span",
           "Condensation drainage",
         ],
+        image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
       },
       {
         id: "motorised-skylight",
@@ -557,6 +581,7 @@ export const productCategories: ProductCategory[] = [
           "Remote and app operation",
           "Acoustic glass options",
         ],
+        image: "https://images.unsplash.com/photo-1525438160292-a4a860951216?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },
@@ -583,6 +608,7 @@ export const productCategories: ProductCategory[] = [
           "Matching powder coat finish",
           "Side-slide and pleated types",
         ],
+        image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
       },
     ],
   },

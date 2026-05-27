@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { brands, productCategories } from "@/lib/data";
+
+const brandImages: Record<string, string> = {
+  cortizo: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+  "gulf-extrusion": "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1200&q=80",
+  deceuninck: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=1200&q=80",
+  vetromax: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
+};
 
 export const metadata: Metadata = {
   title: "Brand Partners",
@@ -78,6 +86,18 @@ export default function BrandsPage() {
 
                   <ScrollReveal delay={0.15}>
                     <div>
+                      {brandImages[brand.id] && (
+                        <div className="relative h-48 md:h-64 overflow-hidden mb-8">
+                          <Image
+                            src={brandImages[brand.id]}
+                            alt={brand.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                        </div>
+                      )}
                       {brandProducts.length > 0 && (
                         <>
                           <p className="text-label text-[#007969] mb-6">Products we supply</p>

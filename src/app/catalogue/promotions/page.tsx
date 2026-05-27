@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ const promotions = [
     value: "Worth AED 2,500",
     cta: "Enquire Now",
     href: "/enquire",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "bifold-promo",
@@ -27,6 +29,7 @@ const promotions = [
     value: "Contact for pricing",
     cta: "Get a Quote",
     href: "/enquire",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: "showroom-visit",
@@ -37,6 +40,7 @@ const promotions = [
     value: "No obligation",
     cta: "Book Showroom",
     href: "/showroom",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -70,7 +74,20 @@ export default function PromotionsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {promotions.map((promo, i) => (
               <ScrollReveal key={promo.id} delay={i * 0.1}>
-                <div className="border border-gray-100 hover:border-[#007969]/40 transition-all duration-300 p-8 flex flex-col h-full bg-white">
+                <div className="border border-gray-100 hover:border-[#007969]/40 transition-all duration-300 flex flex-col h-full bg-white overflow-hidden">
+                  {promo.image && (
+                    <div className="relative h-44 flex-shrink-0">
+                      <Image
+                        src={promo.image}
+                        alt={promo.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    </div>
+                  )}
+                  <div className="p-8 flex flex-col flex-1">
                   <span className="text-[0.6rem] tracking-widests uppercase text-[#007969] border border-[#007969]/30 px-2 py-1 self-start mb-6">
                     {promo.badge}
                   </span>
@@ -91,6 +108,7 @@ export default function PromotionsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
+                  </div>
                   </div>
                 </div>
               </ScrollReveal>

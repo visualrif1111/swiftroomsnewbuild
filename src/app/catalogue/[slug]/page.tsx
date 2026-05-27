@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -11,18 +12,31 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-function ProductCard({ product, index }: { product: (typeof productCategories)[0]["products"][0]; index: number }) {
+function ProductCard({ product, index, categoryImage }: { product: (typeof productCategories)[0]["products"][0]; index: number; categoryImage?: string }) {
   const [specsOpen, setSpecsOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(true);
+  const heroImage = product.image ?? categoryImage;
 
   return (
     <ScrollReveal key={product.id} delay={index * 0.08}>
       <div className="bg-white p-5 md:p-8 lg:p-10 hover:bg-[#f8f9fa] transition-colors duration-300">
-        {/* Visual placeholder */}
-        <div className="w-full h-36 md:h-48 mb-6 md:mb-8 flex items-center justify-center relative overflow-hidden bg-[#f0fdf4]">
-          <div className="w-16 md:w-20 h-16 md:h-20 border border-[#007969]/20 rotate-45" />
+        {/* Product image */}
+        <div className="w-full h-36 md:h-48 mb-6 md:mb-8 relative overflow-hidden bg-[#f0fdf4]">
+          {heroImage ? (
+            <Image
+              src={heroImage}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 md:w-20 h-16 md:h-20 border border-[#007969]/20 rotate-45" />
+            </div>
+          )}
           <div className="absolute top-3 right-3 md:top-4 md:right-4">
-            <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] border border-[#007969]/30 px-2 py-1 bg-white">
+            <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] border border-[#007969]/30 px-2 py-1 bg-white/90">
               {product.brand}
             </span>
           </div>
@@ -167,7 +181,7 @@ export default function CategoryPage({ params }: Props) {
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
             {category.products.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
+              <ProductCard key={product.id} product={product} index={i} categoryImage={category.image} />
             ))}
           </div>
         </div>

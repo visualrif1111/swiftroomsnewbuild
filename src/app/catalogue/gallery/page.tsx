@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { portfolioProjects } from "@/lib/data";
 
@@ -53,20 +54,18 @@ export default function GalleryPage() {
                     className="w-full relative overflow-hidden bg-[#f0fdf4]"
                     style={{ height: `${280 + (i % 3) * 80}px` }}
                   >
-                    {/* Decorative element */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                      <div
-                        className="border border-[#007969]/30"
-                        style={{
-                          width: `${60 + (i % 4) * 20}px`,
-                          height: `${60 + (i % 4) * 20}px`,
-                          transform: `rotate(${i * 15}deg)`,
-                        }}
+                    {project.image && (
+                      <Image
+                        src={project.image}
+                        alt={project.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
-                    </div>
+                    )}
 
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-[#007969]/85 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <div className="absolute inset-0 bg-[#007969]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                       <p className="text-[0.6rem] tracking-widests uppercase text-white/80 mb-1">
                         {project.type}
                       </p>
