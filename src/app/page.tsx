@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative h-screen min-h-[700px] overflow-hidden flex items-end bg-[#030a08]">
+      <section ref={heroRef} className="relative h-[100dvh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
 
         {/* YouTube video background — scaled to cover full viewport */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -70,7 +70,7 @@ export default function Home() {
 
         {/* Hero content */}
         <motion.div
-          className="relative z-10 w-full max-w-screen-xl mx-auto px-5 md:px-8 pb-16 md:pb-28"
+          className="relative z-10 w-full max-w-screen-xl mx-auto px-5 md:px-8 pb-24 md:pb-28"
           style={{ opacity: heroOpacity }}
         >
           <motion.p
@@ -107,7 +107,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.65 }}
-            className="flex flex-col sm:flex-row gap-3"
+            className="hidden sm:flex flex-col sm:flex-row gap-3"
           >
             <Link href="/enquire" className="btn-brand">
               Get a Free Quote
@@ -158,7 +158,7 @@ export default function Home() {
       </section>
 
       {/* ── SWIFTROOMS SOLUTION ───────────────────────────────────────────── */}
-      <section className="py-24 md:py-32 bg-white">
+      <section className="py-16 md:py-24 lg:py-32 bg-white">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
             <div className="text-center mb-14">
@@ -227,7 +227,7 @@ export default function Home() {
       </section>
 
       {/* ── TRANSFORM YOUR SPACE ──────────────────────────────────────────── */}
-      <section className="py-24 bg-white overflow-hidden">
+      <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
@@ -269,7 +269,7 @@ export default function Home() {
               </div>
 
               {/* Image stack */}
-              <div className="relative h-[260px] sm:h-[380px] lg:h-[560px]">
+              <div className="relative h-[220px] sm:h-[320px] md:h-[400px] lg:h-[560px]">
                 <ScrollReveal delay={0.1}>
                   <div className="absolute top-0 right-0 w-[75%] h-[55%] overflow-hidden rounded-2xl shadow-2xl">
                     <Image
@@ -303,7 +303,7 @@ export default function Home() {
       </section>
 
       {/* ── PRODUCTS ──────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[#f8f9fa]">
+      <section className="py-16 md:py-24 bg-[#f8f9fa]">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
@@ -318,7 +318,7 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {/* Featured card with real image */}
             <ScrollReveal className="md:col-span-2 lg:col-span-2">
               <Link href="/catalogue/aluminium-doors" className="group block relative h-72 overflow-hidden rounded-2xl card-hover">
@@ -408,7 +408,7 @@ export default function Home() {
       </section>
 
       {/* ── PORTFOLIO ─────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[#f8f9fa]">
+      <section className="py-16 md:py-24 bg-[#f8f9fa]">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
@@ -421,9 +421,9 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {/* Featured skylight project using real photo */}
-            <ScrollReveal className="md:col-span-2">
+            <ScrollReveal className="sm:col-span-2">
               <Link href="/portfolio/4900-gallery" className="group block relative h-72 overflow-hidden rounded-2xl">
                 <Image
                   src="/brand/project-skylight-restaurant.jpg"
@@ -494,7 +494,7 @@ export default function Home() {
               </Link>
             </div>
           </ScrollReveal>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
             {processSteps.map((step, i) => (
               <ScrollReveal key={step.number} delay={i * 0.07}>
                 <div className="relative">

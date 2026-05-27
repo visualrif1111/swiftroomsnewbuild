@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 export default function ProcessPage() {
   return (
     <>
-      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">Technical</p>
           </ScrollReveal>
@@ -31,12 +31,12 @@ export default function ProcessPage() {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
       <section className="py-24">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="space-y-0">
             {processSteps.map((step, i) => (
               <ScrollReveal key={step.number} delay={i * 0.08}>
@@ -58,7 +58,7 @@ export default function ProcessPage() {
       {/* CTA */}
       <section className="py-20 bg-[#007969]">
         <ScrollReveal>
-          <div className="max-w-screen-xl mx-auto px-6 md:px-10 text-center">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
             <p className="text-label text-white/70 mb-4">Ready to start?</p>
             <h2 className="text-title text-white mb-6">Begin with a consultation</h2>
             <p className="text-white/70 mb-10 max-w-md mx-auto">

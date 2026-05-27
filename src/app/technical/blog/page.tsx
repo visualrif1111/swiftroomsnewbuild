@@ -74,8 +74,8 @@ const posts = [
 export default function BlogPage() {
   return (
     <>
-      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">Technical</p>
           </ScrollReveal>
@@ -92,12 +92,12 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
       <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
             {posts.map((post, i) => (
               <ScrollReveal key={post.slug} delay={i * 0.07}>

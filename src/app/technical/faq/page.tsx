@@ -11,8 +11,8 @@ export default function FAQPage() {
 
   return (
     <>
-      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">Technical</p>
           </ScrollReveal>
@@ -30,12 +30,12 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
       <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10 max-w-3xl">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 max-w-3xl">
           <div className="space-y-0">
             {faqs.map((faq, i) => (
               <ScrollReveal key={i} delay={i * 0.05}>
@@ -79,7 +79,7 @@ export default function FAQPage() {
 
       <section className="py-20 border-t border-gray-100 bg-[#f8f9fa]">
         <ScrollReveal>
-          <div className="max-w-screen-xl mx-auto px-6 md:px-10 text-center">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
             <p className="text-label text-[#007969] mb-4">Still have questions?</p>
             <h2 className="text-title text-[#1c1c1e] mb-6">Talk to our team</h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

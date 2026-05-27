@@ -48,8 +48,8 @@ const resources = [
 export default function ResourcesPage() {
   return (
     <>
-      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">Technical</p>
           </ScrollReveal>
@@ -67,12 +67,12 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
       <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10 space-y-16">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 space-y-16">
           {resources.map((section, si) => (
             <ScrollReveal key={section.category} delay={si * 0.1}>
               <div>
@@ -107,7 +107,7 @@ export default function ResourcesPage() {
           ))}
         </div>
 
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10 mt-16">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mt-16">
           <ScrollReveal>
             <div className="p-8 border border-[#007969]/20 bg-[#f0fdf4]">
               <p className="text-label text-[#007969] mb-3">Can&apos;t find what you need?</p>

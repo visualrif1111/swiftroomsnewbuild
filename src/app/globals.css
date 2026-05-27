@@ -197,3 +197,113 @@
 .bg-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
+
+/* ── MOBILE NAVIGATION ITEMS ──────────────────────────────────────────── */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  font-family: "Exo", sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #1c1c1e;
+  border-bottom: 1px solid #f3f4f6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: color 0.2s ease, background 0.2s ease;
+  min-height: 56px;
+}
+.mobile-nav-item:hover, .mobile-nav-item:active {
+  color: #007969;
+  background: #f0fdf4;
+}
+
+.mobile-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.8125rem 1.5rem;
+  font-family: "Barlow", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #3a3a3c;
+  border-bottom: 1px solid #f3f4f6;
+  transition: color 0.2s ease, background 0.2s ease;
+  min-height: 48px;
+}
+.mobile-sub-item:hover, .mobile-sub-item:active {
+  color: #007969;
+  background: #f0fdf4;
+}
+
+.mobile-deep-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.6875rem 2rem;
+  font-family: "Barlow", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
+  border-bottom: 1px solid #f9fafb;
+  transition: color 0.2s ease;
+  min-height: 44px;
+}
+.mobile-deep-item:hover, .mobile-deep-item:active {
+  color: #007969;
+}
+
+/* Safe area for notched phones */
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Touch-friendly tap targets */
+@media (max-width: 1023px) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .card-hover:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Swipeable horizontal scroll */
+.swipe-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.swipe-scroll::-webkit-scrollbar { display: none; }
+.swipe-scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Prevent horizontal overflow */
+@media (max-width: 767px) {
+  .text-display {
+    font-size: clamp(2.75rem, 12vw, 5rem);
+    line-height: 0.96;
+  }
+  .text-headline {
+    font-size: clamp(1.75rem, 7vw, 3rem);
+    line-height: 1.08;
+  }
+  .text-title {
+    font-size: clamp(1.375rem, 5.5vw, 2rem);
+    line-height: 1.15;
+  }
+}
+
+/* Tablet-specific overrides (768–1023) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .text-display {
+    font-size: clamp(3.5rem, 9vw, 6.5rem);
+  }
+}

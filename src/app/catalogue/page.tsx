@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 export default function CataloguePage() {
   return (
     <>
-      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">Catalogue</p>
           </ScrollReveal>
@@ -32,12 +32,12 @@ export default function CataloguePage() {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
-      <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="py-12 md:py-20">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           {/* Quick links */}
           <ScrollReveal>
             <div className="flex gap-2 md:gap-3 mb-10 md:mb-16 overflow-x-auto pb-2 -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
@@ -66,7 +66,7 @@ export default function CataloguePage() {
           </ScrollReveal>
 
           {/* Category grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
             {productCategories.map((cat, i) => (
               <ScrollReveal key={cat.id} delay={i * 0.06}>
                 <Link
@@ -84,7 +84,7 @@ export default function CataloguePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </div>
                   )}
-                  <div className="p-5 sm:p-8 md:p-10">
+                  <div className="p-4 sm:p-6 md:p-8 lg:p-10">
                   <span className="text-label text-[#007969] mb-4 block">
                     {String(i + 1).padStart(2, "0")}
                   </span>

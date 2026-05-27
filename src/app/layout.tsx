@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LenisProvider from "@/components/layout/LenisProvider";
+import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 
 export const metadata: Metadata = {
   title: {
@@ -35,8 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white text-[#1c1c1e] antialiased">
         <LenisProvider>
           <Navbar />
-          <main>{children}</main>
+          <main className="pb-[72px] lg:pb-0">{children}</main>
           <Footer />
+          <StickyMobileCTA />
         </LenisProvider>
       </body>
     </html>

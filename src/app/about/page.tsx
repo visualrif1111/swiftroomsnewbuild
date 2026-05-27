@@ -40,8 +40,8 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-40 pb-24 md:pt-52 md:pb-32">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-24 lg:pt-52 lg:pb-32">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6">About Swiftrooms</p>
           </ScrollReveal>
@@ -62,13 +62,13 @@ export default function AboutPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
       {/* Story */}
-      <section className="py-24 md:py-32">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24">
+      <section className="py-16 md:py-24 lg:py-32">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24">
           <ScrollReveal>
             <div>
               <p className="text-label text-[#007969] mb-6">Our Story</p>
@@ -131,8 +131,8 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-[#f8f9fa] border-y border-gray-100">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+      <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-4">What We Stand For</p>
             <h2 className="text-title text-[#1c1c1e] mb-14 max-w-xl">
@@ -140,10 +140,10 @@ export default function AboutPage() {
             </h2>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gray-100">
             {values.map((v, i) => (
               <ScrollReveal key={v.number} delay={i * 0.1}>
-                <div className="bg-white p-6 md:p-10">
+                <div className="bg-white p-5 md:p-8 lg:p-10">
                   <span className="text-label text-[#007969] mb-4 block">{v.number}</span>
                   <h3 className="text-[#1c1c1e] text-xl font-semibold mb-3">{v.title}</h3>
                   <p className="text-[#6b7280] leading-relaxed">{v.description}</p>
@@ -155,9 +155,9 @@ export default function AboutPage() {
       </section>
 
       {/* Showroom CTA */}
-      <section className="py-16 md:py-40">
+      <section className="py-14 md:py-28 lg:py-40">
         <ScrollReveal>
-          <div className="max-w-screen-xl mx-auto px-6 md:px-10 text-center">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
             <p className="text-label text-[#007969] mb-6">Experience it in person</p>
             <h2 className="text-title text-[#1c1c1e] mb-6 max-w-2xl mx-auto">
               Visit our Jebel Ali showroom

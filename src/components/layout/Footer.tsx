@@ -52,9 +52,9 @@ export default function Footer() {
 
       {/* Main footer */}
       <div className="max-w-screen-xl mx-auto px-5 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-10 mb-10 md:mb-14">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-10 mb-10 md:mb-14">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo.svg"
@@ -135,7 +135,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="border-t border-white/10 pt-8 pb-[72px] lg:pb-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <p className="text-white/20 text-xs">
             © {new Date().getFullYear()} Swiftrooms. All rights reserved.
           </p>
