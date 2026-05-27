@@ -193,7 +193,7 @@ export default function CategoryPage({ params }: Props) {
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-6 md:mb-8">Other Product Ranges</p>
           </ScrollReveal>
-          <div className="swipe-scroll md:flex-wrap">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 md:flex-wrap md:overflow-x-visible md:pb-0">
             {productCategories
               .filter((c) => c.id !== category.id)
               .map((cat) => (

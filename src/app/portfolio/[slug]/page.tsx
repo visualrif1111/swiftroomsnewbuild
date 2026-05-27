@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { portfolioProjects } from "@/lib/data";
@@ -76,16 +77,21 @@ export default async function ProjectPage({ params }: Props) {
       {/* Main image */}
       <section className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mb-12 md:mb-20">
         <ScrollReveal>
-          <div className="w-full h-[40vh] md:h-[50vh] lg:h-[65vh] flex items-center justify-center relative overflow-hidden bg-[#f0fdf4]">
-            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <svg viewBox="0 0 400 300" className="w-full max-w-2xl" fill="none">
-                <rect x="50" y="50" width="300" height="200" stroke="#007969" strokeWidth="1" />
-                <line x1="50" y1="50" x2="350" y2="250" stroke="#007969" strokeWidth="0.5" />
-                <line x1="350" y1="50" x2="50" y2="250" stroke="#007969" strokeWidth="0.5" />
-                <circle cx="200" cy="150" r="60" stroke="#007969" strokeWidth="1" />
-              </svg>
-            </div>
-            <p className="text-[#007969]/40 text-label tracking-widest">{project.name}</p>
+          <div className="w-full h-[40vh] md:h-[50vh] lg:h-[65vh] relative overflow-hidden bg-[#f0fdf4]">
+            {project.image ? (
+              <Image
+                src={project.image}
+                alt={project.name}
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-[#007969]/40 text-label tracking-widest">{project.name}</p>
+              </div>
+            )}
           </div>
         </ScrollReveal>
       </section>
@@ -197,7 +203,17 @@ export default async function ProjectPage({ params }: Props) {
                     href={`/portfolio/${rel.slug}`}
                     className="group block border border-gray-100 hover:border-[#007969]/30 transition-all overflow-hidden bg-white active:scale-[0.98]"
                   >
-                    <div className="h-32 md:h-36 w-full bg-[#f0fdf4]" />
+                    <div className="h-32 md:h-36 w-full relative overflow-hidden bg-[#f0fdf4]">
+                      {rel.image && (
+                        <Image
+                          src={rel.image}
+                          alt={rel.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-700"
+                          sizes="(max-width: 768px) 75vw, 33vw"
+                        />
+                      )}
+                    </div>
                     <div className="p-4 md:p-5">
                       <p className="text-[#1c1c1e] font-semibold text-sm group-hover:text-[#007969] transition-colors mb-1">
                         {rel.name}

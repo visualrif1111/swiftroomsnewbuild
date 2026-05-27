@@ -190,7 +190,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.65 }}
-            className="hidden sm:flex flex-col sm:flex-row gap-3"
+            className="flex flex-col sm:flex-row gap-3"
           >
             <Link href="/enquire" className="btn-brand">
               Get a Free Quote
@@ -360,7 +360,7 @@ export default function Home() {
                   </svg>
                 </Link>
               </div>
-              <div className="relative h-[220px] sm:h-[320px] md:h-[400px] lg:h-[560px]">
+              <div className="relative h-[300px] sm:h-[340px] md:h-[420px] lg:h-[560px]">
                 <ScrollReveal delay={0.1}>
                   <div className="absolute top-0 right-0 w-[75%] h-[55%] overflow-hidden rounded-2xl shadow-2xl">
                     <Image src="/brand/hero-villa-dubai.png" alt="Modern Dubai villa with bi-fold doors" fill className="object-cover" />
@@ -739,7 +739,7 @@ export default function Home() {
               Experience our full product range at full scale. Free consultation, no obligation.
               Jebel Ali, Dubai — open Sunday to Thursday.
             </p>
-            <div className="hidden sm:flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/enquire" className="btn-brand">Get a Free Quote</Link>
               <Link href="/showroom" className="btn-outline border-white/30 text-white hover:bg-white hover:text-[#007969]">
                 Book Showroom Visit
