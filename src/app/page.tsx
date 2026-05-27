@@ -406,7 +406,7 @@ export default function Home() {
           <div className="md:hidden">
             <div
               ref={productCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-5 px-5 gap-4 pb-2"
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(productCarouselRef, setActiveProduct)}
             >
@@ -563,7 +563,7 @@ export default function Home() {
           <div className="md:hidden">
             <div
               ref={portfolioCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-5 px-5 gap-4 pb-2"
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(portfolioCarouselRef, setActivePortfolio)}
             >
@@ -665,7 +665,7 @@ export default function Home() {
           <div className="md:hidden">
             <div
               ref={processCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-5 px-5 gap-0 pb-2"
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-0 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(processCarouselRef, setActiveProcess)}
             >

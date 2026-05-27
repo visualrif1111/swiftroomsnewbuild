@@ -23,6 +23,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: "Barlow", sans-serif;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
   }
 
   * {
@@ -290,8 +295,8 @@
   display: flex;
   overflow-x: auto;
   gap: 1rem;
-  -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }

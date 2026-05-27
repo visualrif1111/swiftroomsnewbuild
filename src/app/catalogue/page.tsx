@@ -40,25 +40,25 @@ export default function CataloguePage() {
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           {/* Quick links */}
           <ScrollReveal>
-            <div className="flex gap-2 md:gap-3 mb-10 md:mb-16 overflow-x-auto pb-2 -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
+            <div className="flex gap-2 md:gap-3 mb-10 md:mb-16 overflow-x-auto overscroll-x-contain pb-2 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap scrollbar-hide">
               {productCategories.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/catalogue/${cat.slug}`}
-                  className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all"
+                  className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap flex-shrink-0"
                 >
                   {cat.name}
                 </Link>
               ))}
               <Link
                 href="/catalogue/brands"
-                className="text-[0.7rem] tracking-widests uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all"
+                className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap flex-shrink-0"
               >
                 Brands
               </Link>
               <Link
                 href="/catalogue/promotions"
-                className="text-[0.7rem] tracking-widests uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all"
+                className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap flex-shrink-0"
               >
                 Promotions
               </Link>
