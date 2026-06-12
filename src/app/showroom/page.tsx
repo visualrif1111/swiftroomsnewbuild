@@ -68,8 +68,47 @@ const visitSteps = [
 ];
 
 export default function ShowroomPage() {
+  const showroomSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "Swiftrooms 4900 Showroom",
+    description:
+      "The UAE's only showroom featuring full-scale working displays of Cortizo Cor Vision, Cor Vision Plus, TP52 curtain wall and Gulf Extrusions TB600. Open by appointment.",
+    url: "https://swiftrooms-newbuild.vercel.app/showroom",
+    telephone: "+971-4-000-0000",
+    email: "info@swiftrooms.ae",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Jebel Ali Industrial Area 1",
+      addressLocality: "Dubai",
+      addressRegion: "Dubai",
+      addressCountry: "AE",
+    },
+    geo: { "@type": "GeoCoordinates", latitude: 24.9942, longitude: 55.0614 },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+        opens: "08:30",
+        closes: "17:30",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Saturday"],
+        opens: "10:00",
+        closes: "14:00",
+      },
+    ],
+    amenityFeature: displays.map((d) => ({
+      "@type": "LocationFeatureSpecification",
+      name: d.name,
+      value: d.type,
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(showroomSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-0 md:pt-44 lg:pt-52">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">

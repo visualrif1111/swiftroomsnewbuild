@@ -24,8 +24,29 @@ export const metadata: Metadata = {
 };
 
 export default function BrandsPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const brandListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Swiftrooms Brand Partners",
+    description: "Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions aluminium systems.",
+    url: `${base}/catalogue/brands`,
+    numberOfItems: brands.length,
+    itemListElement: brands.map((brand, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Brand",
+        name: brand.name,
+        description: brand.tagline,
+        foundingLocation: { "@type": "Place", name: brand.country },
+      },
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(brandListSchema) }} />
       <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
