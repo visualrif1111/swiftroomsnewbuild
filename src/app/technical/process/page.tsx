@@ -57,7 +57,7 @@ export default function ProcessPage() {
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-8">
-              <Link href="/technical/blog" className="hover:text-[#007969] transition-colors">Technical</Link>
+              <Link href="/technical" className="hover:text-[#007969] transition-colors">Technical</Link>
               <span>/</span>
               <span className="text-[#6b7280]">Our Process</span>
             </nav>

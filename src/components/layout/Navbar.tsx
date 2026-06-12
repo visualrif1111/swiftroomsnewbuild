@@ -183,14 +183,15 @@ export default function Navbar() {
               onMouseEnter={() => openMega("technical")}
               onMouseLeave={closeMega}
             >
-              <button
+              <Link
+                href="/technical"
                 className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}
               >
                 Technical
                 <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Link>
             </li>
           </ul>
 

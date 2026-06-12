@@ -14,11 +14,11 @@ const productLinks = [
 const companyLinks = [
   { label: "About Us", href: "/about" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Promotions", href: "/catalogue/promotions" },
-  { label: "Gallery", href: "/catalogue/gallery" },
+  { label: "Technical Hub", href: "/technical" },
   { label: "Blog", href: "/technical/blog" },
   { label: "Resources", href: "/technical/resources" },
   { label: "FAQ", href: "/technical/faq" },
+  { label: "Gallery", href: "/catalogue/gallery" },
 ];
 
 export default function Footer() {

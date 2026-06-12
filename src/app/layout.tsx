@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | Swiftrooms",
   },
   description:
-    "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast. Authorised Cortizo, Vetromax and Deceuninck partners.",
+    "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
   keywords: [
     "aluminium windows Dubai",
     "aluminium doors UAE",
