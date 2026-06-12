@@ -6,6 +6,7 @@ import LenisProvider from "@/components/layout/LenisProvider";
 import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://swiftrooms-newbuild.vercel.app"),
   title: {
     default: "Swiftrooms — Performance Windows & Doors, UAE",
     template: "%s | Swiftrooms",
@@ -27,6 +28,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_AE",
     siteName: "Swiftrooms",
+    title: "Swiftrooms — Performance Windows & Doors, UAE",
+    description:
+      "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
+    url: "https://swiftrooms-newbuild.vercel.app",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Swiftrooms — Performance Windows & Doors, UAE",
+    description:
+      "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects.",
   },
 };
 

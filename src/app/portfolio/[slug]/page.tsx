@@ -20,6 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: project.name,
     description: project.description,
+    openGraph: {
+      title: `${project.name} | Swiftrooms Portfolio`,
+      description: project.description,
+      url: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}`,
+      images: project.image ? [{ url: project.image, alt: project.name }] : [],
+    },
   };
 }
 
