@@ -12,9 +12,9 @@ const promotions = [
   {
     id: "summer-2025",
     badge: "Limited Time",
-    title: "Summer 2025 Installation Offer",
+    title: "Summer 2026 Installation Offer",
     description:
-      "Free technical survey and complimentary hardware upgrade on any full villa window and door package booked before 31 August 2025.",
+      "Free technical survey and complimentary hardware upgrade on any full villa window and door package booked before 31 August 2026.",
     value: "Worth AED 2,500",
     cta: "Enquire Now",
     href: "/enquire",

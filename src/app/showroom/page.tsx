@@ -43,7 +43,7 @@ const displays = [
     type: "Structural Panel Section",
     description: "Full-height structural glazing section with exposed pressure-plate detail.",
     image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
-    link: "/catalogue/curtain-wall-systems",
+    link: "/catalogue/curtain-wall",
   },
   {
     name: "Gulf Extrusions TB600",
