@@ -45,8 +45,18 @@ export default async function ProjectPage({ params }: Props) {
     { label: "Outcome", content: project.outcome },
   ].filter((s): s is { label: string; content: string } => Boolean(s.content));
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Portfolio", item: "https://swiftrooms-newbuild.vercel.app/portfolio" },
+      { "@type": "ListItem", position: 2, name: project.name, item: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-10 md:pt-44 md:pb-16 lg:pt-52 lg:pb-24">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">

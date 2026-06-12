@@ -45,8 +45,36 @@ export default async function ProductDetailPage({ params }: Props) {
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: heroImage ?? undefined,
+    brand: { "@type": "Brand", name: product.brand },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "AED",
+      availability: "https://schema.org/InStock",
+      url: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}`,
+      seller: { "@type": "Organization", name: "Swiftrooms" },
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Catalogue", item: "https://swiftrooms-newbuild.vercel.app/catalogue" },
+      { "@type": "ListItem", position: 2, name: cat.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}` },
+      { "@type": "ListItem", position: 3, name: product.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* 1 — Hero */}
       <section className="pt-32 pb-0 md:pt-44 lg:pt-52">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">

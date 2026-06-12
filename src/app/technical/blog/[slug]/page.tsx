@@ -43,8 +43,39 @@ export default async function BlogPostPage({ params }: Props) {
   );
   const relatedPosts = [...related, ...allOther].slice(0, 3);
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    image: post.image,
+    datePublished: post.date,
+    author: { "@type": "Organization", name: "Swiftrooms", url: "https://swiftrooms-newbuild.vercel.app" },
+    publisher: {
+      "@type": "Organization",
+      name: "Swiftrooms",
+      url: "https://swiftrooms-newbuild.vercel.app",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}`,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Technical", item: "https://swiftrooms-newbuild.vercel.app/technical" },
+      { "@type": "ListItem", position: 2, name: "Blog & Insights", item: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
+      { "@type": "ListItem", position: 3, name: post.title, item: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-0 md:pt-44 lg:pt-52">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
