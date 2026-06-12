@@ -23,9 +23,9 @@ const problems = [
 
 const brands = [
   { name: "Cortizo", country: "Spain", tagline: "European precision systems" },
-  { name: "Vetromax", country: "UAE", tagline: "Minimalist aluminium systems" },
-  { name: "Deceuninck", country: "Belgium", tagline: "Premium uPVC systems" },
-  { name: "Gulf Extrusion", country: "UAE", tagline: "Built for the Gulf climate" },
+  { name: "Vetromax", country: "UAE", tagline: "Frameless & ultra-slim glazing" },
+  { name: "Vetro", country: "UAE", tagline: "Minimal sightlines. Maximum light." },
+  { name: "Gulf Extrusions", country: "UAE", tagline: "Built for the Gulf climate" },
 ];
 
 /* ── Dot indicator component ──────────────────────────────────────────────── */
@@ -84,11 +84,11 @@ export default function Home() {
     href: string; image?: string; label: string; title: string; sub: string; isImage: boolean;
   }> = [
     {
-      href: "/catalogue/aluminium-doors",
+      href: "/catalogue/aluminium-sliding-doors",
       image: "/brand/product-bifold-kitchen.png",
       label: "01",
-      title: "Aluminium Doors",
-      sub: "Lift-and-slide, bi-fold & entrance systems",
+      title: "Aluminium Sliding Doors",
+      sub: "Lift-and-slide systems from Cortizo",
       isImage: true,
     },
     ...productCategories.slice(1, 5).map((cat, i) => ({
@@ -452,13 +452,13 @@ export default function Home() {
           {/* ── Desktop: original grid ── */}
           <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-5">
             <ScrollReveal className="md:col-span-2 lg:col-span-2">
-              <Link href="/catalogue/aluminium-doors" className="group block relative h-72 overflow-hidden rounded-2xl card-hover">
-                <Image src="/brand/product-bifold-kitchen.png" alt="Aluminium bi-fold doors" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <Link href="/catalogue/aluminium-sliding-doors" className="group block relative h-72 overflow-hidden rounded-2xl card-hover">
+                <Image src="/brand/product-bifold-kitchen.png" alt="Aluminium sliding doors" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 sm:p-6">
                   <p className="text-label text-[#00a389] mb-1">01</p>
-                  <h3 className="font-heading font-bold text-xl text-white mb-1">Aluminium Doors</h3>
-                  <p className="text-white/60 text-sm">Lift-and-slide, bi-fold & entrance systems</p>
+                  <h3 className="font-heading font-bold text-xl text-white mb-1">Aluminium Sliding Doors</h3>
+                  <p className="text-white/60 text-sm">Lift-and-slide systems from Cortizo</p>
                 </div>
               </Link>
             </ScrollReveal>
