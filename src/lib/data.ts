@@ -1081,6 +1081,12 @@ export const timeline: TimelineEntry[] = [
     description:
       "Featured in international architectural and glazing trade press for our Emirates Hills and Phileas Fogg projects, bringing Swiftrooms to the attention of the wider global architecture community.",
   },
+  {
+    year: "2025",
+    title: "Vetro Partnership & Cor Vision Plus",
+    description:
+      "Became authorised Vetro partners, expanding our frameless and ultra-slim glazing offer. Launched the Cor Vision Plus flush-threshold collection — our most specified residential system to date.",
+  },
 ];
 
 // ─── FAQs ───────────────────────────────────────────────────────────────────
@@ -1231,6 +1237,55 @@ export const faqs: FAQ[] = [
 // ─── Blog Posts ─────────────────────────────────────────────────────────────
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "bi-fold-vs-lift-and-slide-uae",
+    date: "April 2026",
+    category: "Buying Guide",
+    title: "Bi-fold vs Lift-and-Slide: Which Door Is Right for Your UAE Villa?",
+    excerpt:
+      "Both systems open walls to outdoor space. But they do it differently, at different price points and with different trade-offs. Here is how to decide.",
+    readTime: "6 min read",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
+    body: [
+      {
+        heading: "The question we hear most often",
+        paragraphs: [
+          "Walk through any high-end UAE villa showroom and you will see both systems on display — the bi-fold and the lift-and-slide. They serve the same architectural purpose: opening a wall between interior and exterior living space. But they achieve it through fundamentally different mechanisms, and the right choice depends on your opening size, the view you want to frame and how you actually live in the space.",
+          "This article explains both systems plainly, from an installer's perspective — without the marketing language. By the end, you should have a clear sense of which is the better fit for your project.",
+        ],
+      },
+      {
+        heading: "How each system opens",
+        paragraphs: [
+          "A bi-fold door stacks its panels to one or both sides of the opening. Each panel folds against the next along vertical hinges, concertina-style, until the entire door set sits in a compact stack against the wall. The opening is unobstructed. There is no frame crossing the middle of the view.",
+          "A lift-and-slide door moves horizontally on tracks. Turning the handle lifts the panel fractionally off the sill seal, allowing it to glide on precision rollers. Panels park behind each other or into a pocket, leaving the opening clear up to the extent that the track allows. A two-panel system opens to roughly 50% of the overall width; a four-panel system can open further, but two panels always remain as the parked stack.",
+        ],
+      },
+      {
+        heading: "Comparing key factors",
+        paragraphs: [
+          "Opening width: bi-fold systems can span wider openings because additional panels add little structural complexity. A six-panel bi-fold can fill a 6-metre opening. Lift-and-slide systems become more complex and expensive at very large widths because each panel must be independently operable with a precision mechanism. For openings beyond 5 metres, bi-fold is often the more practical specification.",
+          "Panel size and glass area: lift-and-slide wins decisively here. Individual panels can reach 4 metres wide and 3.5 metres tall with the Cortizo 4700. Bi-fold panels are constrained by the hinge and folding mechanism — typically 1.2 metres maximum per leaf. This means bi-fold systems have more frame visible in the opening relative to glass area.",
+          "Operation in daily use: lift-and-slide is the choice for doors used daily. One handle operation, no stepping over folding panels, no dust accumulation in hinge mechanisms. Bi-fold doors with multiple leaves require a specific folding sequence and the folded panels occupy pavement space. For a living room door opened and closed multiple times daily, lift-and-slide is significantly more convenient.",
+        ],
+      },
+      {
+        heading: "The UAE climate consideration",
+        paragraphs: [
+          "Both systems can be specified with thermal break profiles and appropriate solar control glass for UAE conditions. However, the fold-and-stack mechanism of a bi-fold door creates more exposed hinge surfaces, hardware and sealing interfaces that can accumulate dust. In areas exposed to regular sandstorms, the simpler mechanism of a lift-and-slide requires less maintenance.",
+          "For a rear elevation pool terrace door opened regularly in the evenings but kept closed during daylight in summer, either system performs well. For a loggia that may be fully open for days at a time during winter months, bi-fold's complete opening might be preferable despite the maintenance premium.",
+        ],
+      },
+      {
+        heading: "Our recommendation",
+        paragraphs: [
+          "For most UAE villa living-room-to-pool connections: lift-and-slide. The daily operation, glass-to-frame ratio and long-term maintenance profile are superior. The Cortizo Cor Vision 4600 or 4700 will do this better than any bi-fold at comparable price points.",
+          "For large entertaining terraces, loggia openings or spaces where the full opening matters architecturally and the door is opened for extended periods: bi-fold. The Cortizo bi-fold system is engineered to European standards and handles the full opening width that lift-and-slide cannot practically achieve at a reasonable cost.",
+          "Both systems are available to view at full scale in our Jebel Ali showroom — operate both, experience the difference and make the decision with your hands, not just a brochure.",
+        ],
+      },
+    ],
+  },
   {
     slug: "choosing-aluminium-windows-dubai",
     date: "March 2025",
