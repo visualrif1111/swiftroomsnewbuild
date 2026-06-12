@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -81,56 +82,7 @@ export default function ContactPage() {
 
           {/* Contact form */}
           <ScrollReveal delay={0.15}>
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-label text-[#6b7280] block mb-2">First Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                    placeholder="First name"
-                  />
-                </div>
-                <div>
-                  <label className="text-label text-[#6b7280] block mb-2">Last Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                    placeholder="Last name"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-label text-[#6b7280] block mb-2">Email</label>
-                <input
-                  type="email"
-                  className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                  placeholder="your@email.com"
-                />
-              </div>
-              <div>
-                <label className="text-label text-[#6b7280] block mb-2">Phone</label>
-                <input
-                  type="tel"
-                  className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                  placeholder="+971 50 000 0000"
-                />
-              </div>
-              <div>
-                <label className="text-label text-[#6b7280] block mb-2">Message</label>
-                <textarea
-                  rows={5}
-                  className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors resize-none"
-                  placeholder="Tell us about your project..."
-                />
-              </div>
-              <button type="submit" className="btn-brand w-full justify-center">
-                Send Message
-              </button>
-              <p className="text-gray-400 text-xs text-center">
-                We typically respond within 1 business day.
-              </p>
-            </form>
+            <ContactForm />
           </ScrollReveal>
         </div>
       </section>

@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: "Cor Vision Plus Gallery",
   description:
     "Photography from completed Cor Vision Plus lift-and-slide installations across UAE villas — flush thresholds, frameless aesthetics and barrier-free indoor-outdoor living.",
+  openGraph: {
+    title: "Cor Vision Plus Gallery | Swiftrooms",
+    description:
+      "12 photographs from completed Cor Vision Plus installations across UAE villas. Flush thresholds, frameless aesthetics and barrier-free indoor-outdoor living.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision-plus",
+    images: [{ url: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Plus Gallery" }],
+  },
 };
 
 const images = [

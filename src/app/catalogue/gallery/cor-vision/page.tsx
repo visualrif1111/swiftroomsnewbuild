@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: "Cor Vision Gallery",
   description:
     "Photography from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas — minimal sightlines, maximum glass area.",
+  openGraph: {
+    title: "Cor Vision Gallery | Swiftrooms",
+    description:
+      "18 photographs from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas. Minimal sightlines, maximum glass.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision",
+    images: [{ url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Gallery" }],
+  },
 };
 
 const images = [

@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: "4900 Showroom Gallery",
   description:
     "The Swiftrooms 4900 showroom in Jebel Ali — the UAE's only space where you can experience the Cor Vision, Cor Vision Plus and TP52 curtain wall range at full scale, in working condition.",
+  openGraph: {
+    title: "4900 Showroom Gallery | Swiftrooms",
+    description:
+      "9 photographs from the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space to experience Cor Vision and TP52 curtain wall at full scale.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/4900",
+    images: [{ url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80", alt: "4900 Showroom Gallery" }],
+  },
 };
 
 const images = [
