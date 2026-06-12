@@ -128,11 +128,14 @@ function ProductCard({ product, index, categoryImage }: { product: (typeof produ
         )}
 
         <div className="mt-6 md:mt-8 flex flex-col sm:flex-row gap-3">
-          <Link href="/enquire" className="btn-brand text-xs sm:text-sm">
-            Enquire about this product
+          <Link href={`/catalogue/${product.category}/${product.slug}`} className="btn-brand text-xs sm:text-sm">
+            View Product Details
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
+          </Link>
+          <Link href="/enquire" className="btn-outline text-xs sm:text-sm">
+            Enquire
           </Link>
         </div>
       </div>
