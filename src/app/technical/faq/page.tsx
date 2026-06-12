@@ -25,7 +25,11 @@ export default function FAQPage() {
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Technical</p>
+            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-8 flex-wrap">
+              <Link href="/technical" className="hover:text-[#007969] transition-colors">Technical</Link>
+              <span>/</span>
+              <span className="text-[#6b7280]">FAQ</span>
+            </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
