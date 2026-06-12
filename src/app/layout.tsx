@@ -118,6 +118,12 @@ const webSiteSchema = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+      </head>
       <body className="bg-white text-[#1c1c1e] antialiased">
         <script
           type="application/ld+json"
