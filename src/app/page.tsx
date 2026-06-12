@@ -133,25 +133,39 @@ export default function Home() {
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section ref={heroRef} className="relative h-[100dvh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transform: "translateZ(0)" }}>
-          <div
-            className="absolute top-1/2 left-1/2"
-            style={{
-              width: "max(100vw, calc(100vh * 16 / 9))",
-              height: "max(100vh, calc(100vw * 9 / 16))",
-              transform: "translate(-50%, -50%) scale(1.25)",
-            }}
-          >
-            <iframe
-              src="https://www.youtube.com/embed/a7Q40rrVvo4?autoplay=1&mute=1&loop=1&playlist=a7Q40rrVvo4&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              className="w-full h-full"
-              style={{ border: "none", pointerEvents: "none" }}
-              title="Swiftrooms showcase"
-            />
-          </div>
+        {/* Poster image — LCP candidate, always visible */}
+        <div className="absolute inset-0 pointer-events-none">
+          <Image
+            src="/brand/hero-villa-dubai.png"
+            alt=""
+            fill
+            className="object-cover opacity-70"
+            priority
+            sizes="100vw"
+          />
         </div>
+        {/* Video overlay — desktop only, loads after poster */}
+        {!isTouch && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transform: "translateZ(0)" }}>
+            <div
+              className="absolute top-1/2 left-1/2"
+              style={{
+                width: "max(100vw, calc(100vh * 16 / 9))",
+                height: "max(100vh, calc(100vw * 9 / 16))",
+                transform: "translate(-50%, -50%) scale(1.25)",
+              }}
+            >
+              <iframe
+                src="https://www.youtube.com/embed/a7Q40rrVvo4?autoplay=1&mute=1&loop=1&playlist=a7Q40rrVvo4&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                className="w-full h-full"
+                style={{ border: "none", pointerEvents: "none" }}
+                title="Swiftrooms showcase"
+              />
+            </div>
+          </div>
+        )}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
