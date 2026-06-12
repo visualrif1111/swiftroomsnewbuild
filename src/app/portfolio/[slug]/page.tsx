@@ -28,9 +28,16 @@ export default async function ProjectPage({ params }: Props) {
   const project = portfolioProjects.find((p) => p.slug === slug);
   if (!project) notFound();
 
-  const related = portfolioProjects.filter(
-    (p) => p.id !== project.id && p.tags.some((t) => project.tags.includes(t))
-  ).slice(0, 3);
+  const related = portfolioProjects
+    .filter((p) => p.id !== project.id && p.tags.some((t) => project.tags.includes(t)))
+    .slice(0, 3);
+
+  const caseStudySections = [
+    { label: "Brief", content: project.brief },
+    { label: "Challenge", content: project.challenge },
+    { label: "Solution", content: project.solution },
+    { label: "Outcome", content: project.outcome },
+  ].filter((s): s is { label: string; content: string } => Boolean(s.content));
 
   return (
     <>
@@ -45,7 +52,6 @@ export default async function ProjectPage({ params }: Props) {
             </nav>
           </ScrollReveal>
 
-          {/* Mobile: stacked; Desktop: 2-col */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-end">
             <div>
               <ScrollReveal>
@@ -55,7 +61,6 @@ export default async function ProjectPage({ params }: Props) {
               </ScrollReveal>
             </div>
 
-            {/* Stats — horizontal scroll on mobile */}
             <ScrollReveal delay={0.15}>
               <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:pb-0">
                 {[
@@ -96,10 +101,10 @@ export default async function ProjectPage({ params }: Props) {
         </ScrollReveal>
       </section>
 
-      {/* Description — mobile: stacked CTA; desktop: sidebar */}
+      {/* Case study content */}
       <section className="py-10 md:py-16">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-          {/* Mobile inline CTA */}
+          {/* Mobile CTA */}
           <div className="lg:hidden mb-8 flex gap-3">
             <Link href="/enquire" className="flex-1 btn-brand justify-center text-xs">
               Start a Similar Project
@@ -114,13 +119,35 @@ export default async function ProjectPage({ params }: Props) {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
             <div className="lg:col-span-2">
+              {/* Project description */}
               <ScrollReveal>
                 <p className="text-label text-[#007969] mb-4 md:mb-6">Project Overview</p>
-                <p className="text-[#3a3a3c] text-base md:text-lg leading-relaxed mb-6 md:mb-8">{project.description}</p>
+                <p className="text-[#3a3a3c] text-base md:text-lg leading-relaxed mb-10 md:mb-14">
+                  {project.description}
+                </p>
               </ScrollReveal>
 
-              <div className="divider-brand mb-6 md:mb-8" />
+              {/* Case study sections */}
+              {caseStudySections.length > 0 && (
+                <div className="space-y-0">
+                  {caseStudySections.map((section, i) => (
+                    <ScrollReveal key={section.label} delay={i * 0.08}>
+                      <div className="border-t border-gray-100 py-8 md:py-10 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
+                        <div>
+                          <span className="text-label text-[#007969]">{section.label}</span>
+                        </div>
+                        <div className="md:col-span-3">
+                          <p className="text-[#6b7280] leading-relaxed">{section.content}</p>
+                        </div>
+                      </div>
+                    </ScrollReveal>
+                  ))}
+                </div>
+              )}
 
+              <div className="divider-brand my-10 md:my-14" />
+
+              {/* Products installed */}
               <ScrollReveal>
                 <p className="text-label text-[#007969] mb-4 md:mb-6">Products Installed</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
@@ -142,7 +169,7 @@ export default async function ProjectPage({ params }: Props) {
               <ScrollReveal delay={0.1}>
                 <div className="sticky top-28">
                   <p className="text-label text-[#007969] mb-6">Project Details</p>
-                  <div className="space-y-4">
+                  <div className="space-y-4 mb-8">
                     {[
                       { label: "Project Type", value: project.type },
                       { label: "Location", value: project.location },
@@ -156,7 +183,7 @@ export default async function ProjectPage({ params }: Props) {
                     ))}
                   </div>
 
-                  <div className="mt-8 space-y-3">
+                  <div className="space-y-3">
                     <Link href="/enquire" className="btn-brand w-full justify-center">
                       Start a Similar Project
                     </Link>
@@ -167,6 +194,21 @@ export default async function ProjectPage({ params }: Props) {
                       ← Back to Portfolio
                     </Link>
                   </div>
+
+                  {/* Tags */}
+                  <div className="mt-8">
+                    <p className="text-[0.6rem] tracking-widests uppercase text-gray-400 mb-3">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[0.6rem] tracking-widest uppercase text-[#6b7280] border border-gray-100 px-2.5 py-1"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </ScrollReveal>
             </div>
@@ -174,13 +216,13 @@ export default async function ProjectPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Tags */}
-      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mb-12 md:mb-16">
+      {/* Mobile tags */}
+      <div className="lg:hidden max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mb-12">
         <div className="flex flex-wrap gap-2">
           {project.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] border border-gray-100 px-3 py-1.5"
+              className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] border border-gray-100 px-3 py-1.5"
             >
               {tag}
             </span>
@@ -195,7 +237,6 @@ export default async function ProjectPage({ params }: Props) {
             <ScrollReveal>
               <p className="text-label text-[#007969] mb-6 md:mb-10">Related Projects</p>
             </ScrollReveal>
-            {/* Mobile: horizontal scroll; Desktop: grid */}
             <div className="swipe-scroll md:grid md:grid-cols-3 md:gap-6">
               {related.map((rel, i) => (
                 <ScrollReveal key={rel.id} delay={i * 0.1} className="w-[75vw] sm:w-[45vw] md:w-auto">
@@ -227,6 +268,26 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* Bottom CTA */}
+      <section className="py-16 md:py-24 border-t border-gray-100">
+        <ScrollReveal>
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
+            <p className="text-label text-[#007969] mb-4">Start your project</p>
+            <h2 className="text-title text-[#1c1c1e] mb-6 max-w-xl mx-auto">
+              Ready to transform your space?
+            </h2>
+            <p className="text-[#6b7280] max-w-md mx-auto mb-10">
+              Every Swiftrooms project begins with a conversation. Contact our team to discuss your
+              requirements.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
+              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
     </>
   );
 }

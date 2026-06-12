@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-
-export const metadata: Metadata = {
-  title: "About Us",
-  description:
-    "Swiftrooms — 15+ years supplying and installing premium aluminium windows, doors and glazing systems across the UAE.",
-};
+import { teamMembers, timeline, stats } from "@/lib/data";
 
 const values = [
   {
@@ -36,7 +34,19 @@ const values = [
   },
 ];
 
+const certifications = [
+  { name: "Cortizo Authorised Partner", detail: "UAE — since 2011" },
+  { name: "Gulf Extrusions Approved Installer", detail: "UAE — since 2015" },
+  { name: "Vetromax Authorised Partner", detail: "UAE — since 2017" },
+  { name: "QUALICOAT Certified", detail: "Powder coat quality standard" },
+  { name: "Dubai Municipality Registered", detail: "Commercial contractor" },
+  { name: "ISO 9001:2015", detail: "Quality management system" },
+];
+
 export default function AboutPage() {
+  const [activeYear, setActiveYear] = useState(0);
+  const [activeTeam, setActiveTeam] = useState(0);
+
   return (
     <>
       {/* Hero */}
@@ -54,19 +64,18 @@ export default function AboutPage() {
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
               Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain
               wall systems across the UAE since 2009. We are authorised partners for Cortizo,
-              Vetromax and Deceuninck — three of the world&apos;s leading aluminium and glazing
+              Vetromax, Vetro and Gulf Extrusions — four of the world&apos;s leading aluminium and glazing
               systems manufacturers.
             </p>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* Divider */}
       <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
         <div className="divider-brand" />
       </div>
 
-      {/* Story */}
+      {/* Company Story */}
       <section className="py-16 md:py-24 lg:py-32">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24">
           <ScrollReveal>
@@ -97,40 +106,181 @@ export default function AboutPage() {
             </div>
           </ScrollReveal>
 
-          <div className="space-y-6">
-            <ScrollReveal delay={0.1}>
-              <div className="relative h-48 sm:h-64 lg:h-72 overflow-hidden">
-                <Image
-                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
-                  alt="Luxury UAE villa with premium glazing"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.15}>
-              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
-                <div className="text-4xl font-bold text-[#007969] mb-2">500+</div>
-                <div className="text-label text-[#6b7280]">Projects completed</div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.2}>
-              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
-                <div className="text-4xl font-bold text-[#007969] mb-2">15+</div>
-                <div className="text-label text-[#6b7280]">Years in the UAE</div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.25}>
-              <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
-                <div className="text-4xl font-bold text-[#007969] mb-2">7</div>
-                <div className="text-label text-[#6b7280]">Emirates served</div>
-              </div>
-            </ScrollReveal>
+          <div className="grid grid-cols-2 gap-4">
+            {stats.map((s, i) => (
+              <ScrollReveal key={s.label} delay={i * 0.08}>
+                <div className="bg-[#f8f9fa] border border-gray-100 p-6 sm:p-8">
+                  <div className="text-3xl md:text-4xl font-bold text-[#007969] mb-2">{s.value}</div>
+                  <div className="text-label text-[#6b7280]">{s.label}</div>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Values */}
+      {/* Interactive Timeline */}
+      <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <ScrollReveal>
+            <p className="text-label text-[#007969] mb-4">Our History</p>
+            <h2 className="text-title text-[#1c1c1e] mb-12 max-w-xl">
+              Fifteen years building the UAE&apos;s finest glazing company.
+            </h2>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+            {/* Year selector */}
+            <ScrollReveal>
+              <div className="flex flex-col gap-0">
+                {timeline.map((entry, i) => (
+                  <button
+                    key={entry.year}
+                    onClick={() => setActiveYear(i)}
+                    className={`text-left flex items-start gap-5 py-4 border-b border-gray-200 group transition-all ${
+                      activeYear === i ? "border-[#007969]" : ""
+                    }`}
+                  >
+                    <span
+                      className={`text-lg font-bold transition-colors flex-shrink-0 ${
+                        activeYear === i ? "text-[#007969]" : "text-gray-300 group-hover:text-[#007969]/60"
+                      }`}
+                    >
+                      {entry.year}
+                    </span>
+                    <span
+                      className={`font-medium transition-colors ${
+                        activeYear === i ? "text-[#1c1c1e]" : "text-[#6b7280] group-hover:text-[#3a3a3c]"
+                      }`}
+                    >
+                      {entry.title}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </ScrollReveal>
+
+            {/* Detail panel */}
+            <div className="flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeYear}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full"
+                >
+                  <ScrollReveal>
+                    <div className="bg-white border border-gray-100 p-8 md:p-10">
+                      <p className="text-5xl font-bold text-[#007969] mb-2">
+                        {timeline[activeYear].year}
+                      </p>
+                      <h3 className="text-xl font-semibold text-[#1c1c1e] mb-4">
+                        {timeline[activeYear].title}
+                      </h3>
+                      <p className="text-[#6b7280] leading-relaxed">
+                        {timeline[activeYear].description}
+                      </p>
+                    </div>
+                  </ScrollReveal>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Carousel */}
+      <section className="py-16 md:py-24 lg:py-32">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <ScrollReveal>
+            <p className="text-label text-[#007969] mb-4">The Team</p>
+            <h2 className="text-title text-[#1c1c1e] mb-12 max-w-xl">
+              The people behind every project.
+            </h2>
+          </ScrollReveal>
+
+          {/* Desktop grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
+            {teamMembers.map((member, i) => (
+              <ScrollReveal key={member.name} delay={i * 0.08}>
+                <div className="bg-white p-8 lg:p-10">
+                  <div className="w-16 h-16 rounded-full overflow-hidden mb-5 relative bg-[#f0fdf4]">
+                    {member.image && (
+                      <Image
+                        src={member.image}
+                        alt={member.name}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    )}
+                  </div>
+                  <p className="font-semibold text-[#1c1c1e] mb-1">{member.name}</p>
+                  <p className="text-label text-[#007969] mb-4">{member.role}</p>
+                  <p className="text-[#6b7280] text-sm leading-relaxed">{member.bio}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          {/* Mobile carousel */}
+          <div className="md:hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTeam}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
+                className="bg-[#f8f9fa] border border-gray-100 p-6"
+              >
+                <div className="w-14 h-14 rounded-full overflow-hidden mb-4 relative bg-[#f0fdf4]">
+                  {teamMembers[activeTeam].image && (
+                    <Image
+                      src={teamMembers[activeTeam].image!}
+                      alt={teamMembers[activeTeam].name}
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  )}
+                </div>
+                <p className="font-semibold text-[#1c1c1e] mb-1">{teamMembers[activeTeam].name}</p>
+                <p className="text-label text-[#007969] mb-4">{teamMembers[activeTeam].role}</p>
+                <p className="text-[#6b7280] text-sm leading-relaxed">{teamMembers[activeTeam].bio}</p>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="flex items-center justify-between mt-4">
+              <button
+                onClick={() => setActiveTeam((p) => Math.max(0, p - 1))}
+                disabled={activeTeam === 0}
+                className="w-10 h-10 border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#007969] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <span className="text-[0.65rem] tracking-widest uppercase text-gray-400">
+                {activeTeam + 1} / {teamMembers.length}
+              </span>
+              <button
+                onClick={() => setActiveTeam((p) => Math.min(teamMembers.length - 1, p + 1))}
+                disabled={activeTeam === teamMembers.length - 1}
+                className="w-10 h-10 border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#007969] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values */}
       <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -154,24 +304,56 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Showroom CTA */}
-      <section className="py-14 md:py-28 lg:py-40">
+      {/* Certifications */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <ScrollReveal>
+            <p className="text-label text-[#007969] mb-4">Accreditations</p>
+            <h2 className="text-title text-[#1c1c1e] mb-12 max-w-xl">
+              Certified. Authorised. Trusted.
+            </h2>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
+            {certifications.map((cert, i) => (
+              <ScrollReveal key={cert.name} delay={i * 0.08}>
+                <div className="bg-white p-6 md:p-8 flex items-start gap-4">
+                  <div className="w-2 h-2 rounded-full bg-[#007969] flex-shrink-0 mt-2" />
+                  <div>
+                    <p className="font-semibold text-[#1c1c1e] mb-1">{cert.name}</p>
+                    <p className="text-[#6b7280] text-sm">{cert.detail}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-14 md:py-28 lg:py-40 bg-[#007969]">
         <ScrollReveal>
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
-            <p className="text-label text-[#007969] mb-6">Experience it in person</p>
-            <h2 className="text-title text-[#1c1c1e] mb-6 max-w-2xl mx-auto">
+            <p className="text-label text-white/70 mb-6">Experience it in person</p>
+            <h2 className="text-title text-white mb-6 max-w-2xl mx-auto">
               Visit our Jebel Ali showroom
             </h2>
-            <p className="text-[#6b7280] max-w-lg mx-auto mb-10 leading-relaxed">
+            <p className="text-white/70 max-w-lg mx-auto mb-10 leading-relaxed">
               See our full product range at full scale, meet our specification team and discuss your
               project in person.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/showroom" className="btn-brand">
+              <Link
+                href="/showroom"
+                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
+              >
                 Book a Showroom Visit
               </Link>
-              <Link href="/enquire" className="btn-outline">
-                Get a Quote
+              <Link
+                href="/enquire"
+                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
+              >
+                Get A Quote
               </Link>
             </div>
           </div>

@@ -1,77 +1,19 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { blogPosts } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description:
-    "Insights, guides and technical advice from the Swiftrooms team on windows, doors, glazing and the UAE property market.",
-};
-
-const posts = [
-  {
-    slug: "choosing-aluminium-windows-dubai",
-    date: "March 2025",
-    category: "Buying Guide",
-    title: "How to Choose Aluminium Windows for a Dubai Villa",
-    excerpt:
-      "With so many system options on the market, navigating the aluminium window specification process can feel overwhelming. Here we break down what matters most.",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "thermal-break-uae-climate",
-    date: "February 2025",
-    category: "Technical",
-    title: "Why Thermal Break Aluminium is Essential in the UAE",
-    excerpt:
-      "Without thermal break technology, aluminium window frames become heat conductors in summer. We explain the physics and the performance difference you can measure.",
-    readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "cortizo-vs-generic-aluminium",
-    date: "January 2025",
-    category: "Product",
-    title: "Cortizo vs Generic Aluminium Systems: A Practical Comparison",
-    excerpt:
-      "The price difference between a premium European system and a generic equivalent can be significant. We compare what you actually get for the additional investment.",
-    readTime: "8 min read",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "lift-and-slide-doors-villa",
-    date: "December 2024",
-    category: "Product",
-    title: "Lift-and-Slide Doors: Everything You Need to Know",
-    excerpt:
-      "The Cor Vision 4600 and 4700 are our most popular products. We explain how lift-and-slide technology works and why it outperforms standard sliding doors at any price point.",
-    readTime: "7 min read",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "curtain-wall-residential",
-    date: "November 2024",
-    category: "Technical",
-    title: "Curtain Wall for Residential Projects: When and Why",
-    excerpt:
-      "Once reserved for commercial towers, structural glazing and curtain wall systems are increasingly specified for prestige Dubai villas. Is it right for your project?",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "garden-rooms-uae",
-    date: "October 2024",
-    category: "Product",
-    title: "Glass Garden Rooms: The UAE&apos;s Most Requested Addition",
-    excerpt:
-      "The demand for year-round outdoor living space in the UAE has driven a surge in garden room and conservatory enquiries. We explore the options and costs.",
-    readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-  },
-];
+const categories = ["All", ...Array.from(new Set(blogPosts.map((p) => p.category)))];
 
 export default function BlogPage() {
+  const [active, setActive] = useState("All");
+
+  const filtered = active === "All" ? blogPosts : blogPosts.filter((p) => p.category === active);
+
   return (
     <>
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
@@ -96,47 +38,98 @@ export default function BlogPage() {
         <div className="divider-brand" />
       </div>
 
-      <section className="py-20">
+      {/* Category filter */}
+      <section className="pt-10 pb-4">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
-            {posts.map((post, i) => (
-              <ScrollReveal key={post.slug} delay={i * 0.07}>
-                <article className="bg-white hover:bg-[#f8f9fa] transition-colors duration-300 h-full flex flex-col overflow-hidden">
-                  {post.image && (
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActive(cat)}
+                className={`text-[0.65rem] tracking-widest uppercase px-4 py-2.5 border transition-all ${
+                  active === cat
+                    ? "bg-[#007969] text-white border-[#007969]"
+                    : "border-gray-200 text-[#6b7280] hover:border-[#007969] hover:text-[#007969]"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-10 md:py-16">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100"
+            >
+              {filtered.map((post, i) => (
+                <ScrollReveal key={post.slug} delay={i * 0.07}>
+                  <Link
+                    href={`/technical/blog/${post.slug}`}
+                    className="group block bg-white hover:bg-[#f8f9fa] transition-colors duration-300 h-full flex flex-col overflow-hidden"
+                  >
                     <div className="h-36 sm:h-44 relative overflow-hidden flex-shrink-0">
                       <Image
                         src={post.image}
                         alt={post.title}
                         fill
-                        className="object-cover hover:scale-105 transition-transform duration-700"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
-                  )}
-                  <div className="p-5 sm:p-8 flex flex-col flex-1">
-                  <div className="flex items-center gap-3 mb-5">
-                    <span className="text-[0.6rem] tracking-widests uppercase text-[#007969] border border-[#007969]/30 px-2 py-1">
-                      {post.category}
-                    </span>
-                    <span className="text-gray-400 text-xs">{post.date}</span>
-                  </div>
-                  <h2 className="text-[#1c1c1e] font-semibold mb-3 leading-snug flex-1">
-                    {post.title}
-                  </h2>
-                  <p className="text-[#6b7280] text-sm leading-relaxed mb-6 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                    <span className="text-gray-400 text-xs">{post.readTime}</span>
-                    <span className="text-[0.7rem] tracking-widests uppercase text-gray-400">
-                      Coming soon
-                    </span>
-                  </div>
-                  </div>
-                </article>
-              </ScrollReveal>
-            ))}
-          </div>
+                    <div className="p-5 sm:p-8 flex flex-col flex-1">
+                      <div className="flex items-center gap-3 mb-5">
+                        <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] border border-[#007969]/30 px-2 py-1">
+                          {post.category}
+                        </span>
+                        <span className="text-gray-400 text-xs">{post.date}</span>
+                      </div>
+                      <h2 className="text-[#1c1c1e] font-semibold mb-3 leading-snug flex-1 group-hover:text-[#007969] transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="text-[#6b7280] text-sm leading-relaxed mb-6 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                        <span className="text-gray-400 text-xs">{post.readTime}</span>
+                        <span className="text-[0.65rem] tracking-widest uppercase text-[#007969] group-hover:underline">
+                          Read article →
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 border-t border-gray-100 bg-[#f8f9fa]">
+        <ScrollReveal>
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
+            <p className="text-label text-[#007969] mb-4">Need project advice?</p>
+            <h2 className="text-title text-[#1c1c1e] mb-6 max-w-xl mx-auto">
+              Talk to our specification team
+            </h2>
+            <p className="text-[#6b7280] mb-10 max-w-md mx-auto">
+              Every project is different. Our team provides expert guidance tailored to your specific requirements — no obligation.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
+              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+            </div>
+          </div>
+        </ScrollReveal>
       </section>
     </>
   );
