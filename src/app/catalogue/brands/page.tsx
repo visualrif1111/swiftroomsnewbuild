@@ -7,14 +7,14 @@ import { brands, productCategories } from "@/lib/data";
 const brandImages: Record<string, string> = {
   cortizo: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
   "gulf-extrusion": "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1200&q=80",
-  deceuninck: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=1200&q=80",
+  vetro: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=1200&q=80",
   vetromax: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
 };
 
 export const metadata: Metadata = {
   title: "Brand Partners",
   description:
-    "Swiftrooms is an authorised partner for Cortizo, Vetromax, Deceuninck and Gulf Extrusion — Europe and the UAE's leading aluminium systems manufacturers.",
+    "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
 };
 
 export default function BrandsPage() {

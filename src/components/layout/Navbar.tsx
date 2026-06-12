@@ -8,15 +8,15 @@ import { motion, AnimatePresence } from "framer-motion";
 const catalogueItems = [
   { label: "All Products", href: "/catalogue" },
   { label: "Brands", href: "/catalogue/brands" },
-  { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
+  { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
+  { label: "Aluminium Bi-folding Doors", href: "/catalogue/aluminium-bi-folding-doors" },
   { label: "Aluminium Windows", href: "/catalogue/aluminium-windows" },
+  { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
   { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
-  { label: "Bi-fold Doors", href: "/catalogue/bi-fold" },
   { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
   { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
   { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
   { label: "Insect Screens", href: "/catalogue/insect-screens" },
-  { label: "Promotions", href: "/catalogue/promotions" },
   { label: "Gallery", href: "/catalogue/gallery" },
 ];
 
@@ -28,12 +28,12 @@ const technicalItems = [
 ];
 
 const productRangeItems = [
-  { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-doors" },
-  { label: "Aluminium Bi-folding Doors", href: "/catalogue/bi-fold" },
+  { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
+  { label: "Aluminium Bi-folding Doors", href: "/catalogue/aluminium-bi-folding-doors" },
   { label: "Aluminium Windows", href: "/catalogue/aluminium-windows" },
   { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
-  { label: "UPVC Windows & Doors", href: "/catalogue/upvc" },
-  { label: "Curtain Wall / Facade Glazing System", href: "/catalogue/curtain-wall" },
+  { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
+  { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
   { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
   { label: "Insect Screens", href: "/catalogue/insect-screens" },
   { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
