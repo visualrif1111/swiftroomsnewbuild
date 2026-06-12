@@ -32,12 +32,21 @@ export const metadata: Metadata = {
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
     url: "https://swiftrooms-newbuild.vercel.app",
+    images: [
+      {
+        url: "https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png",
+        width: 1200,
+        height: 630,
+        alt: "Swiftrooms — Premium Glazing Systems, UAE",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects.",
+    images: ["https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png"],
   },
 };
 
