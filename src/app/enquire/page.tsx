@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: "Get a Quote",
   description:
     "Request a free quotation for aluminium windows, doors and glazing systems from Swiftrooms UAE.",
+  openGraph: {
+    title: "Get a Free Quote | Swiftrooms",
+    description:
+      "Request a free quotation for premium aluminium windows, doors and glazing systems. We respond within 1 business day and offer a free technical site survey.",
+    url: "https://swiftrooms-newbuild.vercel.app/enquire",
+  },
 };
 
 export default function EnquirePage() {

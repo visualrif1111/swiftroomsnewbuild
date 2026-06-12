@@ -15,6 +15,12 @@ export const metadata: Metadata = {
   title: "Brand Partners",
   description:
     "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
+  openGraph: {
+    title: "Brand Partners | Swiftrooms",
+    description:
+      "Authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/brands",
+  },
 };
 
 export default function BrandsPage() {

@@ -8,11 +8,34 @@ export const metadata: Metadata = {
   title: "Product Catalogue",
   description:
     "Browse the complete Swiftrooms product range — aluminium doors, windows, curtain wall, bi-fold, uPVC and more.",
+  openGraph: {
+    title: "Product Catalogue | Swiftrooms",
+    description:
+      "Browse the complete Swiftrooms product range — aluminium doors, windows, curtain wall, bi-fold, uPVC and more. Engineered in Europe, installed across the UAE.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue",
+  },
 };
 
 export default function CataloguePage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Swiftrooms Product Catalogue",
+    description: "The complete range of premium aluminium windows, doors and glazing systems available from Swiftrooms UAE.",
+    url: `${base}/catalogue`,
+    numberOfItems: productCategories.length,
+    itemListElement: productCategories.map((cat, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: cat.name,
+      url: `${base}/catalogue/${cat.slug}`,
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>

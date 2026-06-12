@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   title: "Gallery",
   description:
     "Product photography and installation photography from Swiftrooms projects across the UAE.",
+  openGraph: {
+    title: "Gallery | Swiftrooms",
+    description:
+      "Product photography and installation photography from Swiftrooms glazing projects across the UAE. Three dedicated product galleries.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery",
+  },
 };
 
 const galleries = [

@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   title: "Technical Hub",
   description:
     "Swiftrooms technical resources — our process, blog articles, downloadable guides, FAQ and everything you need to specify, plan and manage your glazing project in the UAE.",
+  openGraph: {
+    title: "Technical Hub | Swiftrooms",
+    description:
+      "Technical resources for glazing projects in the UAE — our process, expert articles, specification guides, FAQ and downloadable documents.",
+    url: "https://swiftrooms-newbuild.vercel.app/technical",
+  },
 };
 
 const sections = [

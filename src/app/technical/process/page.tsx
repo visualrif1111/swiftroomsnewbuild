@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   title: "Our Process",
   description:
     "How Swiftrooms works — from initial consultation and survey through manufacture, installation and aftercare. Six steps, zero surprises.",
+  openGraph: {
+    title: "Our Process | Swiftrooms",
+    description:
+      "Six clear steps from first enquiry to aftercare. Understand exactly what Swiftrooms does at each stage before you commit to anything.",
+    url: "https://swiftrooms-newbuild.vercel.app/technical/process",
+  },
 };
 
 const stepDetails: Record<string, { duration: string; youDo: string; weDo: string; image: string }> = {

@@ -6,6 +6,11 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 export const metadata: Metadata = {
   title: "Promotions",
   description: "Current promotions and seasonal offers from Swiftrooms UAE.",
+  openGraph: {
+    title: "Promotions | Swiftrooms",
+    description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE.",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions",
+  },
 };
 
 const promotions = [

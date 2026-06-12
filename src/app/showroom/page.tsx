@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   title: "Showroom — Jebel Ali, Dubai",
   description:
     "Visit the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space where you can experience Cortizo Cor Vision, Cor Vision Plus and TP52 curtain wall at full scale, in working condition.",
+  openGraph: {
+    title: "4900 Showroom, Jebel Ali | Swiftrooms",
+    description:
+      "Visit the Swiftrooms showroom in Jebel Ali, Dubai. Experience Cortizo Cor Vision, Cor Vision Plus, TP52 curtain wall and more at full scale in working condition. Open by appointment.",
+    url: "https://swiftrooms-newbuild.vercel.app/showroom",
+  },
 };
 
 const displays = [

@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Contact Swiftrooms UAE — call, email or visit our Jebel Ali showroom to discuss your windows and doors project.",
+  openGraph: {
+    title: "Contact Swiftrooms | UAE",
+    description:
+      "Contact Swiftrooms in Dubai — call, email or visit our Jebel Ali showroom. Sunday–Thursday 9:00–18:00, Saturday 10:00–15:00.",
+    url: "https://swiftrooms-newbuild.vercel.app/contact",
+  },
 };
 
 export default function ContactPage() {
