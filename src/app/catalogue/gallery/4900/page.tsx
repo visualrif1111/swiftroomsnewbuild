@@ -186,7 +186,7 @@ export default function ShowroomGalleryPage() {
               </ShowroomButton>
               <QuoteButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
                 Send an Enquiry
-              </Link>
+              </QuoteButton>
             </div>
           </div>
         </ScrollReveal>
