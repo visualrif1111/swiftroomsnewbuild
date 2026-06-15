@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { resources } from "@/lib/data";
@@ -218,8 +219,8 @@ export default function ResourcesClient() {
               Talk to our specification team
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
-              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+              <QuoteButton className="btn-brand">Get A Quote</QuoteButton>
+              <ShowroomButton className="btn-outline">Visit Showroom</ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

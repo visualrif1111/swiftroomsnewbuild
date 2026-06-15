@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -127,12 +128,12 @@ export default async function ProductDetailPage({ params }: Props) {
               </ScrollReveal>
               <ScrollReveal delay={0.2}>
                 <div className="flex flex-col sm:flex-row gap-3 mt-8">
-                  <Link href="/enquire" className="btn-brand">
+                  <QuoteButton className="btn-brand">
                     Enquire About This Product
-                  </Link>
-                  <Link href="/showroom" className="btn-outline">
+                  </QuoteButton>
+                  <ShowroomButton className="btn-outline">
                     See It In Our Showroom
-                  </Link>
+                  </ShowroomButton>
                 </div>
               </ScrollReveal>
             </div>
@@ -494,18 +495,12 @@ export default async function ProductDetailPage({ params }: Props) {
               Our team will assess your project requirements and provide a detailed quotation for this system.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/enquire"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
-              >
+              <QuoteButton className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
                 Enquire Now
-              </Link>
-              <Link
-                href="/showroom"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
-              >
-                Visit Showroom
-              </Link>
+              </QuoteButton>
+              <ShowroomButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
+                Book Showroom Visit
+              </ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

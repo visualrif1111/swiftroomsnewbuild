@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -401,8 +402,8 @@ export default function PortfolioClient() {
               Every project begins with a consultation. Tell us about your vision and we&apos;ll take it from there.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
-              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+              <QuoteButton className="btn-brand">Get A Quote</QuoteButton>
+              <ShowroomButton className="btn-outline">Visit Showroom</ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

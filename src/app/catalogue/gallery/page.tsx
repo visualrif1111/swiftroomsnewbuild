@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { portfolioProjects } from "@/lib/data";
@@ -186,8 +187,8 @@ export default function GalleryPage() {
               Visit our Jebel Ali showroom
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/showroom" className="btn-brand">Book a Visit</Link>
-              <Link href="/enquire" className="btn-outline">Get A Quote</Link>
+              <ShowroomButton className="btn-brand">Book a Visit</ShowroomButton>
+              <QuoteButton className="btn-outline">Get A Quote</QuoteButton>
             </div>
           </div>
         </ScrollReveal>

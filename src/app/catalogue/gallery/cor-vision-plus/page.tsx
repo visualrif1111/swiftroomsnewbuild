@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
@@ -79,9 +80,9 @@ export default function CorVisionPlusGalleryPage() {
               <Link href="/catalogue/aluminium-sliding-doors/cor-vision-plus" className="btn-brand">
                 View Product Details
               </Link>
-              <Link href="/enquire" className="btn-outline">
+              <QuoteButton className="btn-outline">
                 Enquire
-              </Link>
+              </QuoteButton>
             </div>
           </ScrollReveal>
         </div>
@@ -159,12 +160,9 @@ export default function CorVisionPlusGalleryPage() {
               >
                 View Product Specifications
               </Link>
-              <Link
-                href="/enquire"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
-              >
+              <QuoteButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
                 Enquire Now
-              </Link>
+              </QuoteButton>
             </div>
           </div>
         </ScrollReveal>

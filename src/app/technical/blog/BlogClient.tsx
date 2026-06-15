@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -198,8 +199,8 @@ export default function BlogClient() {
               Every project is different. Our team provides expert guidance tailored to your specific requirements — no obligation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
-              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+              <QuoteButton className="btn-brand">Get A Quote</QuoteButton>
+              <ShowroomButton className="btn-outline">Visit Showroom</ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

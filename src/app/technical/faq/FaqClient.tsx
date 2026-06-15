@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { QuoteButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { faqs } from "@/lib/data";
@@ -207,7 +208,7 @@ export default function FaqClient() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact" className="btn-brand">Contact Us</Link>
-              <Link href="/enquire" className="btn-outline">Get A Quote</Link>
+              <QuoteButton className="btn-outline">Get A Quote</QuoteButton>
             </div>
           </div>
         </ScrollReveal>

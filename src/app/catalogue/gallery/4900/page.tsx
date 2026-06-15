@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
@@ -79,12 +80,12 @@ export default function ShowroomGalleryPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.25}>
             <div className="flex gap-4 mt-8 flex-wrap">
-              <Link href="/showroom" className="btn-brand">
+              <ShowroomButton className="btn-brand">
                 Book a Showroom Visit
-              </Link>
-              <Link href="/enquire" className="btn-outline">
+              </ShowroomButton>
+              <QuoteButton className="btn-outline">
                 Enquire
-              </Link>
+              </QuoteButton>
             </div>
           </ScrollReveal>
         </div>
@@ -180,16 +181,10 @@ export default function ShowroomGalleryPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <Link
-                href="/showroom"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
-              >
+              <ShowroomButton className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
                 Book a Visit
-              </Link>
-              <Link
-                href="/enquire"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
-              >
+              </ShowroomButton>
+              <QuoteButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
                 Send an Enquiry
               </Link>
             </div>

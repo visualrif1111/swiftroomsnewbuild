@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 
 const catalogueItems = [
   { label: "All Products", href: "/catalogue" },
@@ -206,8 +207,7 @@ export default function Navbar() {
             >
               Showroom
             </Link>
-            <Link
-              href="/enquire"
+            <QuoteButton
               className={`font-accent font-semibold text-[1rem] tracking-[0.12em] uppercase px-5 py-2.5 transition-all ${
                 heroMode
                   ? "border border-white/50 text-white hover:bg-white hover:text-[#007969]"
@@ -215,7 +215,7 @@ export default function Navbar() {
               }`}
             >
               Get a Quote
-            </Link>
+            </QuoteButton>
           </div>
 
           {/* Mobile / Tablet burger */}
@@ -566,8 +566,7 @@ export default function Navbar() {
 
               {/* Bottom CTA */}
               <div className="flex-shrink-0 px-5 py-5 border-t border-gray-100 space-y-3 bg-white">
-                <Link
-                  href="/enquire"
+                <QuoteButton
                   className="btn-brand w-full justify-center text-sm"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -575,14 +574,13 @@ export default function Navbar() {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </Link>
-                <Link
-                  href="/showroom"
+                </QuoteButton>
+                <ShowroomButton
                   className="btn-outline w-full justify-center text-sm"
                   onClick={() => setMenuOpen(false)}
                 >
                   Book Showroom Visit
-                </Link>
+                </ShowroomButton>
               </div>
             </motion.div>
           </>

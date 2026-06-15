@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -220,18 +221,15 @@ export default function HomeClient() {
             transition={{ duration: 0.6, delay: 0.65 }}
             className="flex flex-col sm:flex-row gap-3"
           >
-            <Link href="/enquire" className="btn-brand">
+            <QuoteButton className="btn-brand">
               Get a Free Quote
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </Link>
-            <Link
-              href="/showroom"
-              className="inline-flex items-center justify-center gap-2 border border-white/40 text-white font-accent font-semibold text-[0.8rem] tracking-[0.12em] uppercase px-6 py-3.5 hover:bg-white hover:text-[#007969] transition-all"
-            >
+            </QuoteButton>
+            <ShowroomButton className="inline-flex items-center justify-center gap-2 border border-white/40 text-white font-accent font-semibold text-[0.8rem] tracking-[0.12em] uppercase px-6 py-3.5 hover:bg-white hover:text-[#007969] transition-all">
               Book Showroom Visit
-            </Link>
+            </ShowroomButton>
           </motion.div>
         </motion.div>
         <motion.div
@@ -871,10 +869,10 @@ export default function HomeClient() {
               Jebel Ali, Dubai — open Sunday to Thursday.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/enquire" className="btn-brand">Get a Free Quote</Link>
-              <Link href="/showroom" className="btn-outline border-white/30 text-white hover:bg-white hover:text-[#007969]">
+              <QuoteButton className="btn-brand">Get a Free Quote</QuoteButton>
+              <ShowroomButton className="btn-outline border-white/30 text-white hover:bg-white hover:text-[#007969]">
                 Book Showroom Visit
-              </Link>
+              </ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

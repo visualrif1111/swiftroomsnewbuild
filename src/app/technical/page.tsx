@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { blogPosts, faqs } from "@/lib/data";
@@ -266,18 +267,12 @@ export default function TechnicalPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <Link
-                href="/enquire"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
-              >
+              <QuoteButton className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
                 Get a Free Quote
-              </Link>
-              <Link
-                href="/showroom"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
-              >
-                Visit Our Showroom
-              </Link>
+              </QuoteButton>
+              <ShowroomButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
+                Book Showroom Visit
+              </ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

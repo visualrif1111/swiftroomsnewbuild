@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 
 const productLinks = [
   { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
@@ -35,18 +38,12 @@ export default function Footer() {
             <p className="text-white/70 text-sm">No obligation. Professional survey. Written specification.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-shrink-0">
-            <Link
-              href="/enquire"
-              className="bg-white text-[#007969] font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-gray-50 transition-colors text-center"
-            >
+            <QuoteButton className="bg-white text-[#007969] font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-gray-50 transition-colors text-center">
               Get a Quote
-            </Link>
-            <Link
-              href="/showroom"
-              className="border border-white/40 text-white font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-white/10 transition-colors text-center"
-            >
-              Visit Showroom
-            </Link>
+            </QuoteButton>
+            <ShowroomButton className="border border-white/40 text-white font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-white/10 transition-colors text-center">
+              Book Showroom Visit
+            </ShowroomButton>
           </div>
         </div>
       </div>

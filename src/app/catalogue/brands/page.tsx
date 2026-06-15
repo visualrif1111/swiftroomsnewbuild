@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { brands, productCategories } from "@/lib/data";
@@ -162,15 +163,12 @@ export default function BrandsPage() {
                       )}
 
                       <div className="mt-8">
-                        <Link
-                          href="/enquire"
-                          className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#007969] border border-[#007969]/40 px-5 py-3 hover:bg-[#007969]/10 transition-all"
-                        >
+                        <QuoteButton className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#007969] border border-[#007969]/40 px-5 py-3 hover:bg-[#007969]/10 transition-all">
                           Enquire about {brand.name}
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
-                        </Link>
+                        </QuoteButton>
                       </div>
                     </div>
                   </ScrollReveal>

@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import LenisProvider from "@/components/layout/LenisProvider";
 import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
+import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://swiftrooms-newbuild.vercel.app"),
@@ -136,13 +137,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
-        <LenisProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-          <StickyMobileCTA />
-          <WhatsAppFloat />
-        </LenisProvider>
+        <CTAFormProvider>
+          <LenisProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <StickyMobileCTA />
+            <WhatsAppFloat />
+          </LenisProvider>
+        </CTAFormProvider>
       </body>
     </html>
   );

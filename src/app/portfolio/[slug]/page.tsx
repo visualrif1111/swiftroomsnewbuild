@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -163,9 +164,9 @@ export default async function ProjectPage({ params }: Props) {
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           {/* Mobile CTA */}
           <div className="lg:hidden mb-8 flex gap-3">
-            <Link href="/enquire" className="flex-1 btn-brand justify-center text-xs">
+            <QuoteButton className="flex-1 btn-brand justify-center text-xs">
               Start a Similar Project
-            </Link>
+            </QuoteButton>
             <Link
               href="/portfolio"
               className="flex-1 text-center border border-gray-200 text-[#3a3a3c] py-3 text-[0.65rem] tracking-widest uppercase hover:border-[#007969] hover:text-[#007969] transition-all"
@@ -253,9 +254,9 @@ export default async function ProjectPage({ params }: Props) {
                   </div>
 
                   <div className="space-y-3">
-                    <Link href="/enquire" className="btn-brand w-full justify-center">
+                    <QuoteButton className="btn-brand w-full justify-center">
                       Start a Similar Project
-                    </Link>
+                    </QuoteButton>
                     <Link
                       href="/portfolio"
                       className="block w-full text-center border border-gray-200 text-[#3a3a3c] py-3 text-[0.7rem] tracking-widest uppercase hover:border-[#007969] hover:text-[#007969] transition-all"
@@ -351,8 +352,8 @@ export default async function ProjectPage({ params }: Props) {
               requirements.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/enquire" className="btn-brand">Get A Quote</Link>
-              <Link href="/showroom" className="btn-outline">Visit Showroom</Link>
+              <QuoteButton className="btn-brand">Get A Quote</QuoteButton>
+              <ShowroomButton className="btn-outline">Visit Showroom</ShowroomButton>
             </div>
           </div>
         </ScrollReveal>

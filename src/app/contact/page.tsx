@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ContactForm from "./ContactForm";
 
@@ -129,7 +130,7 @@ export default function ContactPage() {
                   description: "Completed projects across the UAE — villas, apartments, commercial.",
                 },
               ].map((link) => (
-                <Link
+                <CTALink
                   key={link.href}
                   href={link.href}
                   className="group block bg-white hover:bg-[#f0fdf4] transition-colors p-6 md:p-8"
@@ -141,7 +142,7 @@ export default function ContactPage() {
                   <span className="mt-4 block text-[0.65rem] tracking-widest uppercase text-[#007969]">
                     Go →
                   </span>
-                </Link>
+                </CTALink>
               ))}
             </div>
           </ScrollReveal>

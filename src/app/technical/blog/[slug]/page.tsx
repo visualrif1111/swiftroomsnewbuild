@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -175,12 +176,12 @@ export default async function BlogPostPage({ params }: Props) {
                     Talk to our specification team — no obligation, just expert advice tailored to your project.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Link href="/enquire" className="btn-brand">
+                    <QuoteButton className="btn-brand">
                       Get A Quote
-                    </Link>
-                    <Link href="/showroom" className="btn-outline">
+                    </QuoteButton>
+                    <ShowroomButton className="btn-outline">
                       Visit Showroom
-                    </Link>
+                    </ShowroomButton>
                   </div>
                 </div>
               </ScrollReveal>
@@ -214,12 +215,9 @@ export default async function BlogPostPage({ params }: Props) {
                   <p className="text-white font-semibold mb-5 leading-snug">
                     Get a free specification consultation
                   </p>
-                  <Link
-                    href="/enquire"
-                    className="block w-full text-center bg-white text-[#007969] py-3 text-[0.7rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
-                  >
+                  <QuoteButton className="block w-full text-center bg-white text-[#007969] py-3 text-[0.7rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
                     Enquire Now
-                  </Link>
+                  </QuoteButton>
                 </div>
 
                 {/* Related products */}

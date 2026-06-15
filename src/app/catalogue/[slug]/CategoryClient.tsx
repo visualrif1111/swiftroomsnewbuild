@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { productCategories, blogPosts } from "@/lib/data";
+import { QuoteButton } from "@/components/forms/CTAButtons";
 
 type Category = (typeof productCategories)[0];
 type Product = Category["products"][0];
@@ -123,9 +124,9 @@ function ProductCard({ product, index, categoryImage }: { product: Product; inde
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
-          <Link href="/enquire" className="btn-outline text-xs sm:text-sm">
+          <QuoteButton className="btn-outline text-xs sm:text-sm">
             Enquire
-          </Link>
+          </QuoteButton>
         </div>
       </div>
     </ScrollReveal>
@@ -304,9 +305,9 @@ function CategoryFAQ({ category }: { category: Category }) {
           <div className="mt-8 max-w-3xl">
             <p className="text-[#6b7280] text-sm">
               Have a question not listed here?{" "}
-              <Link href="/enquire" className="text-[#007969] hover:underline">
+              <QuoteButton className="text-[#007969] hover:underline">
                 Contact our technical team →
-              </Link>
+              </QuoteButton>
             </p>
           </div>
         </ScrollReveal>

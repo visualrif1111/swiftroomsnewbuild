@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CTALink } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
@@ -139,7 +140,7 @@ export default function PromotionsPage() {
                     <span className="text-[0.65rem] tracking-widest uppercase text-[#007969]">
                       {promo.value}
                     </span>
-                    <Link
+                    <CTALink
                       href={promo.href}
                       className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors flex items-center gap-1"
                     >
@@ -147,7 +148,7 @@ export default function PromotionsPage() {
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </Link>
+                    </CTALink>
                   </div>
                   </div>
                 </div>
@@ -169,12 +170,12 @@ export default function PromotionsPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <Link
+                  <CTALink
                     href="/enquire"
                     className="inline-flex items-center justify-center gap-3 bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
                   >
                     Discuss Trade Pricing
-                  </Link>
+                  </CTALink>
                 </div>
               </div>
             </div>
