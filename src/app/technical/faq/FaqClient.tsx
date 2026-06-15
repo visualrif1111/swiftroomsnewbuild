@@ -11,13 +11,28 @@ const categories = ["All", ...Array.from(new Set(faqs.map((f) => f.category)))];
 export default function FaqClient() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [open, setOpen] = useState<number | null>(0);
+  const [search, setSearch] = useState("");
 
-  const filtered =
-    activeCategory === "All" ? faqs : faqs.filter((f) => f.category === activeCategory);
+  const filtered = faqs.filter((f) => {
+    const matchesCategory = activeCategory === "All" || f.category === activeCategory;
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      f.question.toLowerCase().includes(q) ||
+      f.answer.toLowerCase().includes(q);
+    return matchesCategory && matchesSearch;
+  });
 
   function handleCategory(cat: string) {
     setActiveCategory(cat);
     setOpen(null);
+    setSearch("");
+  }
+
+  function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearch(e.target.value);
+    setOpen(null);
+    if (e.target.value) setActiveCategory("All");
   }
 
   return (
@@ -37,10 +52,40 @@ export default function FaqClient() {
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-body-lg text-[#6b7280] max-w-2xl">
+            <p className="text-body-lg text-[#6b7280] max-w-2xl mb-8">
               Answers to the questions we hear most often. Use the filters below to find your topic, or
               contact our team directly.
             </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
+            <div className="relative max-w-xl">
+              <svg
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b7280]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              <input
+                type="search"
+                placeholder="Search questions…"
+                value={search}
+                onChange={handleSearch}
+                className="w-full pl-11 pr-10 py-3 border border-gray-200 text-[#1c1c1e] text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#007969] focus:border-[#007969] transition-colors bg-white"
+              />
+              {search && (
+                <button
+                  onClick={() => { setSearch(""); setOpen(null); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1c1c1e] transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </ScrollReveal>
         </div>
       </section>
@@ -90,7 +135,7 @@ export default function FaqClient() {
             <div className="lg:col-span-3">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeCategory}
+                  key={`${activeCategory}-${search}`}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
@@ -139,7 +184,11 @@ export default function FaqClient() {
                   ))}
 
                   {filtered.length === 0 && (
-                    <p className="text-[#6b7280] py-8">No questions in this category.</p>
+                    <p className="text-[#6b7280] py-8">
+                      {search
+                        ? `No results for "${search}". Try a different keyword or browse by topic.`
+                        : "No questions in this category."}
+                    </p>
                   )}
                 </motion.div>
               </AnimatePresence>

@@ -3,9 +3,10 @@ import PortfolioClient from "./PortfolioClient";
 import { portfolioProjects } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
   description:
     "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse our portfolio of premium aluminium windows, doors and curtain wall installations.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/portfolio" },
   openGraph: {
     title: "Portfolio | Swiftrooms",
     description:
@@ -16,6 +17,14 @@ export const metadata: Metadata = {
 
 export default function PortfolioPage() {
   const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Portfolio", item: `${base}/portfolio` },
+    ],
+  };
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -33,6 +42,7 @@ export default function PortfolioPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <PortfolioClient />
     </>

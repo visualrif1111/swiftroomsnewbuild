@@ -23,6 +23,12 @@ const locationGroups = [
   { label: "Monty's Golf Course", slugs: ["montys-golf-course"] },
   { label: "Phileas Fogg", slugs: ["phileas-fogg"] },
   { label: "Padel X Project", slugs: ["padel-x"] },
+  { label: "Jumeirah Islands", slugs: ["jumeirah-islands-villa"] },
+  { label: "Saadiyat Island", slugs: ["saadiyat-island-villa"] },
+  { label: "Al Majaz Sharjah", slugs: ["al-majaz-waterfront-villa"] },
+  { label: "Al Hamra RAK", slugs: ["al-hamra-villa-rak"] },
+  { label: "Dubai Hills", slugs: ["dubai-hills-villa"] },
+  { label: "Meydan", slugs: ["meydan-townhouse"] },
 ];
 
 const typeTags = ["All", "Villa", "Apartment", "Townhouse", "Commercial", "Garden Room", "Hospitality"];
@@ -101,11 +107,11 @@ export default function PortfolioClient() {
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-[0.65rem] tracking-widests uppercase text-white/60 mb-2">{featured.type}</p>
+                    <p className="text-[0.65rem] tracking-widest uppercase text-white/60 mb-2">{featured.type}</p>
                     <h2 className="text-2xl md:text-4xl font-semibold text-white mb-1">{featured.name}</h2>
                     <p className="text-white/70 text-sm md:text-base">{featured.location} · {featured.area}</p>
                   </div>
-                  <div className="hidden md:flex items-center gap-2 text-[0.7rem] tracking-widests uppercase text-white border border-white/30 px-5 py-3 group-hover:bg-white group-hover:text-[#007969] transition-all flex-shrink-0">
+                  <div className="hidden md:flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-white border border-white/30 px-5 py-3 group-hover:bg-white group-hover:text-[#007969] transition-all flex-shrink-0">
                     View Case Study
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -184,7 +190,7 @@ export default function PortfolioClient() {
                 {hasFilter && (
                   <button
                     onClick={clearFilters}
-                    className="mt-6 text-[0.65rem] tracking-widests uppercase text-gray-400 hover:text-[#007969] transition-colors underline"
+                    className="mt-6 text-[0.65rem] tracking-widest uppercase text-gray-400 hover:text-[#007969] transition-colors underline"
                   >
                     Clear all filters
                   </button>
@@ -209,7 +215,7 @@ export default function PortfolioClient() {
                 </div>
                 <button
                   onClick={() => setFilterDrawerOpen(true)}
-                  className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-widests text-[#3a3a3c] border border-gray-200 px-3 py-2 hover:border-[#007969] hover:text-[#007969] transition-all"
+                  className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-widest text-[#3a3a3c] border border-gray-200 px-3 py-2 hover:border-[#007969] hover:text-[#007969] transition-all"
                 >
                   Filter
                 </button>
@@ -250,12 +256,12 @@ export default function PortfolioClient() {
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                           <div className="absolute top-3 left-3">
-                            <span className="text-[0.55rem] tracking-widests uppercase text-white bg-black/40 px-2 py-1">
+                            <span className="text-[0.55rem] tracking-widest uppercase text-white bg-black/40 px-2 py-1">
                               {project.type}
                             </span>
                           </div>
                           <div className="absolute bottom-3 right-3">
-                            <span className="text-[0.55rem] tracking-widests uppercase text-white/80">
+                            <span className="text-[0.55rem] tracking-widest uppercase text-white/80">
                               {project.year}
                             </span>
                           </div>
@@ -272,7 +278,7 @@ export default function PortfolioClient() {
                           <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
                             {project.brief ?? project.description}
                           </p>
-                          <div className="mt-4 flex items-center gap-1 text-[0.65rem] uppercase tracking-widests text-[#007969] font-medium">
+                          <div className="mt-4 flex items-center gap-1 text-[0.65rem] uppercase tracking-widest text-[#007969] font-medium">
                             View Case Study
                             <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -333,7 +339,7 @@ export default function PortfolioClient() {
                 <div className="flex flex-wrap gap-2 mb-6">
                   <button
                     onClick={() => { setActiveLocation(null); }}
-                    className={`text-[0.7rem] tracking-widests uppercase px-3 py-2 border transition-all ${
+                    className={`text-[0.7rem] tracking-widest uppercase px-3 py-2 border transition-all ${
                       activeLocation === null ? "border-[#007969] bg-[#007969] text-white" : "border-gray-200 text-[#6b7280]"
                     }`}
                   >
@@ -345,7 +351,7 @@ export default function PortfolioClient() {
                       <button
                         key={loc.label}
                         onClick={() => setActiveLocation(activeLocation === loc.label ? null : loc.label)}
-                        className={`text-[0.7rem] tracking-widests uppercase px-3 py-2 border transition-all ${
+                        className={`text-[0.7rem] tracking-widest uppercase px-3 py-2 border transition-all ${
                           activeLocation === loc.label ? "border-[#007969] bg-[#007969] text-white" : "border-gray-200 text-[#6b7280]"
                         }`}
                       >
@@ -360,7 +366,7 @@ export default function PortfolioClient() {
                     <button
                       key={tag}
                       onClick={() => setActiveType(tag)}
-                      className={`text-[0.7rem] tracking-widests uppercase px-3 py-2 border transition-all ${
+                      className={`text-[0.7rem] tracking-widest uppercase px-3 py-2 border transition-all ${
                         activeType === tag ? "border-[#007969] bg-[#007969] text-white" : "border-gray-200 text-[#6b7280]"
                       }`}
                     >

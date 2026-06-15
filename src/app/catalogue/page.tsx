@@ -5,9 +5,10 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { productCategories } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Product Catalogue",
+  title: "Aluminium Windows, Doors & Glazing Systems — Full Product Range UAE",
   description:
-    "Browse the complete Swiftrooms product range — aluminium doors, windows, curtain wall, bi-fold, uPVC and more.",
+    "Browse the complete Swiftrooms product range — aluminium sliding doors, bi-fold doors, curtain wall, windows, uPVC systems, skylights, garden rooms and insect screens for UAE projects.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue" },
   openGraph: {
     title: "Product Catalogue | Swiftrooms",
     description:
@@ -18,6 +19,14 @@ export const metadata: Metadata = {
 
 export default function CataloguePage() {
   const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Product Catalogue", item: `${base}/catalogue` },
+    ],
+  };
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -35,6 +44,7 @@ export default function CataloguePage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -121,10 +131,10 @@ export default function CataloguePage() {
                     {cat.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] tracking-widests uppercase text-gray-400">
+                    <span className="text-[0.65rem] tracking-widest uppercase text-gray-400">
                       {cat.products.length} products
                     </span>
-                    <div className="flex items-center gap-2 text-[0.7rem] tracking-widests uppercase text-gray-400 group-hover:text-[#007969] transition-colors">
+                    <div className="flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-gray-400 group-hover:text-[#007969] transition-colors">
                       View range
                       <svg
                         className="w-3 h-3 group-hover:translate-x-1 transition-transform"

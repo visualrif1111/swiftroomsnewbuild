@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "4900 Showroom Gallery",
   description:
     "The Swiftrooms 4900 showroom in Jebel Ali — the UAE's only space where you can experience the Cor Vision, Cor Vision Plus and TP52 curtain wall range at full scale, in working condition.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/4900" },
   openGraph: {
     title: "4900 Showroom Gallery | Swiftrooms",
     description:
@@ -37,8 +38,21 @@ const images = [
 const heights = [340, 260, 400, 280, 360, 240, 300, 380, 260, 320, 280, 360, 240, 300, 380];
 
 export default function ShowroomGalleryPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${base}/catalogue` },
+      { "@type": "ListItem", position: 3, name: "Gallery", item: `${base}/catalogue/gallery` },
+      { "@type": "ListItem", position: 4, name: "4900 Showroom Gallery", item: `${base}/catalogue/gallery/4900` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -92,7 +106,7 @@ export default function ShowroomGalleryPage() {
                 { label: "Booking", value: "Recommended — walk-ins welcome" },
               ].map((item) => (
                 <div key={item.label}>
-                  <p className="text-[0.65rem] tracking-widests uppercase text-[#007969] mb-1">{item.label}</p>
+                  <p className="text-[0.65rem] tracking-widest uppercase text-[#007969] mb-1">{item.label}</p>
                   <p className="text-[#3a3a3c] text-sm font-medium">{item.value}</p>
                 </div>
               ))}
@@ -115,7 +129,7 @@ export default function ShowroomGalleryPage() {
                 sizes="100vw"
               />
               <div className="absolute bottom-4 left-5 md:bottom-6 md:left-8">
-                <span className="text-[0.6rem] tracking-widests uppercase text-white/80 bg-black/30 px-3 py-1.5">
+                <span className="text-[0.6rem] tracking-widest uppercase text-white/80 bg-black/30 px-3 py-1.5">
                   {images[0].caption}
                 </span>
               </div>
@@ -143,7 +157,7 @@ export default function ShowroomGalleryPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <p className="text-[0.6rem] tracking-widests uppercase text-white/90">{img.caption}</p>
+                    <p className="text-[0.6rem] tracking-widest uppercase text-white/90">{img.caption}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -168,13 +182,13 @@ export default function ShowroomGalleryPage() {
             <div className="flex flex-col gap-3">
               <Link
                 href="/showroom"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
               >
                 Book a Visit
               </Link>
               <Link
                 href="/enquire"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widests uppercase hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
               >
                 Send an Enquiry
               </Link>
@@ -200,7 +214,7 @@ export default function ShowroomGalleryPage() {
                   </div>
                   <div className="p-6">
                     <h3 className="font-semibold text-[#1c1c1e] group-hover:text-[#007969] transition-colors">{g.name}</h3>
-                    <span className="mt-2 block text-[0.65rem] tracking-widests uppercase text-[#007969]">View Gallery →</span>
+                    <span className="mt-2 block text-[0.65rem] tracking-widest uppercase text-[#007969]">View Gallery →</span>
                   </div>
                 </Link>
               </ScrollReveal>

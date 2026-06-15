@@ -8,6 +8,7 @@ const productLinks = [
   { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
   { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
   { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
+  { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
   { label: "Insect Screens", href: "/catalogue/insect-screens" },
 ];
 
@@ -113,10 +114,10 @@ export default function Footer() {
             <p className="text-label text-[#007969] mb-5">Showroom Hours</p>
             <div className="space-y-2 text-sm text-white/40">
               <div className="flex justify-between gap-4">
-                <span>Sun – Thu</span><span>9:00 – 18:00</span>
+                <span>Sun – Thu</span><span>8:30 – 17:30</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span>Saturday</span><span>10:00 – 15:00</span>
+                <span>Saturday</span><span>10:00 – 14:00</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span>Friday</span><span>Closed</span>

@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LenisProvider from "@/components/layout/LenisProvider";
 import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
+import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://swiftrooms-newbuild.vercel.app"),
@@ -102,6 +103,8 @@ const localBusinessSchema = {
     { "@type": "City", name: "Dubai" },
     { "@type": "City", name: "Abu Dhabi" },
     { "@type": "City", name: "Sharjah" },
+    { "@type": "City", name: "Ras Al Khaimah" },
+    { "@type": "AdministrativeArea", name: "United Arab Emirates" },
   ],
   sameAs: [],
 };
@@ -138,6 +141,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
           <StickyMobileCTA />
+          <WhatsAppFloat />
         </LenisProvider>
       </body>
     </html>

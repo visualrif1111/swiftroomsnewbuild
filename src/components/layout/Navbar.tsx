@@ -18,6 +18,7 @@ const catalogueItems = [
   { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
   { label: "Insect Screens", href: "/catalogue/insect-screens" },
   { label: "Gallery", href: "/catalogue/gallery" },
+  { label: "Promotions", href: "/catalogue/promotions" },
 ];
 
 const technicalItems = [

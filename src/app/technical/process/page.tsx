@@ -5,9 +5,10 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { processSteps } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Our Process",
+  title: "Our Installation Process — From Survey to Handover UAE",
   description:
     "How Swiftrooms works — from initial consultation and survey through manufacture, installation and aftercare. Six steps, zero surprises.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/process" },
   openGraph: {
     title: "Our Process | Swiftrooms",
     description:
@@ -56,8 +57,41 @@ const stepDetails: Record<string, { duration: string; youDo: string; weDo: strin
 };
 
 export default function ProcessPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How Swiftrooms Works: From Enquiry to Installation",
+    description:
+      "Six clear steps from first enquiry to aftercare — the Swiftrooms process for supplying and installing premium aluminium windows, doors and glazing systems in the UAE.",
+    totalTime: "P8W",
+    step: processSteps.map((step, i) => {
+      const detail = stepDetails[step.number] ?? {};
+      return {
+        "@type": "HowToStep",
+        position: i + 1,
+        name: step.title,
+        text: step.description,
+        image: detail.image,
+      };
+    }),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: `${base}/technical` },
+      { "@type": "ListItem", position: 3, name: "Our Process", item: `${base}/technical/process` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -141,7 +175,7 @@ export default function ProcessPage() {
                             <div className="flex items-start gap-3 mb-3">
                               <h2 className="text-xl md:text-2xl font-semibold text-[#1c1c1e]">{step.title}</h2>
                               {detail && (
-                                <span className="flex-shrink-0 mt-1 text-[0.6rem] tracking-widests uppercase text-white bg-[#007969] px-2 py-1">
+                                <span className="flex-shrink-0 mt-1 text-[0.6rem] tracking-widest uppercase text-white bg-[#007969] px-2 py-1">
                                   {detail.duration}
                                 </span>
                               )}
@@ -151,11 +185,11 @@ export default function ProcessPage() {
                             {detail && (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="bg-[#f8f9fa] p-4">
-                                  <p className="text-[0.6rem] tracking-widests uppercase text-[#007969] mb-2">You do</p>
+                                  <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2">You do</p>
                                   <p className="text-[#6b7280] text-sm leading-relaxed">{detail.youDo}</p>
                                 </div>
                                 <div className="bg-[#f0fdf4] p-4">
-                                  <p className="text-[0.6rem] tracking-widests uppercase text-[#007969] mb-2">We do</p>
+                                  <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2">We do</p>
                                   <p className="text-[#6b7280] text-sm leading-relaxed">{detail.weDo}</p>
                                 </div>
                               </div>
@@ -197,7 +231,7 @@ export default function ProcessPage() {
               ].map((s) => (
                 <div key={s.label} className="text-center">
                   <p className="text-3xl md:text-4xl font-bold text-[#007969] mb-2">{s.value}</p>
-                  <p className="text-[0.65rem] tracking-widests uppercase text-[#6b7280]">{s.label}</p>
+                  <p className="text-[0.65rem] tracking-widest uppercase text-[#6b7280]">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -242,13 +276,13 @@ export default function ProcessPage() {
             <div className="flex flex-col gap-3">
               <Link
                 href="/enquire"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
               >
                 Request a Quote
               </Link>
               <Link
                 href="/showroom"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widests uppercase hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
               >
                 Visit Our Showroom
               </Link>

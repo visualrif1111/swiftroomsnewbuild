@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { productCategories } from "@/lib/data";
+import { productCategories, blogPosts } from "@/lib/data";
 
 type Category = (typeof productCategories)[0];
 type Product = Category["products"][0];
@@ -132,6 +132,189 @@ function ProductCard({ product, index, categoryImage }: { product: Product; inde
   );
 }
 
+function CompareTable({ category }: { category: Category }) {
+  const [open, setOpen] = useState(false);
+
+  const productsWithSpecs = category.products.filter(
+    (p) => p.specs && Object.keys(p.specs).length > 0
+  );
+  if (productsWithSpecs.length < 2) return null;
+
+  const allKeys = Array.from(
+    new Set(productsWithSpecs.flatMap((p) => Object.keys(p.specs ?? {})))
+  );
+
+  return (
+    <section className="py-10 md:py-14 border-t border-gray-100">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+        <ScrollReveal>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-label text-[#007969] mb-1">Side-by-side</p>
+              <h2 className="text-lg md:text-xl font-semibold text-[#1c1c1e]">Compare models.</h2>
+            </div>
+            <button
+              onClick={() => setOpen(!open)}
+              className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase border border-gray-200 px-4 py-2.5 text-[#6b7280] hover:border-[#007969] hover:text-[#007969] transition-all"
+            >
+              {open ? "Hide" : "Show"} comparison
+              <motion.svg
+                animate={{ rotate: open ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </motion.svg>
+            </button>
+          </div>
+        </ScrollReveal>
+
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="overflow-hidden"
+            >
+              <div className="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0">
+                <table className="w-full min-w-[480px] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-[#007969]">
+                      <th className="text-left py-3 pr-6 w-40 text-[0.6rem] tracking-widest uppercase text-gray-400 font-normal">
+                        Specification
+                      </th>
+                      {productsWithSpecs.map((p) => (
+                        <th
+                          key={p.id}
+                          className="text-left py-3 px-4 font-semibold text-[#1c1c1e] text-xs leading-snug"
+                        >
+                          {p.name}
+                          <span className="block text-[0.55rem] tracking-widest uppercase text-[#007969] font-normal mt-0.5">
+                            {p.brand}
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allKeys.map((key, i) => (
+                      <tr
+                        key={key}
+                        className={i % 2 === 0 ? "bg-white" : "bg-[#f8f9fa]"}
+                      >
+                        <td className="py-3 pr-6 text-[0.65rem] tracking-wide uppercase text-gray-400 align-top">
+                          {key}
+                        </td>
+                        {productsWithSpecs.map((p) => (
+                          <td
+                            key={p.id}
+                            className="py-3 px-4 text-[#3a3a3c] align-top"
+                          >
+                            {(p.specs as Record<string, string>)?.[key] ?? (
+                              <span className="text-gray-300">—</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                {productsWithSpecs.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/catalogue/${p.category}/${p.slug}`}
+                    className="btn-outline text-xs"
+                  >
+                    View {p.name} →
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
+  );
+}
+
+function CategoryFAQ({ category }: { category: Category }) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  if (!category.faqs || category.faqs.length === 0) return null;
+
+  return (
+    <section className="py-12 md:py-20 border-t border-gray-100">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+        <ScrollReveal>
+          <div className="max-w-3xl">
+            <p className="text-label text-[#007969] mb-3">Common Questions</p>
+            <h2 className="text-title text-[#1c1c1e] mb-10">
+              Frequently asked questions.
+            </h2>
+          </div>
+        </ScrollReveal>
+        <div className="max-w-3xl space-y-0">
+          {category.faqs.map((faq, i) => (
+            <ScrollReveal key={i} delay={i * 0.05}>
+              <div className="border-b border-gray-100">
+                <button
+                  onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                  className="w-full flex items-start justify-between gap-6 py-5 text-left group"
+                >
+                  <span className="text-[#1c1c1e] text-sm md:text-base font-medium leading-snug group-hover:text-[#007969] transition-colors">
+                    {faq.q}
+                  </span>
+                  <motion.svg
+                    animate={{ rotate: openIdx === i ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-4 h-4 flex-shrink-0 mt-1 text-[#007969]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </motion.svg>
+                </button>
+                <AnimatePresence>
+                  {openIdx === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-[#6b7280] text-sm leading-relaxed pb-5">
+                        {faq.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+        <ScrollReveal delay={0.2}>
+          <div className="mt-8 max-w-3xl">
+            <p className="text-[#6b7280] text-sm">
+              Have a question not listed here?{" "}
+              <Link href="/enquire" className="text-[#007969] hover:underline">
+                Contact our technical team →
+              </Link>
+            </p>
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
 export default function CategoryClient({ category }: { category: Category }) {
   return (
     <>
@@ -169,6 +352,52 @@ export default function CategoryClient({ category }: { category: Category }) {
         </div>
       </section>
 
+      <CompareTable category={category} />
+
+      <CategoryFAQ category={category} />
+
+      {category.relatedBlogSlugs && category.relatedBlogSlugs.length > 0 && (() => {
+        const relatedPosts = category.relatedBlogSlugs!
+          .map((s) => blogPosts.find((p) => p.slug === s))
+          .filter(Boolean) as typeof blogPosts;
+        if (relatedPosts.length === 0) return null;
+        return (
+          <section className="py-12 md:py-20 border-t border-gray-100">
+            <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+              <ScrollReveal>
+                <div className="flex items-end justify-between mb-8 md:mb-12">
+                  <div>
+                    <p className="text-label text-[#007969] mb-3">Technical Insights</p>
+                    <h2 className="text-title text-[#1c1c1e]">Further reading.</h2>
+                  </div>
+                  <Link href="/technical/blog" className="hidden sm:flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors">
+                    All articles →
+                  </Link>
+                </div>
+              </ScrollReveal>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-100">
+                {relatedPosts.map((post, i) => (
+                  <ScrollReveal key={post.slug} delay={i * 0.08}>
+                    <Link href={`/technical/blog/${post.slug}`} className="group block bg-white hover:bg-[#f8f9fa] transition-colors h-full">
+                      {post.image && (
+                        <div className="h-36 relative overflow-hidden">
+                          <Image src={post.image} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="(max-width: 768px) 100vw, 33vw" />
+                        </div>
+                      )}
+                      <div className="p-5 md:p-6">
+                        <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2 block">{post.category}</span>
+                        <h3 className="font-semibold text-[#1c1c1e] text-sm leading-snug group-hover:text-[#007969] transition-colors mb-2">{post.title}</h3>
+                        <p className="text-gray-400 text-xs">{post.date} · {post.readTime}</p>
+                      </div>
+                    </Link>
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
       <section className="py-12 md:py-16 bg-[#f8f9fa] border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -189,6 +418,7 @@ export default function CategoryClient({ category }: { category: Category }) {
           </div>
         </div>
       </section>
+
     </>
   );
 }

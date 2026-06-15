@@ -18,8 +18,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = portfolioProjects.find((p) => p.slug === slug);
   if (!project) return { title: "Not Found" };
   return {
-    title: project.name,
+    title: `${project.name} — ${project.type} UAE Glazing Project`,
     description: project.description,
+    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
     openGraph: {
       title: `${project.name} | Swiftrooms Portfolio`,
       description: project.description,
@@ -28,6 +29,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
+
+const productLinks: Record<string, string> = {
+  "Cor Vision 4600": "/catalogue/aluminium-sliding-doors/cor-vision-4600",
+  "Cor Vision 4700": "/catalogue/aluminium-sliding-doors/cor-vision-4700",
+  "Cor Vision Plus": "/catalogue/aluminium-sliding-doors/cor-vision-plus",
+  "Cortizo Bi-fold": "/catalogue/aluminium-bi-folding-doors/cortizo-bifold",
+  "Cortizo Casement": "/catalogue/aluminium-windows/cortizo-casement",
+  "Cortizo Cor 70 Hidden Sash": "/catalogue/aluminium-windows/cortizo-cor-70-hidden-sash",
+  "Gulf Extrusions TB600 Window": "/catalogue/aluminium-windows/gulf-extrusion-tb600-tilt-and-turn",
+  "Aluminium Sliding Windows": "/catalogue/aluminium-windows/aluminium-sliding-windows",
+  "Cortizo Cor 70 Door": "/catalogue/aluminium-doors/cortizo-cor-70-door",
+  "Gulf Extrusions TB600 Door": "/catalogue/aluminium-doors/gulf-extrusion-tb600-door",
+  "Vetromax Pivot Door": "/catalogue/aluminium-doors/vetromax-pivot-door",
+  "uPVC Casement": "/catalogue/upvc/upvc-casement",
+  "Cortizo TP52": "/catalogue/curtain-wall/cortizo-tp52",
+  "Cortizo TP52 Curtain Wall": "/catalogue/curtain-wall/cortizo-tp52",
+  "Gulf Extrusions CW 50mm": "/catalogue/curtain-wall/gulf-extrusion-cw-50",
+  "Vetromax VF35 Facade": "/catalogue/curtain-wall/vetromax-vf35",
+  "Premium Garden Room": "/catalogue/garden-rooms/premium-garden-room",
+  "Glass Conservatory": "/catalogue/garden-rooms/glass-conservatory",
+  "Retractable Fly Screen": "/catalogue/insect-screens/retractable-fly-screen",
+  "Fixed Rooflight": "/catalogue/skylights/fixed-rooflight",
+  "Motorised Skylight": "/catalogue/skylights/motorised-skylight",
+};
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
@@ -49,13 +74,29 @@ export default async function ProjectPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Portfolio", item: "https://swiftrooms-newbuild.vercel.app/portfolio" },
-      { "@type": "ListItem", position: 2, name: project.name, item: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
+      { "@type": "ListItem", position: 2, name: "Portfolio", item: "https://swiftrooms-newbuild.vercel.app/portfolio" },
+      { "@type": "ListItem", position: 3, name: project.name, item: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
     ],
+  };
+
+  const caseStudySchema = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.name,
+    description: project.description,
+    url: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}`,
+    image: project.image ?? undefined,
+    creator: { "@type": "Organization", name: "Swiftrooms", url: "https://swiftrooms-newbuild.vercel.app" },
+    locationCreated: { "@type": "Place", name: project.location },
+    dateCreated: project.year,
+    about: project.products.map((p) => ({ "@type": "Product", name: p })),
+    keywords: project.tags.join(", "),
   };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(caseStudySchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-10 md:pt-44 md:pb-16 lg:pt-52 lg:pb-24">
@@ -167,15 +208,27 @@ export default async function ProjectPage({ params }: Props) {
               <ScrollReveal>
                 <p className="text-label text-[#007969] mb-4 md:mb-6">Products Installed</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                  {project.products.map((product) => (
-                    <div
-                      key={product}
-                      className="flex items-center gap-3 border border-gray-100 p-3 md:p-4 bg-[#f8f9fa]"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#007969] flex-shrink-0" />
-                      <span className="text-[#3a3a3c] text-sm">{product}</span>
-                    </div>
-                  ))}
+                  {project.products.map((product) => {
+                    const href = productLinks[product];
+                    const inner = (
+                      <div className="flex items-center gap-3 border border-gray-100 p-3 md:p-4 bg-[#f8f9fa] group-hover:border-[#007969] transition-colors">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#007969] flex-shrink-0" />
+                        <span className="text-[#3a3a3c] text-sm flex-1">{product}</span>
+                        {href && (
+                          <span className="text-[0.55rem] tracking-widest uppercase text-[#007969] opacity-0 group-hover:opacity-100 transition-opacity">
+                            View →
+                          </span>
+                        )}
+                      </div>
+                    );
+                    return href ? (
+                      <Link key={product} href={href} className="group block">
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div key={product}>{inner}</div>
+                    );
+                  })}
                 </div>
               </ScrollReveal>
             </div>
@@ -213,7 +266,7 @@ export default async function ProjectPage({ params }: Props) {
 
                   {/* Tags */}
                   <div className="mt-8">
-                    <p className="text-[0.6rem] tracking-widests uppercase text-gray-400 mb-3">Tags</p>
+                    <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 mb-3">Tags</p>
                     <div className="flex flex-wrap gap-2">
                       {project.tags.map((tag) => (
                         <span
@@ -238,7 +291,7 @@ export default async function ProjectPage({ params }: Props) {
           {project.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] border border-gray-100 px-3 py-1.5"
+              className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] border border-gray-100 px-3 py-1.5"
             >
               {tag}
             </span>

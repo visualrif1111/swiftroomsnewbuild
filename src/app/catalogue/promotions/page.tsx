@@ -4,8 +4,9 @@ import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "Promotions",
-  description: "Current promotions and seasonal offers from Swiftrooms UAE.",
+  title: "Current Promotions — Windows & Doors Offers UAE",
+  description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE. Free survey, hardware upgrades and trade pricing.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions" },
   openGraph: {
     title: "Promotions | Swiftrooms",
     description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE.",
@@ -50,12 +51,46 @@ const promotions = [
 ];
 
 export default function PromotionsPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+
+  const offersSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Swiftrooms Current Promotions",
+    url: `${base}/catalogue/promotions`,
+    numberOfItems: promotions.length,
+    itemListElement: promotions.map((promo, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Offer",
+        name: promo.title,
+        description: promo.description,
+        url: `${base}${promo.href}`,
+        seller: { "@type": "Organization", name: "Swiftrooms", url: base },
+        areaServed: { "@type": "Country", name: "United Arab Emirates" },
+      },
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${base}/catalogue` },
+      { "@type": "ListItem", position: 3, name: "Promotions", item: `${base}/catalogue/promotions` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offersSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widests uppercase text-gray-400 mb-8">
+            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-8">
               <Link href="/catalogue" className="hover:text-[#007969] transition-colors">Catalogue</Link>
               <span>/</span>
               <span className="text-[#6b7280]">Promotions</span>
@@ -93,7 +128,7 @@ export default function PromotionsPage() {
                     </div>
                   )}
                   <div className="p-8 flex flex-col flex-1">
-                  <span className="text-[0.6rem] tracking-widests uppercase text-[#007969] border border-[#007969]/30 px-2 py-1 self-start mb-6">
+                  <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] border border-[#007969]/30 px-2 py-1 self-start mb-6">
                     {promo.badge}
                   </span>
                   <h2 className="text-[#1c1c1e] text-xl font-semibold mb-4">{promo.title}</h2>
@@ -101,12 +136,12 @@ export default function PromotionsPage() {
                     {promo.description}
                   </p>
                   <div className="border-t border-gray-100 pt-6 flex items-center justify-between">
-                    <span className="text-[0.65rem] tracking-widests uppercase text-[#007969]">
+                    <span className="text-[0.65rem] tracking-widest uppercase text-[#007969]">
                       {promo.value}
                     </span>
                     <Link
                       href={promo.href}
-                      className="text-[0.7rem] tracking-widests uppercase text-[#6b7280] hover:text-[#007969] transition-colors flex items-center gap-1"
+                      className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors flex items-center gap-1"
                     >
                       {promo.cta}
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,7 +171,7 @@ export default function PromotionsPage() {
                 <div className="flex flex-col gap-4">
                   <Link
                     href="/enquire"
-                    className="inline-flex items-center justify-center gap-3 bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center justify-center gap-3 bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
                   >
                     Discuss Trade Pricing
                   </Link>

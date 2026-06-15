@@ -20,11 +20,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.excerpt,
+    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
     openGraph: {
+      type: "article",
       title: post.title,
       description: post.excerpt,
       url: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}`,
       images: post.image ? [{ url: post.image, alt: post.title }] : [],
+      publishedTime: post.date,
+      authors: ["Swiftrooms"],
+      section: post.category,
     },
   };
 }
@@ -50,25 +55,36 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.excerpt,
     image: post.image,
     datePublished: post.date,
-    author: { "@type": "Organization", name: "Swiftrooms", url: "https://swiftrooms-newbuild.vercel.app" },
+    dateModified: post.date,
+    author: {
+      "@type": "Organization",
+      name: "Swiftrooms",
+      url: "https://swiftrooms-newbuild.vercel.app",
+      "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+    },
     publisher: {
       "@type": "Organization",
       name: "Swiftrooms",
       url: "https://swiftrooms-newbuild.vercel.app",
+      "@id": "https://swiftrooms-newbuild.vercel.app/#business",
     },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}`,
     },
+    keywords: post.category,
+    articleSection: post.category,
+    inLanguage: "en-AE",
   };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Technical", item: "https://swiftrooms-newbuild.vercel.app/technical" },
-      { "@type": "ListItem", position: 2, name: "Blog & Insights", item: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
-      { "@type": "ListItem", position: 3, name: post.title, item: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: "https://swiftrooms-newbuild.vercel.app/technical" },
+      { "@type": "ListItem", position: 3, name: "Blog & Insights", item: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
+      { "@type": "ListItem", position: 4, name: post.title, item: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
     ],
   };
 
@@ -200,26 +216,53 @@ export default async function BlogPostPage({ params }: Props) {
                   </p>
                   <Link
                     href="/enquire"
-                    className="block w-full text-center bg-white text-[#007969] py-3 text-[0.7rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                    className="block w-full text-center bg-white text-[#007969] py-3 text-[0.7rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
                   >
                     Enquire Now
                   </Link>
                 </div>
 
-                {/* Browse products */}
+                {/* Related products */}
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Browse Products</p>
-                  <Link
-                    href="/catalogue"
-                    className="flex items-center justify-between border border-gray-100 p-4 hover:border-[#007969]/30 group transition-all"
-                  >
-                    <span className="text-sm text-[#3a3a3c] group-hover:text-[#007969] transition-colors">
-                      View full product range
-                    </span>
-                    <svg className="w-4 h-4 text-gray-400 group-hover:text-[#007969] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
+                  <p className="text-label text-[#007969] mb-4">
+                    {post.relatedProducts && post.relatedProducts.length > 0 ? "Featured Products" : "Browse Products"}
+                  </p>
+                  {post.relatedProducts && post.relatedProducts.length > 0 ? (
+                    <div className="space-y-2">
+                      {post.relatedProducts.map((rp) => (
+                        <Link
+                          key={rp.href}
+                          href={rp.href}
+                          className="flex items-center justify-between border border-gray-100 p-4 hover:border-[#007969]/30 group transition-all"
+                        >
+                          <span className="text-sm text-[#3a3a3c] group-hover:text-[#007969] transition-colors leading-snug">
+                            {rp.name}
+                          </span>
+                          <svg className="w-4 h-4 text-gray-400 group-hover:text-[#007969] transition-colors flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      ))}
+                      <Link
+                        href="/catalogue"
+                        className="block text-[0.65rem] tracking-widest uppercase text-[#007969] pt-2 hover:underline"
+                      >
+                        View all products →
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/catalogue"
+                      className="flex items-center justify-between border border-gray-100 p-4 hover:border-[#007969]/30 group transition-all"
+                    >
+                      <span className="text-sm text-[#3a3a3c] group-hover:text-[#007969] transition-colors">
+                        View full product range
+                      </span>
+                      <svg className="w-4 h-4 text-gray-400 group-hover:text-[#007969] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

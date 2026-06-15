@@ -5,9 +5,10 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { portfolioProjects } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Gallery",
+  title: "Product Gallery — Cor Vision, Bi-Fold & Curtain Wall UAE",
   description:
-    "Product photography and installation photography from Swiftrooms projects across the UAE.",
+    "Product photography and installation photography from Swiftrooms projects across the UAE. Cor Vision lift-and-slide, bi-folding doors, curtain wall and more at full scale.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery" },
   openGraph: {
     title: "Gallery | Swiftrooms",
     description:
@@ -47,8 +48,20 @@ const galleries = [
 ];
 
 export default function GalleryPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${base}/catalogue` },
+      { "@type": "ListItem", position: 3, name: "Gallery", item: `${base}/catalogue/gallery` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -97,7 +110,7 @@ export default function GalleryPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 right-4">
-                      <span className="text-[0.55rem] tracking-widests uppercase text-white/80">
+                      <span className="text-[0.55rem] tracking-widest uppercase text-white/80">
                         {g.count} images
                       </span>
                     </div>
@@ -108,7 +121,7 @@ export default function GalleryPage() {
                     </h2>
                     <p className="text-[#007969] text-sm italic mb-3">{g.tagline}</p>
                     <p className="text-[#6b7280] text-sm leading-relaxed line-clamp-2">{g.description}</p>
-                    <span className="mt-5 block text-[0.65rem] tracking-widests uppercase text-[#007969]">
+                    <span className="mt-5 block text-[0.65rem] tracking-widest uppercase text-[#007969]">
                       View Gallery →
                     </span>
                   </div>
@@ -150,7 +163,7 @@ export default function GalleryPage() {
                       />
                     )}
                     <div className="absolute inset-0 bg-[#007969]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-5">
-                      <p className="text-[0.6rem] tracking-widests uppercase text-white/80 mb-1">
+                      <p className="text-[0.6rem] tracking-widest uppercase text-white/80 mb-1">
                         {project.type}
                       </p>
                       <p className="text-white font-semibold text-sm">{project.name}</p>

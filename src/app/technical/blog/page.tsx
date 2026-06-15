@@ -3,9 +3,10 @@ import BlogClient from "./BlogClient";
 import { blogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Blog & Insights",
+  title: "Glazing Blog — Expert Guides for UAE Windows & Doors",
   description:
     "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems from the Swiftrooms team.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
   openGraph: {
     title: "Blog & Insights | Swiftrooms",
     description:
@@ -16,6 +17,15 @@ export const metadata: Metadata = {
 
 export default function BlogPage() {
   const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: `${base}/technical` },
+      { "@type": "ListItem", position: 3, name: "Blog & Insights", item: `${base}/technical/blog` },
+    ],
+  };
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -34,6 +44,7 @@ export default function BlogPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <BlogClient />
     </>

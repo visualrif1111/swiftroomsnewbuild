@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { productCategories } from "@/lib/data";
+import { productCategories, blogPosts, portfolioProjects } from "@/lib/data";
 
 interface Props {
   params: Promise<{ slug: string; product: string }>;
@@ -24,10 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = cat?.products.find((p) => p.slug === productSlug);
   if (!product) return { title: "Not Found" };
   return {
-    title: `${product.name} — ${cat!.name}`,
+    title: `${product.name} UAE — ${product.brand} Glazing Specialist`,
     description: product.description,
+    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}/${productSlug}` },
     openGraph: {
-      title: `${product.name} | Swiftrooms`,
+      title: `${product.name} | ${product.brand} UAE | Swiftrooms`,
       description: product.description,
       url: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}/${productSlug}`,
       images: product.image ? [{ url: product.image, alt: product.name }] : [],
@@ -44,6 +45,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
+  const projectsUsingProduct = portfolioProjects
+    .filter((proj) => proj.products.some((pName) => pName.toLowerCase().includes(product.name.split(" ").slice(-2).join(" ").toLowerCase()) || product.name.toLowerCase().includes(pName.toLowerCase())))
+    .slice(0, 3);
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -52,22 +56,37 @@ export default async function ProductDetailPage({ params }: Props) {
     description: product.description,
     image: heroImage ?? undefined,
     brand: { "@type": "Brand", name: product.brand },
+    category: cat.name,
+    manufacturer: { "@type": "Organization", name: product.brand },
     offers: {
       "@type": "Offer",
       priceCurrency: "AED",
       availability: "https://schema.org/InStock",
       url: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}`,
-      seller: { "@type": "Organization", name: "Swiftrooms" },
+      seller: {
+        "@type": "Organization",
+        name: "Swiftrooms",
+        "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+      },
+      areaServed: { "@type": "Country", name: "United Arab Emirates" },
     },
+    ...(product.specs && Object.keys(product.specs).length > 0 && {
+      additionalProperty: Object.entries(product.specs).map(([name, value]) => ({
+        "@type": "PropertyValue",
+        name,
+        value: value as string,
+      })),
+    }),
   };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Catalogue", item: "https://swiftrooms-newbuild.vercel.app/catalogue" },
-      { "@type": "ListItem", position: 2, name: cat.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}` },
-      { "@type": "ListItem", position: 3, name: product.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: "https://swiftrooms-newbuild.vercel.app/catalogue" },
+      { "@type": "ListItem", position: 3, name: cat.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}` },
+      { "@type": "ListItem", position: 4, name: product.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}` },
     ],
   };
 
@@ -310,7 +329,67 @@ export default async function ProductDetailPage({ params }: Props) {
         </div>
       </section>
 
-      {/* 7 — Related Products */}
+      {/* 7 — Projects Using This Product */}
+      {projectsUsingProduct.length > 0 && (
+        <section className="py-14 md:py-20 border-t border-gray-100">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+            <ScrollReveal>
+              <div className="flex items-end justify-between mb-8 md:mb-12">
+                <div>
+                  <p className="text-label text-[#007969] mb-3">Installed Projects</p>
+                  <h2 className="text-title text-[#1c1c1e]">
+                    See it in completed projects.
+                  </h2>
+                </div>
+                <Link
+                  href="/portfolio"
+                  className="hidden sm:inline-flex text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors"
+                >
+                  All projects →
+                </Link>
+              </div>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-100">
+              {projectsUsingProduct.map((proj, i) => (
+                <ScrollReveal key={proj.id} delay={i * 0.08}>
+                  <Link
+                    href={`/portfolio/${proj.slug}`}
+                    className="group block bg-white hover:bg-[#f0fdf4] transition-colors overflow-hidden"
+                  >
+                    <div className="h-44 relative overflow-hidden">
+                      <Image
+                        src={proj.image ?? "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
+                        alt={proj.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute bottom-3 left-4">
+                        <span className="text-[0.55rem] tracking-widest uppercase text-white/80">
+                          {proj.type}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-5 md:p-6">
+                      <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2">{proj.location}</p>
+                      <h3 className="font-semibold text-[#1c1c1e] group-hover:text-[#007969] transition-colors mb-1">
+                        {proj.name}
+                      </h3>
+                      <p className="text-gray-400 text-xs">{proj.area} · {proj.year}</p>
+                      <span className="mt-4 block text-[0.65rem] tracking-widest uppercase text-[#007969]">
+                        View project →
+                      </span>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 8 — Related Products in Category */}
       {related.length > 0 && (
         <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -360,7 +439,50 @@ export default async function ProductDetailPage({ params }: Props) {
         </section>
       )}
 
-      {/* 8 — CTA */}
+      {/* 9 — Further Reading */}
+      {cat.relatedBlogSlugs && cat.relatedBlogSlugs.length > 0 && (() => {
+        const relatedPosts = cat.relatedBlogSlugs!
+          .map((s) => blogPosts.find((p) => p.slug === s))
+          .filter(Boolean) as typeof blogPosts;
+        if (relatedPosts.length === 0) return null;
+        return (
+          <section className="py-14 md:py-20 border-t border-gray-100">
+            <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+              <ScrollReveal>
+                <div className="flex items-end justify-between mb-8 md:mb-12">
+                  <div>
+                    <p className="text-label text-[#007969] mb-3">Technical Insights</p>
+                    <h2 className="text-title text-[#1c1c1e]">Further reading.</h2>
+                  </div>
+                  <Link href="/technical/blog" className="hidden sm:inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors">
+                    All articles →
+                  </Link>
+                </div>
+              </ScrollReveal>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-100">
+                {relatedPosts.slice(0, 3).map((post, i) => (
+                  <ScrollReveal key={post.slug} delay={i * 0.08}>
+                    <Link href={`/technical/blog/${post.slug}`} className="group block bg-white hover:bg-[#f8f9fa] transition-colors h-full">
+                      {post.image && (
+                        <div className="h-36 relative overflow-hidden">
+                          <Image src={post.image} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="(max-width: 768px) 100vw, 33vw" />
+                        </div>
+                      )}
+                      <div className="p-5 md:p-6">
+                        <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2 block">{post.category}</span>
+                        <h3 className="font-semibold text-[#1c1c1e] leading-snug group-hover:text-[#007969] transition-colors mb-2">{post.title}</h3>
+                        <p className="text-gray-400 text-xs">{post.date} · {post.readTime}</p>
+                      </div>
+                    </Link>
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* 10 — CTA */}
       <section className="py-20 md:py-32 bg-[#007969]">
         <ScrollReveal>
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
@@ -388,6 +510,7 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </ScrollReveal>
       </section>
+
     </>
   );
 }

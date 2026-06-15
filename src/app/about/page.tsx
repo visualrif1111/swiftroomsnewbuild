@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
   description:
     "Fifteen years supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE. Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/about" },
   openGraph: {
     title: "About Swiftrooms | The UAE's Trusted Glazing Authority",
     description:
@@ -17,6 +18,7 @@ export default function AboutPage() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": "https://swiftrooms-newbuild.vercel.app/#business",
     name: "Swiftrooms",
     url: "https://swiftrooms-newbuild.vercel.app",
     foundingDate: "2009",
@@ -45,9 +47,20 @@ export default function AboutPage() {
     ],
   };
 
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "About Swiftrooms", item: `${base}/about` },
+    ],
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <AboutClient />
     </>
   );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { teamMembers, timeline, stats } from "@/lib/data";
+import { teamMembers, timeline, stats, testimonials } from "@/lib/data";
 
 const values = [
   {
@@ -322,6 +322,37 @@ export default function AboutClient() {
                   <div>
                     <p className="font-semibold text-[#1c1c1e] mb-1">{cert.name}</p>
                     <p className="text-[#6b7280] text-sm">{cert.detail}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Client Voices */}
+      <section className="py-14 md:py-20 bg-white border-t border-gray-100">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <ScrollReveal>
+            <p className="text-label text-[#007969] mb-4">Client Voices</p>
+            <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">
+              What clients say about working with us.
+            </h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
+            {testimonials.slice(0, 4).map((t, i) => (
+              <ScrollReveal key={i} delay={i * 0.08}>
+                <div className="bg-white p-6 md:p-8 lg:p-10 flex flex-col h-full">
+                  <svg className="w-6 h-6 text-[#007969]/25 mb-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                  <p className="text-[#3a3a3c] leading-relaxed italic flex-1 mb-6">&ldquo;{t.quote}&rdquo;</p>
+                  <div>
+                    <p className="font-semibold text-[#1c1c1e] text-sm">{t.author}</p>
+                    <p className="text-[#6b7280] text-xs mt-0.5">{t.location}</p>
+                    <span className="inline-block mt-2 text-[0.55rem] tracking-widest uppercase text-[#007969] border border-[#007969]/20 px-2 py-0.5">
+                      {t.product}
+                    </span>
                   </div>
                 </div>
               </ScrollReveal>

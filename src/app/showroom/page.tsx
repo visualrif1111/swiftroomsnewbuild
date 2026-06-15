@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import ShowroomBookingForm from "./ShowroomBookingForm";
 
 export const metadata: Metadata = {
   title: "Showroom — Jebel Ali, Dubai",
   description:
     "Visit the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space where you can experience Cortizo Cor Vision, Cor Vision Plus and TP52 curtain wall at full scale, in working condition.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/showroom" },
   openGraph: {
     title: "4900 Showroom, Jebel Ali | Swiftrooms",
     description:
@@ -68,6 +70,15 @@ const visitSteps = [
 ];
 
 export default function ShowroomPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Visit Showroom", item: `${base}/showroom` },
+    ],
+  };
   const showroomSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -108,6 +119,7 @@ export default function ShowroomPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(showroomSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-0 md:pt-44 lg:pt-52">
@@ -177,7 +189,7 @@ export default function ShowroomPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               <div className="absolute bottom-6 left-6 md:bottom-8 md:left-10">
-                <p className="text-[0.6rem] tracking-widests uppercase text-white/80">4900 Showroom · Jebel Ali Industrial Area 1, Dubai</p>
+                <p className="text-[0.6rem] tracking-widest uppercase text-white/80">4900 Showroom · Jebel Ali Industrial Area 1, Dubai</p>
               </div>
             </div>
           </ScrollReveal>
@@ -211,13 +223,13 @@ export default function ShowroomPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-3 left-4">
-                      <span className="text-[0.55rem] tracking-widests uppercase text-white/80">{display.type}</span>
+                      <span className="text-[0.55rem] tracking-widest uppercase text-white/80">{display.type}</span>
                     </div>
                   </div>
                   <div className="p-5 md:p-6">
                     <h3 className="font-semibold text-[#1c1c1e] mb-2 group-hover:text-[#007969] transition-colors">{display.name}</h3>
                     <p className="text-[#6b7280] text-sm leading-relaxed">{display.description}</p>
-                    <span className="mt-4 block text-[0.65rem] tracking-widests uppercase text-[#007969]">View Product →</span>
+                    <span className="mt-4 block text-[0.65rem] tracking-widest uppercase text-[#007969]">View Product →</span>
                   </div>
                 </Link>
               </ScrollReveal>
@@ -317,54 +329,7 @@ export default function ShowroomPage() {
               {/* Booking form */}
               <div id="book" className="border-t border-gray-200 pt-8">
                 <p className="text-label text-[#007969] mb-6">Book a Visit</p>
-                <form className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[0.6rem] tracking-widests uppercase text-[#6b7280] block mb-2">Name *</label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[0.6rem] tracking-widests uppercase text-[#6b7280] block mb-2">Phone *</label>
-                      <input
-                        type="tel"
-                        required
-                        className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-[0.6rem] tracking-widests uppercase text-[#6b7280] block mb-2">Email *</label>
-                    <input
-                      type="email"
-                      required
-                      className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[0.6rem] tracking-widests uppercase text-[#6b7280] block mb-2">Preferred Date & Time</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Tuesday morning, any week"
-                      className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors placeholder:text-gray-300"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[0.6rem] tracking-widests uppercase text-[#6b7280] block mb-2">Your Project</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Brief description of your project — helps us prepare the right team member."
-                      className="w-full bg-white border border-gray-200 text-[#1c1c1e] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors resize-none placeholder:text-gray-300"
-                    />
-                  </div>
-                  <button type="submit" className="btn-brand w-full justify-center">
-                    Request Appointment
-                  </button>
-                  <p className="text-gray-400 text-xs text-center">We confirm within 24 hours. No obligation.</p>
-                </form>
+                <ShowroomBookingForm />
               </div>
             </div>
           </ScrollReveal>

@@ -12,9 +12,10 @@ const brandImages: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: "Brand Partners",
+  title: "Cortizo, Vetromax & Gulf Extrusions — Authorised Brand Partners UAE",
   description:
     "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/brands" },
   openGraph: {
     title: "Brand Partners | Swiftrooms",
     description:
@@ -25,6 +26,15 @@ export const metadata: Metadata = {
 
 export default function BrandsPage() {
   const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${base}/catalogue` },
+      { "@type": "ListItem", position: 3, name: "Brand Partners", item: `${base}/catalogue/brands` },
+    ],
+  };
   const brandListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -46,11 +56,12 @@ export default function BrandsPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(brandListSchema) }} />
       <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10">
           <ScrollReveal>
-            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widests uppercase text-gray-400 mb-8">
+            <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-8">
               <Link href="/catalogue" className="hover:text-[#007969] transition-colors">Catalogue</Link>
               <span>/</span>
               <span className="text-[#6b7280]">Brands</span>
@@ -101,7 +112,7 @@ export default function BrandsPage() {
                           {brand.speciality.map((s) => (
                             <span
                               key={s}
-                              className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] border border-gray-200 px-3 py-1.5"
+                              className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-3 py-1.5"
                             >
                               {s}
                             </span>
@@ -140,7 +151,7 @@ export default function BrandsPage() {
                                 </div>
                                 <Link
                                   href={`/catalogue/${product.category}`}
-                                  className="text-[0.65rem] tracking-widests uppercase text-gray-400 hover:text-[#007969] transition-colors"
+                                  className="text-[0.65rem] tracking-widest uppercase text-gray-400 hover:text-[#007969] transition-colors"
                                 >
                                   View →
                                 </Link>
@@ -153,7 +164,7 @@ export default function BrandsPage() {
                       <div className="mt-8">
                         <Link
                           href="/enquire"
-                          className="inline-flex items-center gap-2 text-[0.7rem] tracking-widests uppercase text-[#007969] border border-[#007969]/40 px-5 py-3 hover:bg-[#007969]/10 transition-all"
+                          className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#007969] border border-[#007969]/40 px-5 py-3 hover:bg-[#007969]/10 transition-all"
                         >
                           Enquire about {brand.name}
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

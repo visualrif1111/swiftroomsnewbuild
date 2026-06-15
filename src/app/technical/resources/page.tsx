@@ -3,9 +3,10 @@ import ResourcesClient from "./ResourcesClient";
 import { resources } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Technical Resources",
+  title: "Glazing Technical Resources — Guides, Specifications & Downloads UAE",
   description:
     "Product guides, project inspiration, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly from our team.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/resources" },
   openGraph: {
     title: "Technical Resources | Swiftrooms",
     description:
@@ -16,6 +17,15 @@ export const metadata: Metadata = {
 
 export default function ResourcesPage() {
   const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: `${base}/technical` },
+      { "@type": "ListItem", position: 3, name: "Technical Resources", item: `${base}/technical/resources` },
+    ],
+  };
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -33,6 +43,7 @@ export default function ResourcesPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <ResourcesClient />
     </>

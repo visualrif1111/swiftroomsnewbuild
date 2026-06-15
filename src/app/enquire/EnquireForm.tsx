@@ -80,7 +80,7 @@ export default function EnquireForm() {
           <p className="text-label text-[#007969] mb-6">Contact Details</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">First Name *</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">First Name *</label>
               <input
                 name="firstName"
                 type="text"
@@ -89,7 +89,7 @@ export default function EnquireForm() {
               />
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Last Name *</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Last Name *</label>
               <input
                 name="lastName"
                 type="text"
@@ -98,7 +98,7 @@ export default function EnquireForm() {
               />
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Email *</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Email *</label>
               <input
                 name="email"
                 type="email"
@@ -107,7 +107,7 @@ export default function EnquireForm() {
               />
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Phone *</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Phone *</label>
               <input
                 name="phone"
                 type="tel"
@@ -122,7 +122,7 @@ export default function EnquireForm() {
           <p className="text-label text-[#007969] mb-6">Project Details</p>
           <div className="space-y-4">
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Project Type</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Project Type</label>
               <select
                 name="projectType"
                 className="w-full bg-white border border-gray-200 text-[#3a3a3c] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
@@ -136,7 +136,7 @@ export default function EnquireForm() {
               </select>
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Location</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Location</label>
               <input
                 name="location"
                 type="text"
@@ -145,7 +145,7 @@ export default function EnquireForm() {
               />
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-3">Products of Interest</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-3">Products of Interest</label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {productCategories.map((cat) => (
                   <label key={cat.id} className="flex items-center gap-2 cursor-pointer group">
@@ -163,7 +163,7 @@ export default function EnquireForm() {
               </div>
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Budget Range</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Budget Range</label>
               <select
                 name="budget"
                 className="w-full bg-white border border-gray-200 text-[#3a3a3c] px-4 py-3 text-sm focus:outline-none focus:border-[#007969] transition-colors"
@@ -176,7 +176,7 @@ export default function EnquireForm() {
               </select>
             </div>
             <div>
-              <label className="text-[0.65rem] tracking-widests uppercase text-[#6b7280] block mb-2">Additional Notes</label>
+              <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-2">Additional Notes</label>
               <textarea
                 name="notes"
                 rows={4}

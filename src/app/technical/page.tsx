@@ -5,9 +5,10 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { blogPosts, faqs } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Technical Hub",
+  title: "Technical Hub — Glazing Guides, Process & FAQ for UAE Projects",
   description:
     "Swiftrooms technical resources — our process, blog articles, downloadable guides, FAQ and everything you need to specify, plan and manage your glazing project in the UAE.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical" },
   openGraph: {
     title: "Technical Hub | Swiftrooms",
     description:
@@ -47,7 +48,7 @@ const sections = [
       "Specification guides, project case studies and planning tools. Request any document and our team will send it directly — no gatekeeping, no forms to fill.",
     cta: "Browse resources",
     image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80",
-    stat: "11 documents",
+    stat: "14 documents",
     statLabel: "Free to request",
   },
   {
@@ -63,11 +64,32 @@ const sections = [
   },
 ];
 
-const recentPosts = blogPosts.slice(0, 3);
+const MONTHS: Record<string, number> = {
+  January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+  July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
+};
+const recentPosts = [...blogPosts]
+  .sort((a, b) => {
+    const [aM, aY] = a.date.split(" ");
+    const [bM, bY] = b.date.split(" ");
+    return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
+  })
+  .slice(0, 3);
 
 export default function TechnicalPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: `${base}/technical` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {/* Hero */}
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -113,10 +135,10 @@ export default function TechnicalPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 left-5 flex items-center gap-3">
-                      <span className="text-[0.55rem] tracking-widests uppercase text-white bg-[#007969] px-2 py-1">
+                      <span className="text-[0.55rem] tracking-widest uppercase text-white bg-[#007969] px-2 py-1">
                         {section.stat}
                       </span>
-                      <span className="text-[0.55rem] tracking-widests uppercase text-white/70">
+                      <span className="text-[0.55rem] tracking-widest uppercase text-white/70">
                         {section.statLabel}
                       </span>
                     </div>
@@ -127,7 +149,7 @@ export default function TechnicalPage() {
                       {section.title}
                     </h2>
                     <p className="text-[#6b7280] text-sm leading-relaxed mb-6">{section.description}</p>
-                    <span className="text-[0.65rem] tracking-widests uppercase text-[#007969]">
+                    <span className="text-[0.65rem] tracking-widest uppercase text-[#007969]">
                       {section.cta} →
                     </span>
                   </div>
@@ -174,12 +196,12 @@ export default function TechnicalPage() {
                     </div>
                   )}
                   <div className="p-5 md:p-6">
-                    <p className="text-[0.6rem] tracking-widests uppercase text-[#007969] mb-2">{post.category}</p>
+                    <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2">{post.category}</p>
                     <h3 className="font-semibold text-[#1c1c1e] mb-2 group-hover:text-[#007969] transition-colors leading-snug">
                       {post.title}
                     </h3>
                     <p className="text-[#6b7280] text-sm leading-relaxed line-clamp-2">{post.excerpt}</p>
-                    <span className="mt-4 block text-[0.65rem] tracking-widests uppercase text-[#007969]">
+                    <span className="mt-4 block text-[0.65rem] tracking-widest uppercase text-[#007969]">
                       Read article →
                     </span>
                   </div>
@@ -218,7 +240,7 @@ export default function TechnicalPage() {
                 {faqs.slice(0, 5).map((faq, i) => (
                   <ScrollReveal key={faq.question} delay={i * 0.05}>
                     <div className="border-b border-gray-100 py-4">
-                      <p className="text-[0.6rem] tracking-widests uppercase text-[#007969] mb-1">{faq.category}</p>
+                      <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-1">{faq.category}</p>
                       <p className="font-medium text-[#1c1c1e] text-sm mb-1">{faq.question}</p>
                       <p className="text-[#6b7280] text-sm leading-relaxed line-clamp-2">{faq.answer}</p>
                     </div>
@@ -246,13 +268,13 @@ export default function TechnicalPage() {
             <div className="flex flex-col gap-3">
               <Link
                 href="/enquire"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
               >
                 Get a Free Quote
               </Link>
               <Link
                 href="/showroom"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widests uppercase hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
               >
                 Visit Our Showroom
               </Link>

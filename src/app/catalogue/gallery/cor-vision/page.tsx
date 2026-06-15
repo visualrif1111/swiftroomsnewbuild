@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Cor Vision Gallery",
   description:
     "Photography from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas — minimal sightlines, maximum glass area.",
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision" },
   openGraph: {
     title: "Cor Vision Gallery | Swiftrooms",
     description:
@@ -40,8 +41,21 @@ const images = [
 const heights = [300, 380, 260, 340, 220, 300, 360, 280, 400, 240, 320, 280, 360, 240, 300, 380, 260, 340];
 
 export default function CorVisionGalleryPage() {
+  const base = "https://swiftrooms-newbuild.vercel.app";
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${base}/catalogue` },
+      { "@type": "ListItem", position: 3, name: "Gallery", item: `${base}/catalogue/gallery` },
+      { "@type": "ListItem", position: 4, name: "Cor Vision Gallery", item: `${base}/catalogue/gallery/cor-vision` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -97,7 +111,7 @@ export default function CorVisionGalleryPage() {
                 sizes="100vw"
               />
               <div className="absolute bottom-4 left-5 md:bottom-6 md:left-8">
-                <span className="text-[0.6rem] tracking-widests uppercase text-white/80 bg-black/30 px-3 py-1.5">
+                <span className="text-[0.6rem] tracking-widest uppercase text-white/80 bg-black/30 px-3 py-1.5">
                   {images[0].caption}
                 </span>
               </div>
@@ -125,7 +139,7 @@ export default function CorVisionGalleryPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <p className="text-[0.6rem] tracking-widests uppercase text-white/90">{img.caption}</p>
+                    <p className="text-[0.6rem] tracking-widest uppercase text-white/90">{img.caption}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -150,13 +164,13 @@ export default function CorVisionGalleryPage() {
             <div className="flex flex-col gap-3">
               <Link
                 href="/catalogue/aluminium-sliding-doors"
-                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widests uppercase font-semibold hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
               >
                 View Sliding Door Range
               </Link>
               <Link
                 href="/enquire"
-                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widests uppercase hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all"
               >
                 Enquire Now
               </Link>
@@ -182,7 +196,7 @@ export default function CorVisionGalleryPage() {
                   </div>
                   <div className="p-6">
                     <h3 className="font-semibold text-[#1c1c1e] group-hover:text-[#007969] transition-colors">{g.name}</h3>
-                    <span className="mt-2 block text-[0.65rem] tracking-widests uppercase text-[#007969]">View Gallery →</span>
+                    <span className="mt-2 block text-[0.65rem] tracking-widest uppercase text-[#007969]">View Gallery →</span>
                   </div>
                 </Link>
               </ScrollReveal>

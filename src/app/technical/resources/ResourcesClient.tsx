@@ -30,8 +30,17 @@ export default function ResourcesClient() {
   const filtered =
     activeTab === "all" ? resources : resources.filter((r) => r.category === activeTab);
 
-  function handleRequest(id: string) {
+  async function handleRequest(id: string, title: string) {
     setRequested((prev) => new Set([...prev, id]));
+    try {
+      await fetch("/api/resource-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resourceId: id, resourceTitle: title }),
+      });
+    } catch {
+      // non-blocking — UI already shows "Requested ✓"
+    }
   }
 
   const grouped = categoryOrder.reduce<Record<string, typeof resources>>(
@@ -149,7 +158,7 @@ export default function ResourcesClient() {
 
                           <div className="flex items-center gap-3 flex-shrink-0">
                             <div className="hidden sm:flex items-center gap-2">
-                              <span className="text-[0.6rem] tracking-widests uppercase text-gray-400 border border-gray-200 px-2 py-1">
+                              <span className="text-[0.6rem] tracking-widest uppercase text-gray-400 border border-gray-200 px-2 py-1">
                                 {resource.fileType}
                               </span>
                               <span className="text-gray-400 text-xs">{resource.fileSize}</span>
@@ -160,7 +169,7 @@ export default function ResourcesClient() {
                               </span>
                             ) : (
                               <button
-                                onClick={() => handleRequest(resource.id)}
+                                onClick={() => handleRequest(resource.id, resource.title)}
                                 className="text-[0.65rem] tracking-widest uppercase border border-gray-200 px-3 py-2 text-[#6b7280] hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap"
                               >
                                 Request
