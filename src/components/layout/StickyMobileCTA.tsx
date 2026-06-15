@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const WA_NUMBER = "971000000000";
+const WA_NUMBER = "971505269149";
 const WA_MESSAGE = encodeURIComponent(
   "Hi Swiftrooms, I'd like to enquire about windows and doors for my project."
 );

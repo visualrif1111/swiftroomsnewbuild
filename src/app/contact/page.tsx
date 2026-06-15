@@ -68,8 +68,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-label text-[#007969] mb-4">Telephone</p>
-                  <a href="tel:+971000000000" className="text-[#3a3a3c] hover:text-[#007969] transition-colors text-lg">
-                    +971 (0) 00 000 0000
+                  <a href="tel:+971505269149" className="text-[#3a3a3c] hover:text-[#007969] transition-colors text-lg">
+                    +971 505 269 149
                   </a>
                 </div>
                 <div>

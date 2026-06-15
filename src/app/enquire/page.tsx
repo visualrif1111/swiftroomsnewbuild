@@ -117,8 +117,8 @@ export default function EnquirePage() {
 
                 <div className="border-t border-gray-100 pt-8">
                   <p className="text-label text-[#007969] mb-4">Prefer to call?</p>
-                  <a href="tel:+971000000000" className="text-[#1c1c1e] text-lg hover:text-[#007969] transition-colors">
-                    +971 (0) 00 000 0000
+                  <a href="tel:+971505269149" className="text-[#1c1c1e] text-lg hover:text-[#007969] transition-colors">
+                    +971 505 269 149
                   </a>
                   <p className="text-gray-400 text-xs mt-1">Sun–Thu 8:30–17:30, Sat 10:00–14:00</p>
                 </div>

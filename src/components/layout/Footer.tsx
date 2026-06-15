@@ -69,8 +69,8 @@ export default function Footer() {
             </p>
             <div className="space-y-1.5 text-sm">
               <p className="text-label text-[#007969] mb-3">Contact</p>
-              <a href="tel:+971000000000" className="block text-white/50 hover:text-white transition-colors">
-                +971 (0) 00 000 0000
+              <a href="tel:+971505269149" className="block text-white/50 hover:text-white transition-colors">
+                +971 505 269 149
               </a>
               <a href="mailto:info@swiftrooms.ae" className="block text-white/50 hover:text-white transition-colors">
                 info@swiftrooms.ae
