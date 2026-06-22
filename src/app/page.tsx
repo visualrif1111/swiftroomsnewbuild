@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "Swiftrooms — Performance Windows & Doors, UAE",
   description:
     "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app" },
+  alternates: { canonical: "https://www.swiftrooms.ae" },
   openGraph: {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-    url: "https://swiftrooms-newbuild.vercel.app",
+    url: "https://www.swiftrooms.ae",
   },
 };
 
@@ -19,7 +19,7 @@ export default function Home() {
   const reviewSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+    "@id": "https://www.swiftrooms.ae/#business",
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.9",

@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: "Cor Vision Plus Gallery",
   description:
     "Photography from completed Cor Vision Plus lift-and-slide installations across UAE villas — flush thresholds, frameless aesthetics and barrier-free indoor-outdoor living.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision-plus" },
+  alternates: { canonical: "https://www.swiftrooms.ae/catalogue/gallery/cor-vision-plus" },
   openGraph: {
     title: "Cor Vision Plus Gallery | Swiftrooms",
     description:
       "12 photographs from completed Cor Vision Plus installations across UAE villas. Flush thresholds, frameless aesthetics and barrier-free indoor-outdoor living.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision-plus",
+    url: "https://www.swiftrooms.ae/catalogue/gallery/cor-vision-plus",
     images: [{ url: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Plus Gallery" }],
   },
 };
@@ -36,7 +36,7 @@ const images = [
 const heights = [320, 240, 400, 280, 360, 220, 300, 380, 260, 340, 280, 320];
 
 export default function CorVisionPlusGalleryPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

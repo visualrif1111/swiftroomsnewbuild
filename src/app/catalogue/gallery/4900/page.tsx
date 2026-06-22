@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: "4900 Showroom Gallery",
   description:
     "The Swiftrooms 4900 showroom in Jebel Ali — the UAE's only space where you can experience the Cor Vision, Cor Vision Plus and TP52 curtain wall range at full scale, in working condition.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/4900" },
+  alternates: { canonical: "https://www.swiftrooms.ae/catalogue/gallery/4900" },
   openGraph: {
     title: "4900 Showroom Gallery | Swiftrooms",
     description:
       "9 photographs from the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space to experience Cor Vision and TP52 curtain wall at full scale.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/4900",
+    url: "https://www.swiftrooms.ae/catalogue/gallery/4900",
     images: [{ url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80", alt: "4900 Showroom Gallery" }],
   },
 };
@@ -39,7 +39,7 @@ const images = [
 const heights = [340, 260, 400, 280, 360, 240, 300, 380, 260, 320, 280, 360, 240, 300, 380];
 
 export default function ShowroomGalleryPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

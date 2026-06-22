@@ -6,17 +6,17 @@ export const metadata: Metadata = {
   title: "Glazing FAQ — Windows, Doors & Aluminium Systems UAE",
   description:
     "Answers to the most common questions about premium aluminium windows, doors and glazing systems in the UAE. Get clear, expert answers from the Swiftrooms team.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/faq" },
+  alternates: { canonical: "https://www.swiftrooms.ae/technical/faq" },
   openGraph: {
     title: "FAQ | Swiftrooms",
     description:
       "Answers to the most common questions about premium aluminium windows, doors and glazing systems in the UAE.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/faq",
+    url: "https://www.swiftrooms.ae/technical/faq",
   },
 };
 
 export default function FaqPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

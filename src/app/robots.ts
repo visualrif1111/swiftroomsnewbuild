@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://swiftrooms-newbuild.vercel.app/sitemap.xml",
+    sitemap: "https://www.swiftrooms.ae/sitemap.xml",
   };
 }

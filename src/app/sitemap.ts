@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { productCategories, portfolioProjects, blogPosts } from "@/lib/data";
 
-const BASE_URL = "https://swiftrooms-newbuild.vercel.app";
+const BASE_URL = "https://www.swiftrooms.ae";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -25,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/showroom`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/enquire`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/reviews`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 
   const categoryRoutes: MetadataRoute.Sitemap = productCategories.map((cat) => ({

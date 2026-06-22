@@ -8,17 +8,17 @@ export const metadata: Metadata = {
   title: "Aluminium Windows, Doors & Glazing Systems — Full Product Range UAE",
   description:
     "Browse the complete Swiftrooms product range — aluminium sliding doors, bi-fold doors, curtain wall, windows, uPVC systems, skylights, garden rooms and insect screens for UAE projects.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue" },
+  alternates: { canonical: "https://www.swiftrooms.ae/catalogue" },
   openGraph: {
     title: "Product Catalogue | Swiftrooms",
     description:
       "Browse the complete Swiftrooms product range — aluminium doors, windows, curtain wall, bi-fold, uPVC and more. Engineered in Europe, installed across the UAE.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue",
+    url: "https://www.swiftrooms.ae/catalogue",
   },
 };
 
 export default function CataloguePage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

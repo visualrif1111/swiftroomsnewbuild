@@ -6,17 +6,17 @@ export const metadata: Metadata = {
   title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
   description:
     "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse our portfolio of premium aluminium windows, doors and curtain wall installations.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/portfolio" },
+  alternates: { canonical: "https://www.swiftrooms.ae/portfolio" },
   openGraph: {
     title: "Portfolio | Swiftrooms",
     description:
       "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse premium aluminium windows, doors and curtain wall installations.",
-    url: "https://swiftrooms-newbuild.vercel.app/portfolio",
+    url: "https://www.swiftrooms.ae/portfolio",
   },
 };
 
 export default function PortfolioPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

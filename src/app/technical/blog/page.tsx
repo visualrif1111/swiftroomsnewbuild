@@ -6,17 +6,17 @@ export const metadata: Metadata = {
   title: "Glazing Blog — Expert Guides for UAE Windows & Doors",
   description:
     "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems from the Swiftrooms team.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
+  alternates: { canonical: "https://www.swiftrooms.ae/technical/blog" },
   openGraph: {
     title: "Blog & Insights | Swiftrooms",
     description:
       "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/blog",
+    url: "https://www.swiftrooms.ae/technical/blog",
   },
 };
 
 export default function BlogPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
