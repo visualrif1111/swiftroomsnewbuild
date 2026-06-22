@@ -62,7 +62,8 @@ export type Testimonial = {
 export type TeamMember = {
   name: string;
   role: string;
-  bio: string;
+  group: string;
+  bio?: string;
   image?: string;
 };
 
@@ -1510,36 +1511,27 @@ export const stats = [
 // ─── Team ───────────────────────────────────────────────────────────────────
 
 export const teamMembers: TeamMember[] = [
-  {
-    name: "Ahmed Al Rashidi",
-    role: "Managing Director",
-    bio: "Ahmed founded Swiftrooms in 2009 with a vision to bring European-grade glazing systems to the UAE market. With 20 years in UAE construction, he oversees all major client relationships and strategic partnerships.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    name: "James Hartley",
-    role: "Technical Director",
-    bio: "James trained directly with Cortizo engineers in Spain before joining Swiftrooms. He leads all technical specification, quality assurance and installer training — ensuring every installation meets European standards.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    name: "Sarah Mitchell",
-    role: "Head of Design",
-    bio: "With a background in architectural practice, Sarah bridges the gap between design intent and technical specification. She works with architects, interior designers and clients to translate vision into product selections.",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    name: "Mohammed Al Farsi",
-    role: "Senior Project Manager",
-    bio: "Mohammed has overseen more than 200 Swiftrooms installations across the UAE. His coordination of complex multi-system projects — from Emirates Hills villas to commercial curtain wall — ensures every delivery meets the programme.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    name: "Layla Hassan",
-    role: "Client Relations Manager",
-    bio: "Layla manages the client journey from initial enquiry through to aftercare, ensuring every Swiftrooms client receives the level of attention their project deserves. She personally oversees all showroom consultations.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80",
-  },
+  // ── Senior Management ──
+  { name: "Asif Choudhary", role: "Managing Director", group: "Senior Management", image: "/brand/team/asif-choudhary.webp" },
+  { name: "Ar. Aamir Saif", role: "General Manager", group: "Senior Management", image: "/brand/team/aamir-saif.jpg" },
+  { name: "Gerald Rangel", role: "Head of Fabrication and Installation", group: "Senior Management", image: "/brand/team/gerald-rangel.jpg" },
+  { name: "Imran Choudhary", role: "Founder", group: "Senior Management", image: "/brand/team/imran-choudhary.webp" },
+  // ── Sales Consultation Team ──
+  { name: "Yaseen Osman", role: "Senior Sales Consultant", group: "Sales Consultation Team", image: "/brand/team/yaseen-osman.webp" },
+  { name: "Murad Salameh", role: "Business Development Manager", group: "Sales Consultation Team", image: "/brand/team/murad-salameh.jpg" },
+  { name: "Abdul Kadir", role: "Sales Engineer", group: "Sales Consultation Team", image: "/brand/team/abdul-kadir.jpg" },
+  { name: "Sayeed Turon", role: "B2B Business Development Manager", group: "Sales Consultation Team" },
+  // ── Project Managers ──
+  { name: "Jibran", role: "Project Manager", group: "Project Managers" },
+  { name: "Matt", role: "Project Manager", group: "Project Managers" },
+  { name: "Benjamin", role: "Project Manager", group: "Project Managers" },
+  // ── Technical Support Team ──
+  { name: "Richa", role: "Operations", group: "Technical Support Team" },
+  { name: "Zeeshan", role: "Accounts Administration", group: "Technical Support Team" },
+  { name: "Shyjo P Jose", role: "Technical Sales Support", group: "Technical Support Team" },
+  { name: "Ambili", role: "Designer / Draughtsperson", group: "Technical Support Team" },
+  { name: "Ayana", role: "Designer", group: "Technical Support Team" },
+  { name: "Ishak", role: "Designer", group: "Technical Support Team" },
 ];
 
 // ─── Testimonials ────────────────────────────────────────────────────────────

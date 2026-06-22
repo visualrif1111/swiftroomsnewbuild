@@ -44,9 +44,19 @@ const certifications = [
   { name: "ISO 9001:2015", detail: "Quality management system" },
 ];
 
+const teamGroups = [...new Set(teamMembers.map((m) => m.group))];
+const initials = (name: string) =>
+  name
+    .replace(/[^A-Za-z ]/g, "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
 export default function AboutClient() {
   const [activeYear, setActiveYear] = useState(0);
-  const [activeTeam, setActiveTeam] = useState(0);
 
   return (
     <>
@@ -192,92 +202,54 @@ export default function AboutClient() {
         </div>
       </section>
 
-      {/* Team Carousel */}
+      {/* Team */}
       <section className="py-16 md:py-24 lg:py-32">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-label text-[#007969] mb-4">The Team</p>
-            <h2 className="text-title text-[#1c1c1e] mb-12 max-w-xl">
+            <h2 className="text-title text-[#1c1c1e] mb-14 max-w-xl">
               The people behind every project.
             </h2>
           </ScrollReveal>
 
-          {/* Desktop grid */}
-          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
-            {teamMembers.map((member, i) => (
-              <ScrollReveal key={member.name} delay={i * 0.08}>
-                <div className="bg-white p-8 lg:p-10">
-                  <div className="w-16 h-16 rounded-full overflow-hidden mb-5 relative bg-[#f0fdf4]">
-                    {member.image && (
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    )}
-                  </div>
-                  <p className="font-semibold text-[#1c1c1e] mb-1">{member.name}</p>
-                  <p className="text-label text-[#007969] mb-4">{member.role}</p>
-                  <p className="text-[#6b7280] text-sm leading-relaxed">{member.bio}</p>
-                </div>
+          {teamGroups.map((group) => (
+            <div key={group} className="mb-14 last:mb-0">
+              <ScrollReveal>
+                <h3 className="text-center text-base md:text-lg font-semibold text-[#1c1c1e] mb-8">
+                  {group}
+                </h3>
               </ScrollReveal>
-            ))}
-          </div>
-
-          {/* Mobile carousel */}
-          <div className="md:hidden">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTeam}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-                className="bg-[#f8f9fa] border border-gray-100 p-6"
-              >
-                <div className="w-14 h-14 rounded-full overflow-hidden mb-4 relative bg-[#f0fdf4]">
-                  {teamMembers[activeTeam].image && (
-                    <Image
-                      src={teamMembers[activeTeam].image!}
-                      alt={teamMembers[activeTeam].name}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
-                  )}
-                </div>
-                <p className="font-semibold text-[#1c1c1e] mb-1">{teamMembers[activeTeam].name}</p>
-                <p className="text-label text-[#007969] mb-4">{teamMembers[activeTeam].role}</p>
-                <p className="text-[#6b7280] text-sm leading-relaxed">{teamMembers[activeTeam].bio}</p>
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="flex items-center justify-between mt-4">
-              <button
-                onClick={() => setActiveTeam((p) => Math.max(0, p - 1))}
-                disabled={activeTeam === 0}
-                className="w-10 h-10 border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#007969] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <span className="text-[0.65rem] tracking-widest uppercase text-gray-400">
-                {activeTeam + 1} / {teamMembers.length}
-              </span>
-              <button
-                onClick={() => setActiveTeam((p) => Math.min(teamMembers.length - 1, p + 1))}
-                disabled={activeTeam === teamMembers.length - 1}
-                className="w-10 h-10 border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:border-[#007969] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+                {teamMembers
+                  .filter((m) => m.group === group)
+                  .map((member, i) => (
+                    <ScrollReveal key={member.name} delay={(i % 4) * 0.06}>
+                      <div className="flex flex-col">
+                        <div className="relative aspect-square w-full border-2 border-[#007969]/80 bg-[#f0fdf4] overflow-hidden">
+                          {member.image ? (
+                            <Image
+                              src={member.image}
+                              alt={member.name}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 25vw"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-3xl font-semibold text-[#007969]/50">
+                              {initials(member.name)}
+                            </div>
+                          )}
+                        </div>
+                        <p className="font-semibold text-[#1c1c1e] mt-4 text-sm uppercase tracking-wide">
+                          {member.name}
+                        </p>
+                        <p className="text-label text-[#6b7280] mt-1">{member.role}</p>
+                      </div>
+                    </ScrollReveal>
+                  ))}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
