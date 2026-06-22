@@ -219,28 +219,28 @@ export default function AboutClient() {
                   {group}
                 </h3>
               </ScrollReveal>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 md:gap-10">
                 {teamMembers
                   .filter((m) => m.group === group)
                   .map((member, i) => (
                     <ScrollReveal key={member.name} delay={(i % 4) * 0.06}>
-                      <div className="flex flex-col">
-                        <div className="relative aspect-square w-full border-2 border-[#007969]/80 bg-[#f0fdf4] overflow-hidden">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden bg-[#f0fdf4] border-2 border-[#007969]/30">
                           {member.image ? (
                             <Image
                               src={member.image}
                               alt={member.name}
                               fill
                               className="object-cover"
-                              sizes="(max-width: 768px) 50vw, 25vw"
+                              sizes="96px"
                             />
                           ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-3xl font-semibold text-[#007969]/50">
+                            <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold text-[#007969]/50">
                               {initials(member.name)}
                             </div>
                           )}
                         </div>
-                        <p className="font-semibold text-[#1c1c1e] mt-4 text-sm uppercase tracking-wide">
+                        <p className="font-semibold text-[#1c1c1e] mt-4 text-sm">
                           {member.name}
                         </p>
                         <p className="text-label text-[#6b7280] mt-1">{member.role}</p>
