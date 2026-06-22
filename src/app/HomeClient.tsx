@@ -7,30 +7,34 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import CortizoLogo from "@/components/logos/CortizoLogo";
+import SchucoLogo from "@/components/logos/SchucoLogo";
+import DeceuninckLogo from "@/components/logos/DeceuninckLogo";
 import { productCategories, portfolioProjects, processSteps, blogPosts, testimonials } from "@/lib/data";
 
-// Brand logos for the "Brands We Work With" cards.
-// TODO: Vetro (Vetromax sub-brand) has no standalone logo asset — keeps the
-// minimal teal mark until a logo is supplied.
-const brandLogos: Record<string, { type: "svg" | "img"; src?: string }> = {
-  Cortizo: { type: "svg" },
-  Vetromax: { type: "img", src: "/brand/logos/vetromax-teal.png" },
-  "Gulf Extrusions": { type: "img", src: "/brand/logos/gulf-extrusions-teal.png" },
+// Brand logos for the "Brands We Work With" cards (mirrors the landing page).
+// Schüco / Deceuninck / Cortizo are teal SVGs; GEX & Vetromax are teal PNGs.
+const brandLogos: Record<string, { Svg?: React.ComponentType<{ className?: string }>; img?: string }> = {
+  Cortizo: { Svg: CortizoLogo },
+  "Schüco": { Svg: SchucoLogo },
+  Deceuninck: { Svg: DeceuninckLogo },
+  Vetromax: { img: "/brand/logos/vetromax-teal.png" },
+  "Gulf Extrusions": { img: "/brand/logos/gulf-extrusions-teal.png" },
 };
 
 function BrandMark({ name }: { name: string }) {
   const logo = brandLogos[name];
-  if (logo?.type === "svg") {
-    return <CortizoLogo className="h-6 w-auto text-[#007969]" />;
+  if (logo?.Svg) {
+    const Svg = logo.Svg;
+    return <Svg className="h-6 w-auto text-[#007969]" />;
   }
-  if (logo?.type === "img" && logo.src) {
+  if (logo?.img) {
     return (
       <div className="relative h-7 w-[112px]">
-        <Image src={logo.src} alt={`${name} logo`} fill className="object-contain" sizes="112px" />
+        <Image src={logo.img} alt={`${name} logo`} fill className="object-contain" sizes="112px" />
       </div>
     );
   }
-  // Fallback (Vetro): minimal teal mark
+  // Fallback: minimal teal mark (brand with no logo asset)
   return (
     <div className="w-10 h-10 bg-[#f0fdf4] rounded-xl flex items-center justify-center">
       <div className="w-3 h-3 rounded-sm bg-[#007969]" />
@@ -63,10 +67,11 @@ const problems = [
 ];
 
 const brands = [
-  { name: "Cortizo", country: "Spain", tagline: "European precision systems" },
-  { name: "Vetromax", country: "UAE", tagline: "Frameless & ultra-slim glazing" },
-  { name: "Vetro", country: "UAE", tagline: "Minimal sightlines. Maximum light." },
+  { name: "Schüco", country: "Germany", tagline: "German engineering excellence" },
+  { name: "Deceuninck", country: "Belgium", tagline: "Belgian uPVC innovation" },
   { name: "Gulf Extrusions", country: "UAE", tagline: "Built for the Gulf climate" },
+  { name: "Vetromax", country: "UAE", tagline: "Frameless & ultra-slim glazing" },
+  { name: "Cortizo", country: "Spain", tagline: "European precision systems" },
 ];
 
 /* ── Dot indicator component ──────────────────────────────────────────────── */
@@ -576,7 +581,7 @@ export default function HomeClient() {
           </div>
 
           {/* ── Desktop: original grid ── */}
-          <div className="hidden md:grid grid-cols-4 gap-4">
+          <div className="hidden md:grid grid-cols-3 lg:grid-cols-5 gap-4">
             {brands.map((brand, i) => (
               <ScrollReveal key={brand.name} delay={i * 0.08}>
                 <Link href="/catalogue/brands" className="group block border border-gray-100 rounded-2xl p-6 hover:border-[#007969]/30 hover:shadow-md transition-all text-center">
