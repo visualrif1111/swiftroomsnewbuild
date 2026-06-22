@@ -3,15 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { productCategories } from "@/lib/data";
-
-const partnerLogos = [
-  { name: "Cortizo", src: "/brand/logos/cortizo.png" },
-  { name: "Reynaers Aluminium", src: "/brand/logos/reynaers.webp" },
-  { name: "Schüco", src: "/brand/logos/schuco.webp" },
-  { name: "Deceuninck", src: "/brand/logos/deceuninck.webp" },
-  { name: "Ultraframe", src: "/brand/logos/ultraframe.webp" },
-  { name: "Vetromax", src: "/brand/logos/vetromax.png" },
-];
+import PartnerBrands from "@/components/PartnerBrands";
 
 export const metadata: Metadata = {
   title: "Aluminium Windows, Doors & Glazing Systems — Full Product Range UAE",
@@ -164,28 +156,7 @@ export default function CataloguePage() {
           {/* Manufacturer partners */}
           <ScrollReveal>
             <div className="mt-16 md:mt-24 border-t border-gray-100 pt-12 md:pt-16">
-              <p className="text-label text-[#007969] mb-3 text-center">Manufacturer Partners</p>
-              <h2 className="text-title text-[#1c1c1e] mb-10 md:mb-12 text-center max-w-2xl mx-auto">
-                Engineered with the world&apos;s leading systems
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-gray-100">
-                {partnerLogos.map((logo) => (
-                  <div
-                    key={logo.name}
-                    className="bg-white flex items-center justify-center p-6 md:p-8 h-28"
-                  >
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={logo.src}
-                        alt={`${logo.name} logo`}
-                        fill
-                        className="object-contain opacity-70 hover:opacity-100 transition-opacity duration-300"
-                        sizes="180px"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <PartnerBrands heading="Engineered with the world's leading systems" />
             </div>
           </ScrollReveal>
 
