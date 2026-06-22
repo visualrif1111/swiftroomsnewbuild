@@ -9,6 +9,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import CortizoLogo from "@/components/logos/CortizoLogo";
 import SchucoLogo from "@/components/logos/SchucoLogo";
 import DeceuninckLogo from "@/components/logos/DeceuninckLogo";
+import ProductSelector from "@/components/ProductSelector";
 import { productCategories, portfolioProjects, processSteps, blogPosts, testimonials } from "@/lib/data";
 
 // Brand logos for the "Brands We Work With" cards (mirrors the landing page).
@@ -595,6 +596,15 @@ export default function HomeClient() {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── GUIDED SELECTOR ───────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8">
+          <ScrollReveal>
+            <ProductSelector />
+          </ScrollReveal>
         </div>
       </section>
 

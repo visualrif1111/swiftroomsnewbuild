@@ -4,6 +4,7 @@ import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { productCategories } from "@/lib/data";
 import PartnerBrands from "@/components/PartnerBrands";
+import ProductSelector from "@/components/ProductSelector";
 
 export const metadata: Metadata = {
   title: "Aluminium Windows, Doors & Glazing Systems — Full Product Range UAE",
@@ -152,6 +153,13 @@ export default function CataloguePage() {
               </ScrollReveal>
             ))}
           </div>
+
+          {/* Guided selector */}
+          <ScrollReveal>
+            <div className="mt-16 md:mt-24">
+              <ProductSelector />
+            </div>
+          </ScrollReveal>
 
           {/* Manufacturer partners */}
           <ScrollReveal>

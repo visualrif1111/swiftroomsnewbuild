@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { productCategories, blogPosts } from "@/lib/data";
 import { QuoteButton } from "@/components/forms/CTAButtons";
+import WorksWellWith from "@/components/WorksWellWith";
 
 type Category = (typeof productCategories)[0];
 type Product = Category["products"][0];
@@ -354,6 +355,8 @@ export default function CategoryClient({ category }: { category: Category }) {
       </section>
 
       <CompareTable category={category} />
+
+      <WorksWellWith categorySlug={category.slug} />
 
       <CategoryFAQ category={category} />
 
