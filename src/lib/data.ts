@@ -149,13 +149,21 @@ export const brands: Brand[] = [
 
 // ─── Products ──────────────────────────────────────────────────────────────
 
+// Landing-page "Our Premium Products" imagery mapped to categories:
+//   aluminium-sliding-doors, aluminium-bi-folding-doors, aluminium-windows,
+//   upvc, skylights  →  /images/products/*.png
+// TODO: landing page has no dedicated image for these categories — they keep
+// their existing real-photo/stock imagery: aluminium-doors, curtain-wall,
+// garden-rooms, insect-screens. (The landing's skylights image combined
+// "Skylights and Garden Rooms"; assigned to skylights only to avoid a forced
+// garden-rooms match.)
 export const productCategories: ProductCategory[] = [
   {
     id: "aluminium-sliding-doors",
     name: "Aluminium Sliding Doors",
     slug: "aluminium-sliding-doors",
     tagline: "Threshold-defining precision.",
-    image: "/brand/categories/aluminium-sliding-doors.jpg",
+    image: "/images/products/aluminium-sliding-doors.png",
     description:
       "Our lift-and-slide door collection redefines the boundary between inside and out. From the Cor Vision 4600 to the flagship 4700, these are sliding systems built for the most demanding UAE villa specifications.",
     relatedBlogSlugs: ["lift-and-slide-doors-villa", "bi-fold-vs-lift-and-slide-uae", "window-ratings-standards-uae"],
@@ -283,7 +291,7 @@ export const productCategories: ProductCategory[] = [
     name: "Aluminium Bi-Folding Doors",
     slug: "aluminium-bi-folding-doors",
     tagline: "Open everything.",
-    image: "/brand/categories/aluminium-bi-folding-doors.jpg",
+    image: "/images/products/aluminium-bi-folding-doors.png",
     description:
       "Our bi-folding door systems transform walls into open vistas, connecting living spaces to gardens, terraces and pools with theatrical effect.",
     relatedBlogSlugs: ["bi-fold-vs-lift-and-slide-uae"],
@@ -339,7 +347,7 @@ export const productCategories: ProductCategory[] = [
     name: "Aluminium Windows",
     slug: "aluminium-windows",
     tagline: "Light. Framed perfectly.",
-    image: "/brand/categories/aluminium-windows.jpg",
+    image: "/images/products/aluminium-windows.png",
     description:
       "Our aluminium window collection covers every architectural requirement — from slim-sash casements to large-format tilt-and-turn, all precision-engineered for Gulf climates.",
     relatedBlogSlugs: ["choosing-aluminium-windows-dubai", "thermal-break-uae-climate", "window-ratings-standards-uae"],
@@ -662,7 +670,7 @@ export const productCategories: ProductCategory[] = [
     name: "UPVC Windows & Doors",
     slug: "upvc",
     tagline: "Low maintenance. High performance.",
-    image: "/brand/categories/upvc.jpg",
+    image: "/images/products/upvc-windows-doors.png",
     description:
       "Our uPVC/PVCu range delivers outstanding thermal and acoustic performance with minimal maintenance requirements — ideal for residential applications.",
     relatedBlogSlugs: ["upvc-vs-aluminium-windows-uae", "acoustic-glazing-dubai-noise-reduction"],
@@ -986,7 +994,7 @@ export const productCategories: ProductCategory[] = [
     name: "Skylights & Rooflights",
     slug: "skylights",
     tagline: "Bring the sky inside.",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+    image: "/images/products/skylights.png",
     description:
       "From fixed pyramid rooflights to motorised opening skylights, our range brings natural light deep into interiors while maintaining weathertight performance.",
     relatedBlogSlugs: ["skylights-rooflights-uae-guide"],
