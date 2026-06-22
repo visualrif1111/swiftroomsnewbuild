@@ -204,7 +204,7 @@ export default function HomeClient() {
           >
             Performance
             <br />
-            <span className="text-[#4dd9c0]">Windows</span> &amp; Doors
+            <span className="text-[#4dd9c0]">Windows</span>{" "}&amp; Doors
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 24 }}
