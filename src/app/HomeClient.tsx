@@ -6,7 +6,37 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import CortizoLogo from "@/components/logos/CortizoLogo";
 import { productCategories, portfolioProjects, processSteps, blogPosts, testimonials } from "@/lib/data";
+
+// Brand logos for the "Brands We Work With" cards.
+// TODO: Vetro (Vetromax sub-brand) has no standalone logo asset — keeps the
+// minimal teal mark until a logo is supplied.
+const brandLogos: Record<string, { type: "svg" | "img"; src?: string }> = {
+  Cortizo: { type: "svg" },
+  Vetromax: { type: "img", src: "/brand/logos/vetromax-teal.png" },
+  "Gulf Extrusions": { type: "img", src: "/brand/logos/gulf-extrusions-teal.png" },
+};
+
+function BrandMark({ name }: { name: string }) {
+  const logo = brandLogos[name];
+  if (logo?.type === "svg") {
+    return <CortizoLogo className="h-6 w-auto text-[#007969]" />;
+  }
+  if (logo?.type === "img" && logo.src) {
+    return (
+      <div className="relative h-7 w-[112px]">
+        <Image src={logo.src} alt={`${name} logo`} fill className="object-contain" sizes="112px" />
+      </div>
+    );
+  }
+  // Fallback (Vetro): minimal teal mark
+  return (
+    <div className="w-10 h-10 bg-[#f0fdf4] rounded-xl flex items-center justify-center">
+      <div className="w-3 h-3 rounded-sm bg-[#007969]" />
+    </div>
+  );
+}
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
@@ -529,8 +559,8 @@ export default function HomeClient() {
                   href="/catalogue/brands"
                   className="snap-start flex-shrink-0 w-[44vw] border border-gray-100 rounded-2xl p-5 text-center active:scale-[0.97] transition-transform"
                 >
-                  <div className="w-10 h-10 bg-[#f0fdf4] rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <div className="w-3 h-3 rounded-sm bg-[#007969]" />
+                  <div className="h-10 flex items-center justify-center mx-auto mb-3">
+                    <BrandMark name={brand.name} />
                   </div>
                   <p className="font-heading font-bold text-[#1c1c1e] mb-1 text-sm">{brand.name}</p>
                   <p className="text-[0.6rem] tracking-wide uppercase text-[#6b7280] mb-0.5">{brand.country}</p>
@@ -550,8 +580,8 @@ export default function HomeClient() {
             {brands.map((brand, i) => (
               <ScrollReveal key={brand.name} delay={i * 0.08}>
                 <Link href="/catalogue/brands" className="group block border border-gray-100 rounded-2xl p-6 hover:border-[#007969]/30 hover:shadow-md transition-all text-center">
-                  <div className="w-10 h-10 bg-[#f0fdf4] rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#007969] transition-colors">
-                    <div className="w-3 h-3 rounded-sm bg-[#007969] group-hover:bg-white transition-colors" />
+                  <div className="h-10 flex items-center justify-center mx-auto mb-3 opacity-85 group-hover:opacity-100 transition-opacity">
+                    <BrandMark name={brand.name} />
                   </div>
                   <p className="font-heading font-bold text-[#1c1c1e] group-hover:text-[#007969] transition-colors mb-1">{brand.name}</p>
                   <p className="text-[0.65rem] tracking-wide uppercase text-[#6b7280] mb-0.5">{brand.country}</p>

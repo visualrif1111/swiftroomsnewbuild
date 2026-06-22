@@ -15,8 +15,8 @@ const brands: Brand[] = [
   { name: "Cortizo", type: "svg", Logo: CortizoLogo },
   { name: "Schüco", type: "svg", Logo: SchucoLogo },
   { name: "Deceuninck", type: "svg", Logo: DeceuninckLogo },
-  { name: "Gulf Extrusions (GEX)", type: "img", src: "/brand/5cd65b8dd83a95980f42df07cc16764bc2c77eb0-aBo2UhUi.png" },
-  { name: "Vetromax", type: "img", src: "/brand/17f0f5e44208889069e3800833da01d1785f5802-rL8f4VrJ.png" },
+  { name: "Gulf Extrusions (GEX)", type: "img", src: "/brand/logos/gulf-extrusions-teal.png" },
+  { name: "Vetromax", type: "img", src: "/brand/logos/vetromax-teal.png" },
 ];
 
 export default function PartnerBrands({ heading = "Brands We Work With" }: { heading?: string }) {
