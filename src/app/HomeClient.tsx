@@ -132,7 +132,7 @@ export default function HomeClient() {
   }> = [
     {
       href: "/catalogue/aluminium-sliding-doors",
-      image: "/brand/product-bifold-kitchen.png",
+      image: "/images/products/aluminium-sliding-doors.png",
       label: "01",
       title: "Aluminium Sliding Doors",
       sub: "Lift-and-slide systems from Cortizo",
@@ -140,17 +140,18 @@ export default function HomeClient() {
     },
     ...productCategories.slice(1, 5).map((cat, i) => ({
       href: `/catalogue/${cat.slug}`,
+      image: cat.image,
       label: String(i + 2).padStart(2, "0"),
       title: cat.name,
       sub: cat.tagline,
-      isImage: false,
+      isImage: true,
     })),
     {
-      href: "/catalogue/garden-rooms",
-      image: "/brand/product-bedroom-doors.png",
-      label: "Garden Rooms",
+      href: "/catalogue/skylights",
+      image: "/images/products/skylights.png",
+      label: "Skylights & Garden Rooms",
       title: "Transform unused space into living space.",
-      sub: "",
+      sub: "Roof windows that flood interiors with light",
       isImage: true,
     },
   ];
@@ -511,7 +512,7 @@ export default function HomeClient() {
           <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-5">
             <ScrollReveal className="md:col-span-2 lg:col-span-2">
               <Link href="/catalogue/aluminium-sliding-doors" className="group block relative h-72 overflow-hidden rounded-2xl card-hover">
-                <Image src="/brand/product-bifold-kitchen.png" alt="Aluminium sliding doors" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                <Image src="/images/products/aluminium-sliding-doors.png" alt="Aluminium sliding doors" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 sm:p-6">
                   <p className="text-label text-[#00a389] mb-1">01</p>
@@ -522,22 +523,25 @@ export default function HomeClient() {
             </ScrollReveal>
             {productCategories.slice(1, 5).map((cat, i) => (
               <ScrollReveal key={cat.id} delay={(i + 1) * 0.07}>
-                <Link href={`/catalogue/${cat.slug}`} className="group block bg-white border border-gray-100 rounded-2xl p-6 card-hover">
-                  <div className="w-12 h-12 rounded-xl bg-[#f0fdf4] flex items-center justify-center mb-4 group-hover:bg-[#007969] transition-colors">
-                    <div className="w-3 h-3 rounded-full bg-[#007969] group-hover:bg-white transition-colors" />
+                <Link href={`/catalogue/${cat.slug}`} className="group block relative h-72 overflow-hidden rounded-2xl card-hover">
+                  {cat.image && (
+                    <Image src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="(max-width: 1024px) 50vw, 25vw" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-4 sm:p-6">
+                    <p className="text-label text-[#00a389] mb-1">{String(i + 2).padStart(2, "0")}</p>
+                    <h3 className="font-heading font-bold text-lg text-white mb-1 group-hover:text-[#4dd9c0] transition-colors">{cat.name}</h3>
+                    <p className="text-white/60 text-sm">{cat.tagline}</p>
                   </div>
-                  <p className="text-label text-[#007969] mb-2">{String(i + 2).padStart(2, "0")}</p>
-                  <h3 className="font-heading font-semibold text-[#1c1c1e] mb-2 group-hover:text-[#007969] transition-colors">{cat.name}</h3>
-                  <p className="text-[#6b7280] text-xs leading-relaxed">{cat.tagline}</p>
                 </Link>
               </ScrollReveal>
             ))}
             <ScrollReveal className="md:col-span-2 lg:col-span-2">
-              <Link href="/catalogue/garden-rooms" className="group block relative h-56 overflow-hidden rounded-2xl card-hover">
-                <Image src="/brand/product-bedroom-doors.png" alt="Garden room doors" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <Link href="/catalogue/skylights" className="group block relative h-56 overflow-hidden rounded-2xl card-hover">
+                <Image src="/images/products/skylights.png" alt="Skylights and garden rooms" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 sm:p-6">
-                  <p className="text-label text-[#00a389] mb-1">Garden Rooms</p>
+                  <p className="text-label text-[#00a389] mb-1">Skylights & Garden Rooms</p>
                   <h3 className="font-heading font-bold text-lg text-white">Transform unused space into living space.</h3>
                 </div>
               </Link>
