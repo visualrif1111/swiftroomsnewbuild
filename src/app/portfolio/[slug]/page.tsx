@@ -4,7 +4,7 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { portfolioProjects } from "@/lib/data";
+import { portfolioProjects, portfolioMedia } from "@/lib/data";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = portfolioProjects.find((p) => p.slug === slug);
   if (!project) return { title: "Not Found" };
+  const ogImage = portfolioMedia[project.slug]?.hero ?? project.image;
   return {
     title: `${project.name} — ${project.type} UAE Glazing Project`,
     description: project.description,
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${project.name} | Swiftrooms Portfolio`,
       description: project.description,
       url: `https://www.swiftrooms.ae/portfolio/${project.slug}`,
-      images: project.image ? [{ url: project.image, alt: project.name }] : [],
+      images: ogImage ? [{ url: ogImage, alt: project.name }] : [],
     },
   };
 }
@@ -60,6 +61,10 @@ export default async function ProjectPage({ params }: Props) {
   const project = portfolioProjects.find((p) => p.slug === slug);
   if (!project) notFound();
 
+  const media = portfolioMedia[project.slug];
+  const heroImage = media?.hero ?? project.image;
+  const gallery = media?.gallery ?? [];
+
   const related = portfolioProjects
     .filter((p) => p.id !== project.id && p.tags.some((t) => project.tags.includes(t)))
     .slice(0, 3);
@@ -87,7 +92,7 @@ export default async function ProjectPage({ params }: Props) {
     name: project.name,
     description: project.description,
     url: `https://www.swiftrooms.ae/portfolio/${project.slug}`,
-    image: project.image ?? undefined,
+    image: heroImage ?? undefined,
     creator: { "@type": "Organization", name: "Swiftrooms", url: "https://www.swiftrooms.ae" },
     locationCreated: { "@type": "Place", name: project.location },
     dateCreated: project.year,
@@ -137,14 +142,24 @@ export default async function ProjectPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Main image */}
+      {/* Hero media — video or image */}
       <section className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mb-12 md:mb-20">
         <ScrollReveal>
           <div className="w-full h-[40vh] md:h-[50vh] lg:h-[65vh] relative overflow-hidden bg-[#f0fdf4]">
-            {project.image ? (
+            {media?.video ? (
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                poster={media.videoPoster}
+                controls
+                playsInline
+                preload="metadata"
+              >
+                <source src={media.video} type="video/mp4" />
+              </video>
+            ) : heroImage ? (
               <Image
-                src={project.image}
-                alt={project.name}
+                src={heroImage}
+                alt={`${project.name} — ${project.type} by Swiftrooms, ${project.location}`}
                 fill
                 className="object-cover"
                 priority
@@ -158,6 +173,31 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </ScrollReveal>
       </section>
+
+      {/* Project gallery */}
+      {gallery.length > 1 && (
+        <section className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 mb-12 md:mb-20">
+          <ScrollReveal>
+            <p className="text-label text-[#007969] mb-6 md:mb-8">Project Gallery</p>
+          </ScrollReveal>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+            {gallery.map((src, i) => (
+              <ScrollReveal key={src} delay={(i % 3) * 0.06}>
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f0fdf4] group">
+                  <Image
+                    src={src}
+                    alt={`${project.name} — ${project.type} installation by Swiftrooms, image ${i + 1}`}
+                    fill
+                    loading="lazy"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Case study content */}
       <section className="py-10 md:py-16">
@@ -315,9 +355,9 @@ export default async function ProjectPage({ params }: Props) {
                     className="group block border border-gray-100 hover:border-[#007969]/30 transition-all overflow-hidden bg-white active:scale-[0.98]"
                   >
                     <div className="h-32 md:h-36 w-full relative overflow-hidden bg-[#f0fdf4]">
-                      {rel.image && (
+                      {(portfolioMedia[rel.slug]?.hero ?? rel.image) && (
                         <Image
-                          src={rel.image}
+                          src={portfolioMedia[rel.slug]?.hero ?? rel.image!}
                           alt={rel.name}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-700"
