@@ -6,7 +6,11 @@ import { projectType } from "./projectType";
 import { productCategoryType } from "./productCategoryType";
 import { productType } from "./productType";
 import { brandType } from "./brandType";
+import { faqType } from "./faqType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [seoType, postType, locationType, projectType, productCategoryType, productType, brandType],
+  types: [
+    seoType, postType, locationType, projectType,
+    productCategoryType, productType, brandType, faqType,
+  ],
 };
