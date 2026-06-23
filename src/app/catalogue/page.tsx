@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { productCategories } from "@/lib/data";
+import { getCategories } from "@/lib/catalogue";
 import PartnerBrands from "@/components/PartnerBrands";
 import ProductSelector from "@/components/ProductSelector";
 
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CataloguePage() {
+export default async function CataloguePage() {
+  const productCategories = await getCategories();
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",

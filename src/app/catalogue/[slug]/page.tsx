@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { productCategories } from "@/lib/data";
+import { getCategory, getCategorySlugs } from "@/lib/catalogue";
 import CategoryClient from "./CategoryClient";
 
 interface Props {
@@ -8,7 +8,8 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return productCategories.map((cat) => ({ slug: cat.slug }));
+  const slugs = await getCategorySlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 const categoryMetaTitles: Record<string, string> = {
@@ -25,7 +26,7 @@ const categoryMetaTitles: Record<string, string> = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = productCategories.find((c) => c.slug === slug);
+  const category = await getCategory(slug);
   if (!category) return {};
   const metaTitle = categoryMetaTitles[slug] ?? category.name;
   return {
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = productCategories.find((c) => c.slug === slug);
+  const category = await getCategory(slug);
   if (!category) notFound();
 
   const base = "https://www.swiftrooms.ae";

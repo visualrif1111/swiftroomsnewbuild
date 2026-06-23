@@ -4,25 +4,21 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { productCategories, blogPosts, portfolioProjects } from "@/lib/data";
+import { blogPosts, portfolioProjects } from "@/lib/data";
+import { getProduct, getProductParams } from "@/lib/catalogue";
 
 interface Props {
   params: Promise<{ slug: string; product: string }>;
 }
 
 export async function generateStaticParams() {
-  return productCategories.flatMap((cat) =>
-    cat.products.map((product) => ({
-      slug: cat.slug,
-      product: product.slug,
-    }))
-  );
+  return getProductParams();
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, product: productSlug } = await params;
-  const cat = productCategories.find((c) => c.slug === slug);
-  const product = cat?.products.find((p) => p.slug === productSlug);
+  const found = await getProduct(slug, productSlug);
+  const product = found?.product;
   if (!product) return { title: "Not Found" };
   return {
     title: `${product.name} UAE — ${product.brand} Glazing Specialist`,
@@ -39,10 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug, product: productSlug } = await params;
-  const cat = productCategories.find((c) => c.slug === slug);
-  if (!cat) notFound();
-  const product = cat.products.find((p) => p.slug === productSlug);
-  if (!product) notFound();
+  const found = await getProduct(slug, productSlug);
+  if (!found) notFound();
+  const { category: cat, product } = found;
 
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
