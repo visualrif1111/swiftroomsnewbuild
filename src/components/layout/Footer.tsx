@@ -1,31 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
+import { getSiteSettings } from "@/lib/site-settings";
 
-const productLinks = [
-  { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
-  { label: "Aluminium Bi-folding Doors", href: "/catalogue/aluminium-bi-folding-doors" },
-  { label: "Aluminium Windows", href: "/catalogue/aluminium-windows" },
-  { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
-  { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
-  { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
-  { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
-  { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
-  { label: "Insect Screens", href: "/catalogue/insect-screens" },
-];
+export default async function Footer() {
+  const settings = await getSiteSettings();
+  const { contact, showroom, footerLinks } = settings;
 
-const companyLinks = [
-  { label: "About Us", href: "/about" },
-  { label: "Portfolio", href: "/portfolio" },
-  { label: "Technical Hub", href: "/technical" },
-  { label: "Blog", href: "/technical/blog" },
-  { label: "Resources", href: "/technical/resources" },
-  { label: "FAQ", href: "/technical/faq" },
-  { label: "Gallery", href: "/catalogue/gallery" },
-];
-
-export default function Footer() {
   return (
     <footer className="bg-[#030213] text-white">
       {/* CTA strip */}
@@ -66,58 +46,49 @@ export default function Footer() {
             </p>
             <div className="space-y-1.5 text-sm">
               <p className="text-label text-[#007969] mb-3">Contact</p>
-              <a href="tel:+971505269149" className="block text-white/50 hover:text-white transition-colors">
-                +971 505 269 149
+              <a href={`tel:${contact.phoneRaw}`} className="block text-white/50 hover:text-white transition-colors">
+                {contact.phone}
               </a>
-              <a href="mailto:info@swiftrooms.ae" className="block text-white/50 hover:text-white transition-colors">
-                info@swiftrooms.ae
+              <a href={`mailto:${contact.email}`} className="block text-white/50 hover:text-white transition-colors">
+                {contact.email}
               </a>
               <p className="text-white/30 mt-3">
-                Jebel Ali Industrial Area 1<br />Dubai, UAE
+                {showroom.addressLine1}
+                <br />
+                {showroom.city}, {showroom.country}
               </p>
             </div>
           </div>
 
-          {/* Products */}
-          <div>
-            <p className="text-label text-[#007969] mb-5">Products</p>
-            <ul className="space-y-2.5">
-              {productLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-white/40 text-sm hover:text-white transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <p className="text-label text-[#007969] mb-5">Company</p>
-            <ul className="space-y-2.5">
-              {companyLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-white/40 text-sm hover:text-white transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Link groups */}
+          {footerLinks.map((group) => (
+            <div key={group.heading}>
+              <p className="text-label text-[#007969] mb-5">{group.heading}</p>
+              <ul className="space-y-2.5">
+                {group.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-white/40 text-sm hover:text-white transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
           {/* Hours */}
           <div>
             <p className="text-label text-[#007969] mb-5">Showroom Hours</p>
             <div className="space-y-2 text-sm text-white/40">
+              {showroom.hours.map((h) => (
+                <div key={h.days} className="flex justify-between gap-4">
+                  <span>{h.days}</span>
+                  <span>{h.opens} – {h.closes}</span>
+                </div>
+              ))}
               <div className="flex justify-between gap-4">
-                <span>Sun – Thu</span><span>8:30 – 17:30</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span>Saturday</span><span>10:00 – 14:00</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span>Friday</span><span>Closed</span>
+                <span>Friday</span>
+                <span>Closed</span>
               </div>
             </div>
             <div className="mt-8">
