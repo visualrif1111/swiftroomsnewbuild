@@ -1,10 +1,17 @@
 import type { MetadataRoute } from "next";
-import { productCategories, portfolioProjects, blogPosts } from "@/lib/data";
+import { getCategories } from "@/lib/catalogue";
+import { getPortfolioProjects } from "@/lib/portfolio";
+import { getArticleSlugs } from "@/lib/blog";
 
 const BASE_URL = "https://www.swiftrooms.ae";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const [productCategories, portfolioProjects, blogSlugs] = await Promise.all([
+    getCategories(),
+    getPortfolioProjects(),
+    getArticleSlugs(),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
@@ -51,8 +58,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${BASE_URL}/technical/blog/${post.slug}`,
+  const blogRoutes: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${BASE_URL}/technical/blog/${slug}`,
     lastModified: now,
     changeFrequency: "monthly",
     priority: 0.6,
