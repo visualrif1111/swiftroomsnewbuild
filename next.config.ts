@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**.swiftrooms.ae" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "cdn.sanity.io" },
     ],
   },
   // SEO migration — preserve equity from EVERY legacy indexed URL on
