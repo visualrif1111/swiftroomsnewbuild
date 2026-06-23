@@ -63,6 +63,14 @@ if (!DRY_RUN && !token) {
 
 const client = createClient({ projectId, dataset, apiVersion, token, useCdn: false });
 
+// Normalise inconsistent data.ts categories to the canonical schema list.
+const CATEGORY_MAP: Record<string, string> = {
+  "Buyer's Guide": "Buying Guide",
+  Technical: "Technical Guide",
+  Product: "Product Insight",
+};
+const normalizeCategory = (c: string) => CATEGORY_MAP[c] ?? c;
+
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
@@ -125,7 +133,7 @@ async function run() {
       _type: "post",
       title: post.title,
       slug: { _type: "slug", current: post.slug },
-      category: post.category,
+      category: normalizeCategory(post.category),
       excerpt: post.excerpt,
       publishedAt: publishedAtFromDate(post.date),
       readTime: post.readTime,
