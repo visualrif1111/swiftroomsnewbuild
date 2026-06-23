@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ResourcesClient from "./ResourcesClient";
-import { resources } from "@/lib/data";
+import { getResources } from "@/lib/resources";
 
 export const metadata: Metadata = {
   title: "Glazing Technical Resources — Guides, Specifications & Downloads UAE",
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ResourcesPage() {
+export default async function ResourcesPage() {
+  const resources = await getResources();
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -45,7 +46,7 @@ export default function ResourcesPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <ResourcesClient />
+      <ResourcesClient resources={resources} />
     </>
   );
 }

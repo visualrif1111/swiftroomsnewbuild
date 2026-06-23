@@ -5,7 +5,7 @@ import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { resources } from "@/lib/data";
+import type { Resource } from "@/lib/data";
 
 const categoryLabels: Record<string, string> = {
   guides: "Guides & Knowledge",
@@ -24,7 +24,7 @@ const tabs = [
 
 type TabKey = "all" | "guides" | "projects" | "planning";
 
-export default function ResourcesClient() {
+export default function ResourcesClient({ resources }: { resources: Resource[] }) {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [requested, setRequested] = useState<Set<string>>(new Set());
 
