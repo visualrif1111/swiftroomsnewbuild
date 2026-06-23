@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import FaqClient from "./FaqClient";
-import { faqs } from "@/lib/data";
+import { getGeneralFaqs } from "@/lib/faqs";
 
 export const metadata: Metadata = {
   title: "Glazing FAQ — Windows, Doors & Aluminium Systems UAE",
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const faqs = await getGeneralFaqs();
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -46,7 +47,7 @@ export default function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <FaqClient />
+      <FaqClient faqs={faqs} />
     </>
   );
 }

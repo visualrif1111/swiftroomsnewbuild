@@ -5,14 +5,14 @@ import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { faqs } from "@/lib/data";
+import type { FAQ } from "@/lib/data";
 
-const categories = ["All", ...Array.from(new Set(faqs.map((f) => f.category)))];
-
-export default function FaqClient() {
+export default function FaqClient({ faqs }: { faqs: FAQ[] }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [open, setOpen] = useState<number | null>(0);
   const [search, setSearch] = useState("");
+
+  const categories = ["All", ...Array.from(new Set(faqs.map((f) => f.category)))];
 
   const filtered = faqs.filter((f) => {
     const matchesCategory = activeCategory === "All" || f.category === activeCategory;
