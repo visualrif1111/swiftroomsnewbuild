@@ -1,15 +1,15 @@
 import { defineField, defineType } from "sanity";
 
-// Portfolio Location — a place a project was delivered (e.g. "Al Barari").
-// Projects reference a location, so the portfolio can be browsed/filtered by place.
+// Portfolio Location — a place projects were delivered (e.g. "Al Barari").
+// Projects reference a location so the portfolio can be browsed by place.
 export const locationType = defineType({
   name: "location",
   title: "Portfolio Location",
   type: "document",
   fields: [
     defineField({
-      name: "name",
-      title: "Name",
+      name: "title",
+      title: "Title",
       type: "string",
       validation: (rule) => rule.required(),
     }),
@@ -17,7 +17,7 @@ export const locationType = defineType({
       name: "slug",
       title: "Slug",
       type: "slug",
-      options: { source: "name", maxLength: 96 },
+      options: { source: "title", maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -26,17 +26,25 @@ export const locationType = defineType({
       type: "string",
       options: {
         list: [
-          "Dubai",
-          "Abu Dhabi",
-          "Sharjah",
-          "Ajman",
-          "Ras Al Khaimah",
-          "Fujairah",
-          "Umm Al Quwain",
+          "Dubai", "Abu Dhabi", "Sharjah", "Ajman",
+          "Ras Al Khaimah", "Fujairah", "Umm Al Quwain",
         ],
       },
     }),
-    defineField({ name: "description", title: "Description", type: "text", rows: 2 }),
+    defineField({
+      name: "heroImage",
+      title: "Hero image",
+      type: "image",
+      options: { hotspot: true },
+      fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+    }),
+    defineField({
+      name: "introContent",
+      title: "Intro content",
+      type: "array",
+      of: [{ type: "block" }],
+    }),
+    defineField({ name: "seo", title: "SEO", type: "seo" }),
   ],
-  preview: { select: { title: "name", subtitle: "emirate" } },
+  preview: { select: { title: "title", subtitle: "emirate", media: "heroImage" } },
 });

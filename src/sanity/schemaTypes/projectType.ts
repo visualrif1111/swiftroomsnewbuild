@@ -1,8 +1,8 @@
 import { defineField, defineType } from "sanity";
 
 // Portfolio Project — a completed Swiftrooms case study. Mirrors the data.ts
-// PortfolioProject + portfolioMedia shape: hero, gallery, optional video, the
-// case-study narrative, products used, and a reference to its location.
+// PortfolioProject + portfolioMedia shape: location reference, hero, gallery,
+// optional video, the case-study narrative, products used, and SEO.
 export const projectType = defineType({
   name: "project",
   title: "Portfolio Project",
@@ -10,24 +10,19 @@ export const projectType = defineType({
   groups: [
     { name: "content", title: "Content", default: true },
     { name: "media", title: "Media" },
+    { name: "seo", title: "SEO" },
   ],
   fields: [
-    defineField({ name: "name", title: "Name", type: "string", group: "content", validation: (r) => r.required() }),
+    defineField({ name: "title", title: "Title", type: "string", group: "content", validation: (r) => r.required() }),
     defineField({
       name: "slug",
       title: "Slug",
       type: "slug",
       group: "content",
-      options: { source: "name", maxLength: 96 },
+      options: { source: "title", maxLength: 96 },
       validation: (r) => r.required(),
     }),
-    defineField({
-      name: "location",
-      title: "Location",
-      type: "reference",
-      group: "content",
-      to: [{ type: "location" }],
-    }),
+    defineField({ name: "location", title: "Location", type: "reference", group: "content", to: [{ type: "location" }] }),
     defineField({ name: "projectType", title: "Project type", type: "string", group: "content" }),
     defineField({ name: "area", title: "Area", type: "string", group: "content" }),
     defineField({ name: "year", title: "Year", type: "string", group: "content" }),
@@ -36,21 +31,9 @@ export const projectType = defineType({
     defineField({ name: "challenge", title: "Challenge", type: "text", rows: 3, group: "content" }),
     defineField({ name: "solution", title: "Solution", type: "text", rows: 3, group: "content" }),
     defineField({ name: "outcome", title: "Outcome", type: "text", rows: 3, group: "content" }),
-    // ── Products used (name-based; maps to catalogue links on render) ──
-    defineField({
-      name: "productsUsed",
-      title: "Products used",
-      type: "array",
-      group: "content",
-      of: [{ type: "string" }],
-    }),
-    defineField({
-      name: "tags",
-      title: "Tags",
-      type: "array",
-      group: "content",
-      of: [{ type: "string" }],
-    }),
+    // Products used — name-based in Phase 1; converts to references in Phase 2.
+    defineField({ name: "productsUsed", title: "Products used", type: "array", group: "content", of: [{ type: "string" }] }),
+    defineField({ name: "tags", title: "Tags", type: "array", group: "content", of: [{ type: "string" }] }),
     // ── Media ──
     defineField({
       name: "heroImage",
@@ -74,22 +57,10 @@ export const projectType = defineType({
         }),
       ],
     }),
-    defineField({
-      name: "video",
-      title: "Video",
-      type: "file",
-      group: "media",
-      options: { accept: "video/*" },
-    }),
-    defineField({
-      name: "videoPoster",
-      title: "Video poster",
-      type: "image",
-      group: "media",
-      options: { hotspot: true },
-    }),
+    defineField({ name: "video", title: "Video", type: "file", group: "media", options: { accept: "video/*" } }),
+    defineField({ name: "videoPoster", title: "Video poster", type: "image", group: "media", options: { hotspot: true } }),
+    // ── SEO ──
+    defineField({ name: "seo", title: "SEO", type: "seo", group: "seo" }),
   ],
-  preview: {
-    select: { title: "name", subtitle: "projectType", media: "heroImage" },
-  },
+  preview: { select: { title: "title", subtitle: "projectType", media: "heroImage" } },
 });
