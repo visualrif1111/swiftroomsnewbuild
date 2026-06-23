@@ -9,11 +9,12 @@ import { brandType } from "./brandType";
 import { faqType } from "./faqType";
 import { resourceType } from "./resourceType";
 import { homepageType } from "./homepageType";
+import { siteSettingsType } from "./siteSettingsType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     seoType, postType, locationType, projectType,
     productCategoryType, productType, brandType, faqType, resourceType,
-    homepageType,
+    homepageType, siteSettingsType,
   ],
 };
