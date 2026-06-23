@@ -10,6 +10,7 @@ import CortizoLogo from "@/components/logos/CortizoLogo";
 import SchucoLogo from "@/components/logos/SchucoLogo";
 import DeceuninckLogo from "@/components/logos/DeceuninckLogo";
 import ProductSelector from "@/components/ProductSelector";
+import type { HomeSettings } from "@/lib/homepage";
 import { productCategories, portfolioProjects, processSteps, blogPosts, testimonials } from "@/lib/data";
 
 // Brand logos for the "Brands We Work With" cards (mirrors the landing page).
@@ -93,7 +94,7 @@ function Dots({ count, active, onDotClick }: { count: number; active: number; on
   );
 }
 
-export default function HomeClient() {
+export default function HomeClient({ settings }: { settings: HomeSettings }) {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -204,7 +205,7 @@ export default function HomeClient() {
               }}
             >
               <iframe
-                src="https://www.youtube.com/embed/xpDcSdw--hg?autoplay=1&mute=1&loop=1&playlist=xpDcSdw--hg&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&vq=hd2160"
+                src={`https://www.youtube.com/embed/${settings.hero.videoId}?autoplay=1&mute=1&loop=1&playlist=${settings.hero.videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&vq=hd2160`}
                 allow="autoplay; encrypted-media"
                 allowFullScreen
                 className="w-full h-full"
@@ -249,8 +250,7 @@ export default function HomeClient() {
             transition={{ duration: 0.7, delay: 0.5 }}
             className="text-body-lg text-white/70 max-w-xl mb-10"
           >
-            Engineered to perform. Built to outlast. Premium aluminium, uPVC and glazing systems
-            installed across the UAE by certified specialists.
+            {settings.hero.subheading}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -259,13 +259,13 @@ export default function HomeClient() {
             className="flex flex-col sm:flex-row gap-3"
           >
             <QuoteButton className="btn-brand">
-              Get a Free Quote
+              {settings.hero.ctaPrimaryLabel}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </QuoteButton>
             <ShowroomButton className="inline-flex items-center justify-center gap-2 border border-white/40 text-white font-accent font-semibold text-[0.8rem] tracking-[0.12em] uppercase px-6 py-3.5 hover:bg-white hover:text-[#007969] transition-all">
-              Book Showroom Visit
+              {settings.hero.ctaSecondaryLabel}
             </ShowroomButton>
           </motion.div>
         </motion.div>
@@ -912,15 +912,15 @@ export default function HomeClient() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/logo.svg" alt="Swiftrooms" className="h-10 w-auto opacity-80" style={{ filter: "brightness(0) invert(1)" }} />
             </div>
-            <h2 className="text-headline text-white mb-5 max-w-2xl mx-auto">Book Your Showroom Visit Today</h2>
+            <h2 className="text-headline text-white mb-5 max-w-2xl mx-auto">{settings.cta.heading}</h2>
             <p className="text-white/50 text-body-lg max-w-lg mx-auto mb-10">
               Experience our full product range at full scale. Free consultation, no obligation.
               Jebel Ali, Dubai — open Sunday to Thursday.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <QuoteButton className="btn-brand">Get a Free Quote</QuoteButton>
+              <QuoteButton className="btn-brand">{settings.cta.primaryLabel}</QuoteButton>
               <ShowroomButton className="btn-outline border-white/30 text-white hover:bg-white hover:text-[#007969]">
-                Book Showroom Visit
+                {settings.cta.secondaryLabel}
               </ShowroomButton>
             </div>
           </div>

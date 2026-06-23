@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
 import { testimonials } from "@/lib/data";
+import { getHomeSettings } from "@/lib/homepage";
 
 export const metadata: Metadata = {
   title: "Swiftrooms — Performance Windows & Doors, UAE",
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getHomeSettings();
   const reviewSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -39,7 +41,7 @@ export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }} />
-      <HomeClient />
+      <HomeClient settings={settings} />
     </>
   );
 }
