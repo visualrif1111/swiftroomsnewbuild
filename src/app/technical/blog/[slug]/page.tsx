@@ -4,6 +4,8 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import PortableTextBody from "@/components/PortableTextBody";
+import type { PortableTextBlock } from "@portabletext/react";
 import { getArticle, getArticles, getArticleSlugs } from "@/lib/blog";
 
 interface Props {
@@ -153,22 +155,30 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-20">
             {/* Article content */}
             <div className="lg:col-span-2">
-              {post.body.map((section, i) => (
-                <ScrollReveal key={i} delay={i * 0.06}>
+              {post.portableText ? (
+                <ScrollReveal>
                   <div className="mb-10 md:mb-14">
-                    {section.heading && (
-                      <h2 className="text-xl md:text-2xl font-semibold text-[#1c1c1e] mb-5">
-                        {section.heading}
-                      </h2>
-                    )}
-                    {section.paragraphs.map((para, j) => (
-                      <p key={j} className="text-[#6b7280] leading-relaxed mb-4 last:mb-0">
-                        {para}
-                      </p>
-                    ))}
+                    <PortableTextBody value={post.portableText as PortableTextBlock[]} />
                   </div>
                 </ScrollReveal>
-              ))}
+              ) : (
+                post.body.map((section, i) => (
+                  <ScrollReveal key={i} delay={i * 0.06}>
+                    <div className="mb-10 md:mb-14">
+                      {section.heading && (
+                        <h2 className="text-xl md:text-2xl font-semibold text-[#1c1c1e] mb-5">
+                          {section.heading}
+                        </h2>
+                      )}
+                      {section.paragraphs.map((para, j) => (
+                        <p key={j} className="text-[#6b7280] leading-relaxed mb-4 last:mb-0">
+                          {para}
+                        </p>
+                      ))}
+                    </div>
+                  </ScrollReveal>
+                ))
+              )}
 
               {/* Inline CTA */}
               <ScrollReveal>

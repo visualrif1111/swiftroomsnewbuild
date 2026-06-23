@@ -9,6 +9,10 @@
 // rendering code works unchanged.
 import { blogPosts, type BlogPost } from "@/lib/data";
 
+// Article = the normalised BlogPost, plus the raw Portable Text body for
+// Sanity-sourced posts (rendered richly; data.ts posts leave it undefined).
+export type Article = BlogPost & { portableText?: unknown };
+
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
@@ -64,7 +68,7 @@ type RawSanityPost = {
   relatedProducts?: { name: string; href: string }[];
 };
 
-async function normalize(p: RawSanityPost): Promise<BlogPost> {
+async function normalize(p: RawSanityPost): Promise<Article> {
   let image = "";
   if (p.mainImage) {
     try {
@@ -83,6 +87,7 @@ async function normalize(p: RawSanityPost): Promise<BlogPost> {
     readTime: p.readTime ?? "",
     image,
     body: portableTextToSections(p.body),
+    portableText: Array.isArray(p.body) ? p.body : undefined,
     relatedProducts: p.relatedProducts,
   };
 }
@@ -113,7 +118,7 @@ export async function getArticleSlugs(): Promise<string[]> {
 }
 
 /** Single article by slug — Sanity first, then data.ts. */
-export async function getArticle(slug: string): Promise<BlogPost | null> {
+export async function getArticle(slug: string): Promise<Article | null> {
   if (sanityConfigured()) {
     try {
       const { getPost } = await import("@/sanity/lib/posts");
