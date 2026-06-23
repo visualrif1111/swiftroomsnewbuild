@@ -4,8 +4,9 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { blogPosts, portfolioProjects } from "@/lib/data";
 import { getProduct, getProductParams } from "@/lib/catalogue";
+import { getPortfolioProjects } from "@/lib/portfolio";
+import { getArticles } from "@/lib/blog";
 
 interface Props {
   params: Promise<{ slug: string; product: string }>;
@@ -41,9 +42,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
-  const projectsUsingProduct = portfolioProjects
+  const allProjects = await getPortfolioProjects();
+  const projectsUsingProduct = allProjects
     .filter((proj) => proj.products.some((pName) => pName.toLowerCase().includes(product.name.split(" ").slice(-2).join(" ").toLowerCase()) || product.name.toLowerCase().includes(pName.toLowerCase())))
     .slice(0, 3);
+  const allPosts = await getArticles();
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -438,8 +441,8 @@ export default async function ProductDetailPage({ params }: Props) {
       {/* 9 — Further Reading */}
       {cat.relatedBlogSlugs && cat.relatedBlogSlugs.length > 0 && (() => {
         const relatedPosts = cat.relatedBlogSlugs!
-          .map((s) => blogPosts.find((p) => p.slug === s))
-          .filter(Boolean) as typeof blogPosts;
+          .map((s) => allPosts.find((p) => p.slug === s))
+          .filter(Boolean) as typeof allPosts;
         if (relatedPosts.length === 0) return null;
         return (
           <section className="py-14 md:py-20 border-t border-gray-100">
