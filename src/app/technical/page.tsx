@@ -4,6 +4,7 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { blogPosts, faqs } from "@/lib/data";
+import { getArticles } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Technical Hub — Glazing Guides, Process & FAQ for UAE Projects",
@@ -69,15 +70,14 @@ const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
 };
-const recentPosts = [...blogPosts]
-  .sort((a, b) => {
-    const [aM, aY] = a.date.split(" ");
-    const [bM, bY] = b.date.split(" ");
-    return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
-  })
-  .slice(0, 3);
-
-export default function TechnicalPage() {
+export default async function TechnicalPage() {
+  const recentPosts = [...(await getArticles())]
+    .sort((a, b) => {
+      const [aM, aY] = a.date.split(" ");
+      const [bM, bY] = b.date.split(" ");
+      return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
+    })
+    .slice(0, 3);
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",

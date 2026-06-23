@@ -3,7 +3,7 @@ import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { portfolioProjects } from "@/lib/data";
+import { getPortfolioProjects } from "@/lib/portfolio";
 
 export const metadata: Metadata = {
   title: "Product Gallery — Cor Vision, Bi-Fold & Curtain Wall UAE",
@@ -48,7 +48,8 @@ const galleries = [
   },
 ];
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const portfolioProjects = await getPortfolioProjects();
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
