@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate:blog": "npx --yes tsx scripts/migrate-blog-to-sanity.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
