@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PortfolioClient from "./PortfolioClient";
-import { portfolioProjects } from "@/lib/data";
+import { getPortfolioProjects } from "@/lib/portfolio";
 
 export const metadata: Metadata = {
   title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const projects = await getPortfolioProjects();
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -31,8 +32,8 @@ export default function PortfolioPage() {
     name: "Swiftrooms Portfolio",
     description: "Completed glazing installations by Swiftrooms across the UAE.",
     url: `${base}/portfolio`,
-    numberOfItems: portfolioProjects.length,
-    itemListElement: portfolioProjects.map((p, i) => ({
+    numberOfItems: projects.length,
+    itemListElement: projects.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
       name: p.name,
@@ -44,7 +45,7 @@ export default function PortfolioPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <PortfolioClient />
+      <PortfolioClient projects={projects} />
     </>
   );
 }

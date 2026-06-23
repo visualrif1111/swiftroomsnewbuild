@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
       { source: "/monty-s-montgomery-golf-course", destination: "/portfolio/montys-golf-course", permanent: true },
       { source: "/padel-x-project", destination: "/portfolio/padel-x", permanent: true },
       { source: "/palm-jumeirah", destination: "/portfolio/palm-jumeirah", permanent: true },
-      { source: "/palmara-2-arabian-ranches", destination: "/portfolio/arabian-ranches", permanent: true },
+      { source: "/palmara-2-arabian-ranches", destination: "/portfolio/palmara-arabian-ranches", permanent: true },
       { source: "/phileas-fogg---dubai", destination: "/portfolio/phileas-fogg", permanent: true },
       { source: "/phoenix-damac-hills", destination: "/portfolio/phoenix-damac-hills", permanent: true },
       { source: "/premium-high-quality-garden-rooms-glass-conservatory", destination: "/catalogue/garden-rooms", permanent: true },

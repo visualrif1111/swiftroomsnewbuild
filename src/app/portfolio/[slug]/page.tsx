@@ -4,21 +4,22 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { portfolioProjects, portfolioMedia } from "@/lib/data";
+import { getPortfolioProject, getPortfolioProjects, getPortfolioSlugs } from "@/lib/portfolio";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return portfolioProjects.map((p) => ({ slug: p.slug }));
+  const slugs = await getPortfolioSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = portfolioProjects.find((p) => p.slug === slug);
+  const project = await getPortfolioProject(slug);
   if (!project) return { title: "Not Found" };
-  const ogImage = portfolioMedia[project.slug]?.hero ?? project.image;
+  const ogImage = project.image;
   return {
     title: `${project.name} — ${project.type} UAE Glazing Project`,
     description: project.description,
@@ -58,15 +59,16 @@ const productLinks: Record<string, string> = {
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
-  const project = portfolioProjects.find((p) => p.slug === slug);
+  const project = await getPortfolioProject(slug);
   if (!project) notFound();
 
-  const media = portfolioMedia[project.slug];
-  const heroImage = media?.hero ?? project.image;
-  const gallery = media?.gallery ?? [];
+  const media = { video: project.video, videoPoster: project.videoPoster };
+  const heroImage = project.image;
+  const gallery = project.gallery;
 
-  const related = portfolioProjects
-    .filter((p) => p.id !== project.id && p.tags.some((t) => project.tags.includes(t)))
+  const allProjects = await getPortfolioProjects();
+  const related = allProjects
+    .filter((p) => p.slug !== project.slug && p.tags.some((t) => project.tags.includes(t)))
     .slice(0, 3);
 
   const caseStudySections = [
@@ -355,9 +357,9 @@ export default async function ProjectPage({ params }: Props) {
                     className="group block border border-gray-100 hover:border-[#007969]/30 transition-all overflow-hidden bg-white active:scale-[0.98]"
                   >
                     <div className="h-32 md:h-36 w-full relative overflow-hidden bg-[#f0fdf4]">
-                      {(portfolioMedia[rel.slug]?.hero ?? rel.image) && (
+                      {rel.image && (
                         <Image
-                          src={portfolioMedia[rel.slug]?.hero ?? rel.image!}
+                          src={rel.image}
                           alt={rel.name}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-700"

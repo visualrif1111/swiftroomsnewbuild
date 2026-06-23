@@ -6,7 +6,7 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { portfolioProjects } from "@/lib/data";
+import type { PortfolioItem } from "@/lib/portfolio";
 
 // Location-based grouping per spec
 const locationGroups = [
@@ -34,15 +34,15 @@ const locationGroups = [
 
 const typeTags = ["All", "Villa", "Apartment", "Townhouse", "Commercial", "Garden Room", "Hospitality"];
 
-// Featured showcase project
-const featured = portfolioProjects.find((p) => p.slug === "emirates-hills")!;
-
-export default function PortfolioClient() {
+export default function PortfolioClient({ projects }: { projects: PortfolioItem[] }) {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [activeType, setActiveType] = useState("All");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
-  const filtered = portfolioProjects.filter((p) => {
+  // Featured showcase project
+  const featured = projects.find((p) => p.slug === "emirates-hills") ?? projects[0];
+
+  const filtered = projects.filter((p) => {
     const matchesType = activeType === "All" || p.tags.some((t) => t === activeType);
     const matchesLocation =
       !activeLocation ||
@@ -72,7 +72,7 @@ export default function PortfolioClient() {
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              {portfolioProjects.length} completed projects spanning Dubai, Abu Dhabi and the wider UAE.
+              {projects.length} completed projects spanning Dubai, Abu Dhabi and the wider UAE.
               From intimate villa renovations to large commercial installations.
             </p>
           </ScrollReveal>
@@ -148,7 +148,7 @@ export default function PortfolioClient() {
                     All Locations
                   </button>
                   {locationGroups.map((loc) => {
-                    const count = portfolioProjects.filter((p) =>
+                    const count = projects.filter((p) =>
                       loc.slugs.includes(p.slug)
                     ).length;
                     if (count === 0) return null;
@@ -347,7 +347,7 @@ export default function PortfolioClient() {
                     All
                   </button>
                   {locationGroups
-                    .filter((loc) => portfolioProjects.some((p) => loc.slugs.includes(p.slug)))
+                    .filter((loc) => projects.some((p) => loc.slugs.includes(p.slug)))
                     .map((loc) => (
                       <button
                         key={loc.label}
