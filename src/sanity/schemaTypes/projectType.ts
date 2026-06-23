@@ -32,7 +32,23 @@ export const projectType = defineType({
     defineField({ name: "solution", title: "Solution", type: "text", rows: 3, group: "content" }),
     defineField({ name: "outcome", title: "Outcome", type: "text", rows: 3, group: "content" }),
     // Products used — name-based in Phase 1; converts to references in Phase 2.
-    defineField({ name: "productsUsed", title: "Products used", type: "array", group: "content", of: [{ type: "string" }] }),
+    // Products used — references to Product documents.
+    defineField({
+      name: "products",
+      title: "Products used",
+      type: "array",
+      group: "content",
+      of: [{ type: "reference", weak: true, to: [{ type: "product" }] }],
+    }),
+    // Legacy name list — kept for display fallback and names not yet matched to
+    // a product. Superseded by the `products` references above.
+    defineField({
+      name: "productsUsed",
+      title: "Products used (legacy names)",
+      type: "array",
+      group: "content",
+      of: [{ type: "string" }],
+    }),
     defineField({ name: "tags", title: "Tags", type: "array", group: "content", of: [{ type: "string" }] }),
     // ── Media ──
     defineField({

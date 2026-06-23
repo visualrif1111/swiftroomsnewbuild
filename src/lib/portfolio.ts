@@ -18,6 +18,7 @@ export type PortfolioItem = {
   type: string;
   description: string;
   products: string[];
+  productLinks: { name: string; href: string }[];
   tags: string[];
   brief?: string;
   challenge?: string;
@@ -31,6 +32,34 @@ export type PortfolioItem = {
 
 const sanityConfigured = () => Boolean(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
 
+// Product name → catalogue href, for the data.ts fallback (Sanity projects use
+// resolved references instead).
+const NAME_TO_HREF: Record<string, string> = {
+  "Cor Vision 4600": "/catalogue/aluminium-sliding-doors/cor-vision-4600",
+  "Cor Vision 4700": "/catalogue/aluminium-sliding-doors/cor-vision-4700",
+  "Cor Vision Plus": "/catalogue/aluminium-sliding-doors/cor-vision-plus",
+  "Cortizo Bi-fold": "/catalogue/aluminium-bi-folding-doors/cortizo-bifold",
+  "Cortizo Casement": "/catalogue/aluminium-windows/cortizo-casement",
+  "Cortizo Cor 70 Hidden Sash": "/catalogue/aluminium-windows/cortizo-cor-70-hidden-sash",
+  "Gulf Extrusions TB600 Window": "/catalogue/aluminium-windows/gulf-extrusion-tb600-tilt-and-turn",
+  "Aluminium Sliding Windows": "/catalogue/aluminium-windows/aluminium-sliding-windows",
+  "Cortizo Cor 70 Door": "/catalogue/aluminium-doors/cortizo-cor-70-door",
+  "Gulf Extrusions TB600 Door": "/catalogue/aluminium-doors/gulf-extrusion-tb600-door",
+  "Vetromax Pivot Door": "/catalogue/aluminium-doors/vetromax-pivot-door",
+  "uPVC Casement": "/catalogue/upvc/upvc-casement",
+  "Cortizo TP52": "/catalogue/curtain-wall/cortizo-tp52",
+  "Cortizo TP52 Curtain Wall": "/catalogue/curtain-wall/cortizo-tp52",
+  "Gulf Extrusions CW 50mm": "/catalogue/curtain-wall/gulf-extrusion-cw-50",
+  "Vetromax VF35 Facade": "/catalogue/curtain-wall/vetromax-vf35",
+  "Premium Garden Room": "/catalogue/garden-rooms/premium-garden-room",
+  "Glass Conservatory": "/catalogue/garden-rooms/glass-conservatory",
+  "Retractable Fly Screen": "/catalogue/insect-screens/retractable-fly-screen",
+  "Fixed Rooflight": "/catalogue/skylights/fixed-rooflight",
+  "Motorised Skylight": "/catalogue/skylights/motorised-skylight",
+};
+const linksFromNames = (names: string[]) =>
+  names.flatMap((n) => (NAME_TO_HREF[n] ? [{ name: n, href: NAME_TO_HREF[n] }] : []));
+
 function fromData(p: PortfolioProject): PortfolioItem {
   const m = portfolioMedia[p.slug] ?? {};
   return {
@@ -43,6 +72,7 @@ function fromData(p: PortfolioProject): PortfolioItem {
     type: p.type,
     description: p.description,
     products: p.products ?? [],
+    productLinks: linksFromNames(p.products ?? []),
     tags: p.tags ?? [],
     brief: p.brief,
     challenge: p.challenge,
@@ -69,6 +99,7 @@ type RawSanityProject = {
   solution?: string;
   outcome?: string;
   productsUsed?: string[];
+  productRefs?: { name?: string; slug?: string; categorySlug?: string }[];
   tags?: string[];
   image?: string | null;
   gallery?: (string | null)[];
@@ -87,6 +118,9 @@ function fromSanity(p: RawSanityProject): PortfolioItem {
     type: p.projectType ?? "",
     description: p.description ?? "",
     products: p.productsUsed ?? [],
+    productLinks: (p.productRefs ?? [])
+      .filter((r): r is { name: string; slug: string; categorySlug: string } => Boolean(r?.name && r?.slug && r?.categorySlug))
+      .map((r) => ({ name: r.name, href: `/catalogue/${r.categorySlug}/${r.slug}` })),
     tags: p.tags ?? [],
     brief: p.brief,
     challenge: p.challenge,
@@ -103,6 +137,7 @@ const PROJECT_FIELDS = `
   "id": _id, title, "slug": slug.current, "location": location->title,
   projectType, area, year, description, brief, challenge, solution, outcome,
   productsUsed, tags,
+  "productRefs": products[]->{ "name": title, "slug": slug.current, "categorySlug": category->slug.current },
   "image": heroImage.asset->url,
   "gallery": gallery[].asset->url,
   "video": video.asset->url,
