@@ -6,14 +6,14 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { blogPosts } from "@/lib/data";
+import type { BlogPost } from "@/lib/data";
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
 };
 
-function sortedByDate(posts: typeof blogPosts) {
+function sortedByDate(posts: BlogPost[]) {
   return [...posts].sort((a, b) => {
     const [aMonth, aYear] = a.date.split(" ");
     const [bMonth, bYear] = b.date.split(" ");
@@ -23,12 +23,11 @@ function sortedByDate(posts: typeof blogPosts) {
   });
 }
 
-const sorted = sortedByDate(blogPosts);
-const categories = ["All", ...Array.from(new Set(sorted.map((p) => p.category)))];
-
-export default function BlogClient() {
+export default function BlogClient({ posts }: { posts: BlogPost[] }) {
   const [active, setActive] = useState("All");
 
+  const sorted = sortedByDate(posts);
+  const categories = ["All", ...Array.from(new Set(sorted.map((p) => p.category)))];
   const filtered = active === "All" ? sorted : sorted.filter((p) => p.category === active);
 
   return (

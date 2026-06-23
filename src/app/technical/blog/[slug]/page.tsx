@@ -4,19 +4,20 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { blogPosts } from "@/lib/data";
+import { getArticle, getArticles, getArticleSlugs } from "@/lib/blog";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return blogPosts.map((p) => ({ slug: p.slug }));
+  const slugs = await getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = await getArticle(slug);
   if (!post) return { title: "Not Found" };
   return {
     title: post.title,
@@ -37,14 +38,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = await getArticle(slug);
   if (!post) notFound();
 
-  const related = blogPosts
+  const allPosts = await getArticles();
+  const related = allPosts
     .filter((p) => p.slug !== slug && p.category === post.category)
     .slice(0, 3);
 
-  const allOther = blogPosts.filter(
+  const allOther = allPosts.filter(
     (p) => p.slug !== slug && !related.find((r) => r.slug === p.slug)
   );
   const relatedPosts = [...related, ...allOther].slice(0, 3);
