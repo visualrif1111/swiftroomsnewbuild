@@ -52,9 +52,21 @@ const PRODUCT_NAME_TO_SLUG: Record<string, string> = {
   "Fixed Rooflight": "fixed-rooflight", "Motorised Skylight": "motorised-skylight",
 };
 
-// productSlug → [projectSlug…] from portfolio "products used".
+// Only these portfolio projects exist in Sanity (migrated in Phase 1) — relate
+// products only to them to avoid dangling references. (Palmara shares Arabian
+// Ranches' product list.)
+const MIGRATED_PROJECTS = new Set([
+  "al-barari", "palm-jumeirah", "emirates-hills", "arabian-ranches",
+  "palmara-arabian-ranches", "centro-the-villas", "brookfields-damac-hills",
+  "victory-heights", "jumeirah-village-triangle", "the-springs",
+  "phoenix-damac-hills", "glass-room-abu-dhabi", "montys-golf-course",
+  "phileas-fogg", "padel-x",
+]);
+
+// productSlug → [projectSlug…] from portfolio "products used" (Sanity projects only).
 const relatedProjects: Record<string, Set<string>> = {};
 for (const proj of portfolioProjects) {
+  if (!MIGRATED_PROJECTS.has(proj.slug)) continue;
   for (const name of proj.products ?? []) {
     const ps = PRODUCT_NAME_TO_SLUG[name];
     if (ps) (relatedProjects[ps] ??= new Set()).add(proj.slug);
@@ -148,10 +160,10 @@ async function run() {
     for (const p of c.products) {
       const hero = await uploadImage(p.image);
       const siblings = c.products.filter((x) => x.slug !== p.slug).map((x) => ({
-        _key: key(), _type: "reference", _ref: `product-${x.slug}`,
+        _key: key(), _type: "reference", _weak: true, _ref: `product-${x.slug}`,
       }));
       const projs = [...(relatedProjects[p.slug] ?? [])].map((s) => ({
-        _key: key(), _type: "reference", _ref: `project-${s}`,
+        _key: key(), _type: "reference", _weak: true, _ref: `project-${s}`,
       }));
       await client.createOrReplace({
         _id: `product-${p.slug}`, _type: "product",
