@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
@@ -8,17 +9,17 @@ export const metadata: Metadata = {
   title: "Contact Swiftrooms — Dubai Showroom & Glazing Enquiries",
   description:
     "Contact Swiftrooms UAE — call, email or visit our Jebel Ali showroom to discuss your windows and doors project.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/contact" },
+  alternates: { canonical: `${SITE_URL}/contact` },
   openGraph: {
     title: "Contact Swiftrooms | UAE",
     description:
       "Contact Swiftrooms in Dubai — call, email or visit our Jebel Ali showroom. Sunday–Thursday 8:30–17:30, Saturday 10:00–14:00.",
-    url: "https://swiftrooms-newbuild.vercel.app/contact",
+    url: `${SITE_URL}/contact`,
   },
 };
 
 export default function ContactPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
@@ -10,19 +11,19 @@ export const metadata: Metadata = {
   title: "Cortizo, Vetromax & Gulf Extrusions — Authorised Brand Partners UAE",
   description:
     "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/brands" },
+  alternates: { canonical: `${SITE_URL}/catalogue/brands` },
   openGraph: {
     title: "Brand Partners | Swiftrooms",
     description:
       "Authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue/brands",
+    url: `${SITE_URL}/catalogue/brands`,
   },
 };
 
 export default async function BrandsPage() {
   const brands = await getBrands();
   const productCategories = await getCategories();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

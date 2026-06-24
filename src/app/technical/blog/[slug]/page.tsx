@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -24,12 +25,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
+    alternates: { canonical: `${SITE_URL}/technical/blog/${post.slug}` },
     openGraph: {
       type: "article",
       title: post.title,
       description: post.excerpt,
-      url: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}`,
+      url: `${SITE_URL}/technical/blog/${post.slug}`,
       images: post.image ? [{ url: post.image, alt: post.title }] : [],
       publishedTime: post.date,
       authors: ["Swiftrooms"],
@@ -64,18 +65,18 @@ export default async function BlogPostPage({ params }: Props) {
     author: {
       "@type": "Organization",
       name: "Swiftrooms",
-      url: "https://swiftrooms-newbuild.vercel.app",
-      "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+      url: SITE_URL,
+      "@id": `${SITE_URL}/#business`,
     },
     publisher: {
       "@type": "Organization",
       name: "Swiftrooms",
-      url: "https://swiftrooms-newbuild.vercel.app",
-      "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+      url: SITE_URL,
+      "@id": `${SITE_URL}/#business`,
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}`,
+      "@id": `${SITE_URL}/technical/blog/${post.slug}`,
     },
     keywords: post.category,
     articleSection: post.category,
@@ -86,10 +87,10 @@ export default async function BlogPostPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
-      { "@type": "ListItem", position: 2, name: "Technical Hub", item: "https://swiftrooms-newbuild.vercel.app/technical" },
-      { "@type": "ListItem", position: 3, name: "Blog & Insights", item: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
-      { "@type": "ListItem", position: 4, name: post.title, item: `https://swiftrooms-newbuild.vercel.app/technical/blog/${post.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Technical Hub", item: `${SITE_URL}/technical` },
+      { "@type": "ListItem", position: 3, name: "Blog & Insights", item: `${SITE_URL}/technical/blog` },
+      { "@type": "ListItem", position: 4, name: post.title, item: `${SITE_URL}/technical/blog/${post.slug}` },
     ],
   };
 

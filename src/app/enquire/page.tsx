@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -9,18 +10,18 @@ export const metadata: Metadata = {
   title: "Get a Free Quote — Windows, Doors & Glazing UAE",
   description:
     "Request a free quotation for aluminium windows, doors and glazing systems from Swiftrooms UAE.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/enquire" },
+  alternates: { canonical: `${SITE_URL}/enquire` },
   openGraph: {
     title: "Get a Free Quote | Swiftrooms",
     description:
       "Request a free quotation for premium aluminium windows, doors and glazing systems. We respond within 1 business day and offer a free technical site survey.",
-    url: "https://swiftrooms-newbuild.vercel.app/enquire",
+    url: `${SITE_URL}/enquire`,
   },
 };
 
 export default async function EnquirePage() {
   const [categories, testimonials] = await Promise.all([getCategories(), getTestimonials()]);
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

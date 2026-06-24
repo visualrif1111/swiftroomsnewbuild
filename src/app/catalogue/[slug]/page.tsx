@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCategory, getCategories, getCategorySlugs } from "@/lib/catalogue";
@@ -33,11 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: metaTitle,
     description: category.description,
-    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}` },
+    alternates: { canonical: `${SITE_URL}/catalogue/${slug}` },
     openGraph: {
       title: `${metaTitle} | Swiftrooms`,
       description: category.description,
-      url: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}`,
+      url: `${SITE_URL}/catalogue/${slug}`,
       ...(category.image ? { images: [{ url: category.image, alt: category.name }] } : {}),
     },
   };
@@ -52,7 +53,7 @@ export default async function CategoryPage({ params }: Props) {
   ]);
   if (!category) notFound();
 
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

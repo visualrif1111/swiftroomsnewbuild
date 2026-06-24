@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -24,11 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${product.name} UAE — ${product.brand} Glazing Specialist`,
     description: product.description,
-    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}/${productSlug}` },
+    alternates: { canonical: `${SITE_URL}/catalogue/${slug}/${productSlug}` },
     openGraph: {
       title: `${product.name} | ${product.brand} UAE | Swiftrooms`,
       description: product.description,
-      url: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}/${productSlug}`,
+      url: `${SITE_URL}/catalogue/${slug}/${productSlug}`,
       images: product.image ? [{ url: product.image, alt: product.name }] : [],
     },
   };
@@ -61,11 +62,11 @@ export default async function ProductDetailPage({ params }: Props) {
       "@type": "Offer",
       priceCurrency: "AED",
       availability: "https://schema.org/InStock",
-      url: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}`,
+      url: `${SITE_URL}/catalogue/${cat.slug}/${product.slug}`,
       seller: {
         "@type": "Organization",
         name: "Swiftrooms",
-        "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+        "@id": `${SITE_URL}/#business`,
       },
       areaServed: { "@type": "Country", name: "United Arab Emirates" },
     },
@@ -82,10 +83,10 @@ export default async function ProductDetailPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
-      { "@type": "ListItem", position: 2, name: "Catalogue", item: "https://swiftrooms-newbuild.vercel.app/catalogue" },
-      { "@type": "ListItem", position: 3, name: cat.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}` },
-      { "@type": "ListItem", position: 4, name: product.name, item: `https://swiftrooms-newbuild.vercel.app/catalogue/${cat.slug}/${product.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Catalogue", item: `${SITE_URL}/catalogue` },
+      { "@type": "ListItem", position: 3, name: cat.name, item: `${SITE_URL}/catalogue/${cat.slug}` },
+      { "@type": "ListItem", position: 4, name: product.name, item: `${SITE_URL}/catalogue/${cat.slug}/${product.slug}` },
     ],
   };
 

@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
 import { getHomeSettings } from "@/lib/homepage";
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
   title: "Swiftrooms — Performance Windows & Doors, UAE",
   description:
     "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app" },
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-    url: "https://swiftrooms-newbuild.vercel.app",
+    url: SITE_URL,
   },
 };
 
@@ -32,7 +33,7 @@ export default async function Home() {
   const reviewSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+    "@id": `${SITE_URL}/#business`,
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.9",

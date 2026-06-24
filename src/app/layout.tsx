@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -8,7 +9,7 @@ import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
 import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://swiftrooms-newbuild.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Swiftrooms — Performance Windows & Doors, UAE",
     template: "%s | Swiftrooms",
@@ -33,10 +34,10 @@ export const metadata: Metadata = {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-    url: "https://swiftrooms-newbuild.vercel.app",
+    url: SITE_URL,
     images: [
       {
-        url: "https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png",
+        url: `${SITE_URL}/brand/hero-villa-dubai.png`,
         width: 1200,
         height: 630,
         alt: "Swiftrooms — Premium Glazing Systems, UAE",
@@ -48,11 +49,11 @@ export const metadata: Metadata = {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects.",
-    images: ["https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png"],
+    images: [`${SITE_URL}/brand/hero-villa-dubai.png`],
   },
 };
 
-const BASE = "https://swiftrooms-newbuild.vercel.app";
+const BASE = SITE_URL;
 
 const localBusinessSchema = {
   "@context": "https://schema.org",

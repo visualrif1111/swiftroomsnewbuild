@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import ResourcesClient from "./ResourcesClient";
 import { getResources } from "@/lib/resources";
@@ -6,18 +7,18 @@ export const metadata: Metadata = {
   title: "Glazing Technical Resources — Guides, Specifications & Downloads UAE",
   description:
     "Product guides, project inspiration, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly from our team.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/resources" },
+  alternates: { canonical: `${SITE_URL}/technical/resources` },
   openGraph: {
     title: "Technical Resources | Swiftrooms",
     description:
       "Product guides, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/resources",
+    url: `${SITE_URL}/technical/resources`,
   },
 };
 
 export default async function ResourcesPage() {
   const resources = await getResources();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

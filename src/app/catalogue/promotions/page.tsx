@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
@@ -7,11 +8,11 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 export const metadata: Metadata = {
   title: "Current Promotions — Windows & Doors Offers UAE",
   description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE. Free survey, hardware upgrades and trade pricing.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions" },
+  alternates: { canonical: `${SITE_URL}/catalogue/promotions` },
   openGraph: {
     title: "Promotions | Swiftrooms",
     description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions",
+    url: `${SITE_URL}/catalogue/promotions`,
   },
 };
 
@@ -52,7 +53,7 @@ const promotions = [
 ];
 
 export default function PromotionsPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
 
   const offersSchema = {
     "@context": "https://schema.org",

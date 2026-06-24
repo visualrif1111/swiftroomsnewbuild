@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -9,12 +10,12 @@ export const metadata: Metadata = {
   title: "Our Installation Process — From Survey to Handover UAE",
   description:
     "How Swiftrooms works — from initial consultation and survey through manufacture, installation and aftercare. Six steps, zero surprises.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/process" },
+  alternates: { canonical: `${SITE_URL}/technical/process` },
   openGraph: {
     title: "Our Process | Swiftrooms",
     description:
       "Six clear steps from first enquiry to aftercare. Understand exactly what Swiftrooms does at each stage before you commit to anything.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/process",
+    url: `${SITE_URL}/technical/process`,
   },
 };
 
@@ -59,7 +60,7 @@ const stepDetails: Record<string, { duration: string; youDo: string; weDo: strin
 
 export default async function ProcessPage() {
   const processSteps = await getProcessSteps();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
 
   const howToSchema = {
     "@context": "https://schema.org",

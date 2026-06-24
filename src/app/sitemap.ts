@@ -1,9 +1,10 @@
+import { SITE_URL } from "@/lib/site";
 import type { MetadataRoute } from "next";
 import { getCategories } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticleSlugs } from "@/lib/blog";
 
-const BASE_URL = "https://swiftrooms-newbuild.vercel.app";
+const BASE_URL = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

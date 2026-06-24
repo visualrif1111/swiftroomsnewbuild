@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,12 +9,12 @@ export const metadata: Metadata = {
   title: "Showroom — Jebel Ali, Dubai",
   description:
     "Visit the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space where you can experience Cortizo Cor Vision, Cor Vision Plus and TP52 curtain wall at full scale, in working condition.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/showroom" },
+  alternates: { canonical: `${SITE_URL}/showroom` },
   openGraph: {
     title: "4900 Showroom, Jebel Ali | Swiftrooms",
     description:
       "Visit the Swiftrooms showroom in Jebel Ali, Dubai. Experience Cortizo Cor Vision, Cor Vision Plus, TP52 curtain wall and more at full scale in working condition. Open by appointment.",
-    url: "https://swiftrooms-newbuild.vercel.app/showroom",
+    url: `${SITE_URL}/showroom`,
   },
 };
 
@@ -70,7 +71,7 @@ const visitSteps = [
 ];
 
 export default function ShowroomPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -85,7 +86,7 @@ export default function ShowroomPage() {
     name: "Swiftrooms 4900 Showroom",
     description:
       "The UAE's only showroom featuring full-scale working displays of Cortizo Cor Vision, Cor Vision Plus, TP52 curtain wall and Gulf Extrusions TB600. Open by appointment.",
-    url: "https://swiftrooms-newbuild.vercel.app/showroom",
+    url: `${SITE_URL}/showroom`,
     telephone: "+971-4-000-0000",
     email: "info@swiftrooms.ae",
     address: {

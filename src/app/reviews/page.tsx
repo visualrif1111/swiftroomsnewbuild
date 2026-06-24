@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
@@ -8,18 +9,18 @@ export const metadata: Metadata = {
   title: "Reviews | Swift Rooms UAE — Client Testimonials Dubai & Abu Dhabi",
   description:
     "Read what Swift Rooms clients across Dubai, Abu Dhabi and the wider UAE say about our premium aluminium windows, doors and glazing systems — exceptional results and a commitment to excellence.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/reviews" },
+  alternates: { canonical: `${SITE_URL}/reviews` },
   openGraph: {
     title: "Reviews | Swift Rooms UAE",
     description:
       "Client testimonials on Swift Rooms premium aluminium windows, doors and glazing systems across the UAE.",
-    url: "https://swiftrooms-newbuild.vercel.app/reviews",
+    url: `${SITE_URL}/reviews`,
   },
 };
 
 export default async function ReviewsPage() {
   const testimonials = await getTestimonials();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
 
   const reviewSchema = {
     "@context": "https://schema.org",

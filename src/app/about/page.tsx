@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 import { getTeamMembers, getTimeline, getTestimonials, getCertifications } from "@/lib/about";
@@ -6,12 +7,12 @@ export const metadata: Metadata = {
   title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
   description:
     "Fifteen years supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE. Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/about" },
+  alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
     title: "About Swiftrooms | The UAE's Trusted Glazing Authority",
     description:
       "Fifteen years supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE. Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions.",
-    url: "https://swiftrooms-newbuild.vercel.app/about",
+    url: `${SITE_URL}/about`,
   },
 };
 
@@ -26,9 +27,9 @@ export default async function AboutPage() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "@id": "https://swiftrooms-newbuild.vercel.app/#business",
+    "@id": `${SITE_URL}/#business`,
     name: "Swiftrooms",
-    url: "https://swiftrooms-newbuild.vercel.app",
+    url: SITE_URL,
     foundingDate: "2009",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
@@ -55,7 +56,7 @@ export default async function AboutPage() {
     ],
   };
 
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

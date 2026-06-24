@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import PortfolioClient from "./PortfolioClient";
 import { getPortfolioProjects } from "@/lib/portfolio";
@@ -6,18 +7,18 @@ export const metadata: Metadata = {
   title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
   description:
     "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse our portfolio of premium aluminium windows, doors and curtain wall installations.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/portfolio" },
+  alternates: { canonical: `${SITE_URL}/portfolio` },
   openGraph: {
     title: "Portfolio | Swiftrooms",
     description:
       "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse premium aluminium windows, doors and curtain wall installations.",
-    url: "https://swiftrooms-newbuild.vercel.app/portfolio",
+    url: `${SITE_URL}/portfolio`,
   },
 };
 
 export default async function PortfolioPage() {
   const projects = await getPortfolioProjects();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

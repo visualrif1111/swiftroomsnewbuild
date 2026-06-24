@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
@@ -8,12 +9,12 @@ export const metadata: Metadata = {
   title: "Cor Vision Gallery",
   description:
     "Photography from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas — minimal sightlines, maximum glass area.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision" },
+  alternates: { canonical: `${SITE_URL}/catalogue/gallery/cor-vision` },
   openGraph: {
     title: "Cor Vision Gallery | Swiftrooms",
     description:
       "18 photographs from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas. Minimal sightlines, maximum glass.",
-    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery/cor-vision",
+    url: `${SITE_URL}/catalogue/gallery/cor-vision`,
     images: [{ url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Gallery" }],
   },
 };
@@ -42,7 +43,7 @@ const images = [
 const heights = [300, 380, 260, 340, 220, 300, 360, 280, 400, 240, 320, 280, 360, 240, 300, 380, 260, 340];
 
 export default function CorVisionGalleryPage() {
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

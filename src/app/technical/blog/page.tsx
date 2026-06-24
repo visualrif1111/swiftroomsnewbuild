@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import BlogClient from "./BlogClient";
 import { getArticles } from "@/lib/blog";
@@ -6,18 +7,18 @@ export const metadata: Metadata = {
   title: "Glazing Blog — Expert Guides for UAE Windows & Doors",
   description:
     "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems from the Swiftrooms team.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/blog" },
+  alternates: { canonical: `${SITE_URL}/technical/blog` },
   openGraph: {
     title: "Blog & Insights | Swiftrooms",
     description:
       "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/blog",
+    url: `${SITE_URL}/technical/blog`,
   },
 };
 
 export default async function BlogPage() {
   const posts = await getArticles();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

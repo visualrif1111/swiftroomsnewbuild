@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
   title: "Technical Hub — Glazing Guides, Process & FAQ for UAE Projects",
   description:
     "Swiftrooms technical resources — our process, blog articles, downloadable guides, FAQ and everything you need to specify, plan and manage your glazing project in the UAE.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical" },
+  alternates: { canonical: `${SITE_URL}/technical` },
   openGraph: {
     title: "Technical Hub | Swiftrooms",
     description:
       "Technical resources for glazing projects in the UAE — our process, expert articles, specification guides, FAQ and downloadable documents.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical",
+    url: `${SITE_URL}/technical`,
   },
 };
 
@@ -80,7 +81,7 @@ export default async function TechnicalPage() {
       return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
     })
     .slice(0, 3);
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

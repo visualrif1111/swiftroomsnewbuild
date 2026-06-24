@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import FaqClient from "./FaqClient";
 import { getGeneralFaqs } from "@/lib/faqs";
@@ -6,18 +7,18 @@ export const metadata: Metadata = {
   title: "Glazing FAQ — Windows, Doors & Aluminium Systems UAE",
   description:
     "Answers to the most common questions about premium aluminium windows, doors and glazing systems in the UAE. Get clear, expert answers from the Swiftrooms team.",
-  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/faq" },
+  alternates: { canonical: `${SITE_URL}/technical/faq` },
   openGraph: {
     title: "FAQ | Swiftrooms",
     description:
       "Answers to the most common questions about premium aluminium windows, doors and glazing systems in the UAE.",
-    url: "https://swiftrooms-newbuild.vercel.app/technical/faq",
+    url: `${SITE_URL}/technical/faq`,
   },
 };
 
 export default async function FaqPage() {
   const faqs = await getGeneralFaqs();
-  const base = "https://swiftrooms-newbuild.vercel.app";
+  const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
