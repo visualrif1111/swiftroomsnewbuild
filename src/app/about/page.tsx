@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
+import { getTeamMembers, getTimeline, getTestimonials, getCertifications } from "@/lib/about";
 
 export const metadata: Metadata = {
   title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
@@ -14,7 +15,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [teamMembers, timeline, testimonials, certifications] = await Promise.all([
+    getTeamMembers(),
+    getTimeline(),
+    getTestimonials(),
+    getCertifications(),
+  ]);
+
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -61,7 +69,12 @@ export default function AboutPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <AboutClient />
+      <AboutClient
+        teamMembers={teamMembers}
+        timeline={timeline}
+        testimonials={testimonials}
+        certifications={certifications}
+      />
     </>
   );
 }

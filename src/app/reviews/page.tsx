@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { testimonials } from "@/lib/data";
+import { getTestimonials } from "@/lib/about";
 
 export const metadata: Metadata = {
   title: "Reviews | Swift Rooms UAE — Client Testimonials Dubai & Abu Dhabi",
@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ReviewsPage() {
+export default async function ReviewsPage() {
+  const testimonials = await getTestimonials();
   const base = "https://www.swiftrooms.ae";
 
   const reviewSchema = {

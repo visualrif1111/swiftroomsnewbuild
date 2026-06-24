@@ -3,7 +3,7 @@ import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { processSteps } from "@/lib/data";
+import { getProcessSteps } from "@/lib/about";
 
 export const metadata: Metadata = {
   title: "Our Installation Process — From Survey to Handover UAE",
@@ -57,7 +57,8 @@ const stepDetails: Record<string, { duration: string; youDo: string; weDo: strin
   },
 };
 
-export default function ProcessPage() {
+export default async function ProcessPage() {
+  const processSteps = await getProcessSteps();
   const base = "https://www.swiftrooms.ae";
 
   const howToSchema = {

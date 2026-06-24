@@ -6,7 +6,8 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { teamMembers, timeline, stats, testimonials } from "@/lib/data";
+import { stats, type TeamMember, type TimelineEntry, type Testimonial } from "@/lib/data";
+import type { Certification } from "@/lib/about";
 
 const values = [
   {
@@ -35,16 +36,6 @@ const values = [
   },
 ];
 
-const certifications = [
-  { name: "Cortizo Authorised Partner", detail: "UAE — since 2011" },
-  { name: "Gulf Extrusions Approved Installer", detail: "UAE — since 2015" },
-  { name: "Vetromax Authorised Partner", detail: "UAE — since 2017" },
-  { name: "QUALICOAT Certified", detail: "Powder coat quality standard" },
-  { name: "Dubai Municipality Registered", detail: "Commercial contractor" },
-  { name: "ISO 9001:2015", detail: "Quality management system" },
-];
-
-const teamGroups = [...new Set(teamMembers.map((m) => m.group))];
 const initials = (name: string) =>
   name
     .replace(/[^A-Za-z ]/g, "")
@@ -55,8 +46,19 @@ const initials = (name: string) =>
     .join("")
     .toUpperCase();
 
-export default function AboutClient() {
+export default function AboutClient({
+  teamMembers,
+  timeline,
+  testimonials,
+  certifications,
+}: {
+  teamMembers: TeamMember[];
+  timeline: TimelineEntry[];
+  testimonials: Testimonial[];
+  certifications: Certification[];
+}) {
   const [activeYear, setActiveYear] = useState(0);
+  const teamGroups = [...new Set(teamMembers.map((m) => m.group))];
 
   return (
     <>
