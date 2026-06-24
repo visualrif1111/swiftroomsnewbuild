@@ -11,7 +11,9 @@ import SchucoLogo from "@/components/logos/SchucoLogo";
 import DeceuninckLogo from "@/components/logos/DeceuninckLogo";
 import ProductSelector from "@/components/ProductSelector";
 import type { HomeSettings } from "@/lib/homepage";
-import { productCategories, portfolioProjects, processSteps, blogPosts, testimonials } from "@/lib/data";
+import type { ProductCategory, BlogPost, Testimonial } from "@/lib/data";
+import type { PortfolioItem } from "@/lib/portfolio";
+import type { ProcessStep } from "@/lib/about";
 
 // Brand logos for the "Brands We Work With" cards (mirrors the landing page).
 // Schüco / Deceuninck / Cortizo are teal SVGs; GEX & Vetromax are teal PNGs.
@@ -48,11 +50,12 @@ const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
 };
-const sortedBlogPosts = [...blogPosts].sort((a, b) => {
-  const [aM, aY] = a.date.split(" ");
-  const [bM, bY] = b.date.split(" ");
-  return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
-});
+const sortByDateDesc = (posts: BlogPost[]) =>
+  [...posts].sort((a, b) => {
+    const [aM, aY] = a.date.split(" ");
+    const [bM, bY] = b.date.split(" ");
+    return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
+  });
 
 const usps = [
   { icon: "🌍", text: "European quality systems from AED 800/sqm" },
@@ -94,7 +97,22 @@ function Dots({ count, active, onDotClick }: { count: number; active: number; on
   );
 }
 
-export default function HomeClient({ settings }: { settings: HomeSettings }) {
+export default function HomeClient({
+  settings,
+  productCategories,
+  portfolioProjects,
+  blogPosts,
+  processSteps,
+  testimonials,
+}: {
+  settings: HomeSettings;
+  productCategories: ProductCategory[];
+  portfolioProjects: PortfolioItem[];
+  blogPosts: BlogPost[];
+  processSteps: ProcessStep[];
+  testimonials: Testimonial[];
+}) {
+  const sortedBlogPosts = sortByDateDesc(blogPosts);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
