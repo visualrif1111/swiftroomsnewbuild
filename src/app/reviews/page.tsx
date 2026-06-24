@@ -8,18 +8,18 @@ export const metadata: Metadata = {
   title: "Reviews | Swift Rooms UAE — Client Testimonials Dubai & Abu Dhabi",
   description:
     "Read what Swift Rooms clients across Dubai, Abu Dhabi and the wider UAE say about our premium aluminium windows, doors and glazing systems — exceptional results and a commitment to excellence.",
-  alternates: { canonical: "https://www.swiftrooms.ae/reviews" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/reviews" },
   openGraph: {
     title: "Reviews | Swift Rooms UAE",
     description:
       "Client testimonials on Swift Rooms premium aluminium windows, doors and glazing systems across the UAE.",
-    url: "https://www.swiftrooms.ae/reviews",
+    url: "https://swiftrooms-newbuild.vercel.app/reviews",
   },
 };
 
 export default async function ReviewsPage() {
   const testimonials = await getTestimonials();
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
 
   const reviewSchema = {
     "@context": "https://schema.org",

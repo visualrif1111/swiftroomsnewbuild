@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   title: "Product Gallery — Cor Vision, Bi-Fold & Curtain Wall UAE",
   description:
     "Product photography and installation photography from Swiftrooms projects across the UAE. Cor Vision lift-and-slide, bi-folding doors, curtain wall and more at full scale.",
-  alternates: { canonical: "https://www.swiftrooms.ae/catalogue/gallery" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery" },
   openGraph: {
     title: "Gallery | Swiftrooms",
     description:
       "Product photography and installation photography from Swiftrooms glazing projects across the UAE. Three dedicated product galleries.",
-    url: "https://www.swiftrooms.ae/catalogue/gallery",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/gallery",
   },
 };
 
@@ -50,7 +50,7 @@ const galleries = [
 
 export default async function GalleryPage() {
   const portfolioProjects = await getPortfolioProjects();
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

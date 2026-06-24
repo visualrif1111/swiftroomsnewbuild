@@ -3,7 +3,7 @@ import { getCategories } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticleSlugs } from "@/lib/blog";
 
-const BASE_URL = "https://www.swiftrooms.ae";
+const BASE_URL = "https://swiftrooms-newbuild.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

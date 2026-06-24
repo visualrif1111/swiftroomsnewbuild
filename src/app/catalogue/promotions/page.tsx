@@ -7,11 +7,11 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 export const metadata: Metadata = {
   title: "Current Promotions — Windows & Doors Offers UAE",
   description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE. Free survey, hardware upgrades and trade pricing.",
-  alternates: { canonical: "https://www.swiftrooms.ae/catalogue/promotions" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions" },
   openGraph: {
     title: "Promotions | Swiftrooms",
     description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE.",
-    url: "https://www.swiftrooms.ae/catalogue/promotions",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/promotions",
   },
 };
 
@@ -52,7 +52,7 @@ const promotions = [
 ];
 
 export default function PromotionsPage() {
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
 
   const offersSchema = {
     "@context": "https://schema.org",

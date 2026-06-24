@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   title: "Our Installation Process — From Survey to Handover UAE",
   description:
     "How Swiftrooms works — from initial consultation and survey through manufacture, installation and aftercare. Six steps, zero surprises.",
-  alternates: { canonical: "https://www.swiftrooms.ae/technical/process" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/process" },
   openGraph: {
     title: "Our Process | Swiftrooms",
     description:
       "Six clear steps from first enquiry to aftercare. Understand exactly what Swiftrooms does at each stage before you commit to anything.",
-    url: "https://www.swiftrooms.ae/technical/process",
+    url: "https://swiftrooms-newbuild.vercel.app/technical/process",
   },
 };
 
@@ -59,7 +59,7 @@ const stepDetails: Record<string, { duration: string; youDo: string; weDo: strin
 
 export default async function ProcessPage() {
   const processSteps = await getProcessSteps();
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
 
   const howToSchema = {
     "@context": "https://schema.org",

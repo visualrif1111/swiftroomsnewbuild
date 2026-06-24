@@ -6,18 +6,18 @@ export const metadata: Metadata = {
   title: "Glazing Technical Resources — Guides, Specifications & Downloads UAE",
   description:
     "Product guides, project inspiration, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly from our team.",
-  alternates: { canonical: "https://www.swiftrooms.ae/technical/resources" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/technical/resources" },
   openGraph: {
     title: "Technical Resources | Swiftrooms",
     description:
       "Product guides, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly.",
-    url: "https://www.swiftrooms.ae/technical/resources",
+    url: "https://swiftrooms-newbuild.vercel.app/technical/resources",
   },
 };
 
 export default async function ResourcesPage() {
   const resources = await getResources();
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

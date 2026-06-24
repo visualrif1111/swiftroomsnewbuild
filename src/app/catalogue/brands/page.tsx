@@ -10,19 +10,19 @@ export const metadata: Metadata = {
   title: "Cortizo, Vetromax & Gulf Extrusions — Authorised Brand Partners UAE",
   description:
     "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
-  alternates: { canonical: "https://www.swiftrooms.ae/catalogue/brands" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/catalogue/brands" },
   openGraph: {
     title: "Brand Partners | Swiftrooms",
     description:
       "Authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
-    url: "https://www.swiftrooms.ae/catalogue/brands",
+    url: "https://swiftrooms-newbuild.vercel.app/catalogue/brands",
   },
 };
 
 export default async function BrandsPage() {
   const brands = await getBrands();
   const productCategories = await getCategories();
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

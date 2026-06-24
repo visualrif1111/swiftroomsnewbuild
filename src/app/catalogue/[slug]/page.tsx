@@ -33,11 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: metaTitle,
     description: category.description,
-    alternates: { canonical: `https://www.swiftrooms.ae/catalogue/${slug}` },
+    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}` },
     openGraph: {
       title: `${metaTitle} | Swiftrooms`,
       description: category.description,
-      url: `https://www.swiftrooms.ae/catalogue/${slug}`,
+      url: `https://swiftrooms-newbuild.vercel.app/catalogue/${slug}`,
       ...(category.image ? { images: [{ url: category.image, alt: category.name }] } : {}),
     },
   };
@@ -52,7 +52,7 @@ export default async function CategoryPage({ params }: Props) {
   ]);
   if (!category) notFound();
 
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

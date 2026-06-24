@@ -8,7 +8,7 @@ import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
 import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.swiftrooms.ae"),
+  metadataBase: new URL("https://swiftrooms-newbuild.vercel.app"),
   title: {
     default: "Swiftrooms — Performance Windows & Doors, UAE",
     template: "%s | Swiftrooms",
@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
-    url: "https://www.swiftrooms.ae",
+    url: "https://swiftrooms-newbuild.vercel.app",
     images: [
       {
-        url: "https://www.swiftrooms.ae/brand/hero-villa-dubai.png",
+        url: "https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png",
         width: 1200,
         height: 630,
         alt: "Swiftrooms — Premium Glazing Systems, UAE",
@@ -48,11 +48,11 @@ export const metadata: Metadata = {
     title: "Swiftrooms — Performance Windows & Doors, UAE",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects.",
-    images: ["https://www.swiftrooms.ae/brand/hero-villa-dubai.png"],
+    images: ["https://swiftrooms-newbuild.vercel.app/brand/hero-villa-dubai.png"],
   },
 };
 
-const BASE = "https://www.swiftrooms.ae";
+const BASE = "https://swiftrooms-newbuild.vercel.app";
 
 const localBusinessSchema = {
   "@context": "https://schema.org",

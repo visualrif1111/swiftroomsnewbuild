@@ -23,11 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${project.name} — ${project.type} UAE Glazing Project`,
     description: project.description,
-    alternates: { canonical: `https://www.swiftrooms.ae/portfolio/${project.slug}` },
+    alternates: { canonical: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
     openGraph: {
       title: `${project.name} | Swiftrooms Portfolio`,
       description: project.description,
-      url: `https://www.swiftrooms.ae/portfolio/${project.slug}`,
+      url: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}`,
       images: ogImage ? [{ url: ogImage, alt: project.name }] : [],
     },
   };
@@ -58,9 +58,9 @@ export default async function ProjectPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.swiftrooms.ae" },
-      { "@type": "ListItem", position: 2, name: "Portfolio", item: "https://www.swiftrooms.ae/portfolio" },
-      { "@type": "ListItem", position: 3, name: project.name, item: `https://www.swiftrooms.ae/portfolio/${project.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://swiftrooms-newbuild.vercel.app" },
+      { "@type": "ListItem", position: 2, name: "Portfolio", item: "https://swiftrooms-newbuild.vercel.app/portfolio" },
+      { "@type": "ListItem", position: 3, name: project.name, item: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}` },
     ],
   };
 
@@ -69,9 +69,9 @@ export default async function ProjectPage({ params }: Props) {
     "@type": "CreativeWork",
     name: project.name,
     description: project.description,
-    url: `https://www.swiftrooms.ae/portfolio/${project.slug}`,
+    url: `https://swiftrooms-newbuild.vercel.app/portfolio/${project.slug}`,
     image: heroImage ?? undefined,
-    creator: { "@type": "Organization", name: "Swiftrooms", url: "https://www.swiftrooms.ae" },
+    creator: { "@type": "Organization", name: "Swiftrooms", url: "https://swiftrooms-newbuild.vercel.app" },
     locationCreated: { "@type": "Place", name: project.location },
     dateCreated: project.year,
     about: project.products.map((p) => ({ "@type": "Product", name: p })),

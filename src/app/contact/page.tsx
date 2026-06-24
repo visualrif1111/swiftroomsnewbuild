@@ -8,17 +8,17 @@ export const metadata: Metadata = {
   title: "Contact Swiftrooms — Dubai Showroom & Glazing Enquiries",
   description:
     "Contact Swiftrooms UAE — call, email or visit our Jebel Ali showroom to discuss your windows and doors project.",
-  alternates: { canonical: "https://www.swiftrooms.ae/contact" },
+  alternates: { canonical: "https://swiftrooms-newbuild.vercel.app/contact" },
   openGraph: {
     title: "Contact Swiftrooms | UAE",
     description:
       "Contact Swiftrooms in Dubai — call, email or visit our Jebel Ali showroom. Sunday–Thursday 8:30–17:30, Saturday 10:00–14:00.",
-    url: "https://www.swiftrooms.ae/contact",
+    url: "https://swiftrooms-newbuild.vercel.app/contact",
   },
 };
 
 export default function ContactPage() {
-  const base = "https://www.swiftrooms.ae";
+  const base = "https://swiftrooms-newbuild.vercel.app";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
