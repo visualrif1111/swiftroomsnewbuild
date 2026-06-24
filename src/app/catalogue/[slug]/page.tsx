@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCategory, getCategorySlugs } from "@/lib/catalogue";
+import { getCategory, getCategories, getCategorySlugs } from "@/lib/catalogue";
+import { getArticles } from "@/lib/blog";
 import CategoryClient from "./CategoryClient";
 
 interface Props {
@@ -44,7 +45,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = await getCategory(slug);
+  const [category, allCategories, blogPosts] = await Promise.all([
+    getCategory(slug),
+    getCategories(),
+    getArticles(),
+  ]);
   if (!category) notFound();
 
   const base = "https://www.swiftrooms.ae";
@@ -91,7 +96,7 @@ export default async function CategoryPage({ params }: Props) {
       {faqSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
-      <CategoryClient category={category} />
+      <CategoryClient category={category} allCategories={allCategories} blogPosts={blogPosts} />
     </>
   );
 }

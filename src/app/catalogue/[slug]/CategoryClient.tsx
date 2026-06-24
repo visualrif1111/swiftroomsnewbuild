@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { productCategories, blogPosts } from "@/lib/data";
+import type { ProductCategory, BlogPost } from "@/lib/data";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import WorksWellWith from "@/components/WorksWellWith";
 
-type Category = (typeof productCategories)[0];
+type Category = ProductCategory;
 type Product = Category["products"][0];
 
 function ProductCard({ product, index, categoryImage }: { product: Product; index: number; categoryImage?: string }) {
@@ -317,7 +317,15 @@ function CategoryFAQ({ category }: { category: Category }) {
   );
 }
 
-export default function CategoryClient({ category }: { category: Category }) {
+export default function CategoryClient({
+  category,
+  allCategories,
+  blogPosts,
+}: {
+  category: Category;
+  allCategories: ProductCategory[];
+  blogPosts: BlogPost[];
+}) {
   return (
     <>
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
@@ -356,7 +364,7 @@ export default function CategoryClient({ category }: { category: Category }) {
 
       <CompareTable category={category} />
 
-      <WorksWellWith categorySlug={category.slug} />
+      <WorksWellWith categorySlug={category.slug} categories={allCategories} />
 
       <CategoryFAQ category={category} />
 
@@ -408,7 +416,7 @@ export default function CategoryClient({ category }: { category: Category }) {
             <p className="text-label text-[#007969] mb-6 md:mb-8">Other Product Ranges</p>
           </ScrollReveal>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 md:flex-wrap md:overflow-x-visible md:pb-0">
-            {productCategories
+            {allCategories
               .filter((c) => c.id !== category.id)
               .map((cat) => (
                 <Link

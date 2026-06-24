@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
-import { productCategories } from "@/lib/data";
+import type { ProductCategory } from "@/lib/data";
 
 // "Which System Is Right For You?" — guided selector. Users self-qualify in a
 // few taps and receive a recommended Swiftrooms system + conversion CTAs.
@@ -72,15 +72,15 @@ function recommend(a: Answers): string {
   return "cor-vision-4600";
 }
 
-function findProduct(slug: string) {
-  for (const cat of productCategories) {
+function findProduct(slug: string, categories: ProductCategory[]) {
+  for (const cat of categories) {
     const p = cat.products.find((x) => x.slug === slug);
     if (p) return { product: p, categorySlug: cat.slug };
   }
   return null;
 }
 
-export default function ProductSelector() {
+export default function ProductSelector({ categories }: { categories: ProductCategory[] }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const done = step >= questions.length;
@@ -94,7 +94,7 @@ export default function ProductSelector() {
     setStep(0);
   };
 
-  const result = done ? findProduct(recommend(answers)) : null;
+  const result = done ? findProduct(recommend(answers), categories) : null;
 
   return (
     <div className="bg-[#f8f9fa] border border-gray-100">

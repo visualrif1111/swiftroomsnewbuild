@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { productCategories } from "@/lib/data";
+import type { ProductCategory } from "@/lib/data";
 
 // "Works Well With" — ecosystem cross-sell. Maps each category to the
 // complementary Swiftrooms systems that are commonly specified alongside it,
@@ -17,10 +17,16 @@ const complementaryMap: Record<string, string[]> = {
   "skylights": ["garden-rooms", "curtain-wall"],
 };
 
-export default function WorksWellWith({ categorySlug }: { categorySlug: string }) {
+export default function WorksWellWith({
+  categorySlug,
+  categories,
+}: {
+  categorySlug: string;
+  categories: ProductCategory[];
+}) {
   const slugs = complementaryMap[categorySlug] ?? [];
   const items = slugs
-    .map((s) => productCategories.find((c) => c.slug === s))
+    .map((s) => categories.find((c) => c.slug === s))
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
   if (items.length === 0) return null;
 

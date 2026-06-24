@@ -158,7 +158,7 @@ export default async function CataloguePage() {
           {/* Guided selector */}
           <ScrollReveal>
             <div className="mt-16 md:mt-24">
-              <ProductSelector />
+              <ProductSelector categories={productCategories} />
             </div>
           </ScrollReveal>
 

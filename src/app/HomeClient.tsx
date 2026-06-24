@@ -625,7 +625,7 @@ export default function HomeClient({
       <section className="py-16 md:py-24">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
-            <ProductSelector />
+            <ProductSelector categories={productCategories} />
           </ScrollReveal>
         </div>
       </section>

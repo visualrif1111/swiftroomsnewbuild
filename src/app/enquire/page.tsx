@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import EnquireForm from "./EnquireForm";
-import { testimonials } from "@/lib/data";
+import { getCategories } from "@/lib/catalogue";
+import { getTestimonials } from "@/lib/about";
 
 export const metadata: Metadata = {
   title: "Get a Free Quote — Windows, Doors & Glazing UAE",
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EnquirePage() {
+export default async function EnquirePage() {
+  const [categories, testimonials] = await Promise.all([getCategories(), getTestimonials()]);
   const base = "https://www.swiftrooms.ae";
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -56,7 +58,7 @@ export default function EnquirePage() {
 
       <section className="py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
-          <EnquireForm />
+          <EnquireForm categories={categories} />
 
           {/* Side info */}
           <div>

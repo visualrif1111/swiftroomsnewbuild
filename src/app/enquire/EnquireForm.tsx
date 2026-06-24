@@ -2,9 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
-import { productCategories } from "@/lib/data";
+import type { ProductCategory } from "@/lib/data";
 
-export default function EnquireForm() {
+export default function EnquireForm({ categories }: { categories: ProductCategory[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
@@ -18,7 +18,7 @@ export default function EnquireForm() {
     const data = new FormData(form);
 
     const products: string[] = [];
-    productCategories.forEach((cat) => {
+    categories.forEach((cat) => {
       if (data.get(`product_${cat.id}`)) products.push(cat.name);
     });
 
@@ -147,7 +147,7 @@ export default function EnquireForm() {
             <div>
               <label className="text-[0.65rem] tracking-widest uppercase text-[#6b7280] block mb-3">Products of Interest</label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {productCategories.map((cat) => (
+                {categories.map((cat) => (
                   <label key={cat.id} className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"

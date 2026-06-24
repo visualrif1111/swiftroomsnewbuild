@@ -3,8 +3,8 @@ import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { blogPosts, faqs } from "@/lib/data";
 import { getArticles } from "@/lib/blog";
+import { getGeneralFaqs } from "@/lib/faqs";
 
 export const metadata: Metadata = {
   title: "Technical Hub — Glazing Guides, Process & FAQ for UAE Projects",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-const sections = [
+const buildSections = (articleCount: number, faqCount: number) => [
   {
     href: "/technical/process",
     label: "01",
@@ -39,7 +39,7 @@ const sections = [
       "Technical articles written by our specification team — covering system selection, UAE climate performance, thermal break technology, and how to compare European vs generic aluminium.",
     cta: "Read the blog",
     image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
-    stat: `${blogPosts.length} articles`,
+    stat: `${articleCount} articles`,
     statLabel: "Expert authored",
   },
   {
@@ -61,7 +61,7 @@ const sections = [
       "Answers to the questions we get asked most — covering pricing, timelines, installation, product selection, maintenance, guarantees and aftercare across 8 categories.",
     cta: "Read the FAQ",
     image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
-    stat: `${faqs.length} questions`,
+    stat: `${faqCount} questions`,
     statLabel: "8 categories",
   },
 ];
@@ -71,7 +71,9 @@ const MONTHS: Record<string, number> = {
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
 };
 export default async function TechnicalPage() {
-  const recentPosts = [...(await getArticles())]
+  const [articles, faqs] = await Promise.all([getArticles(), getGeneralFaqs()]);
+  const sections = buildSections(articles.length, faqs.length);
+  const recentPosts = [...articles]
     .sort((a, b) => {
       const [aM, aY] = a.date.split(" ");
       const [bM, bY] = b.date.split(" ");
