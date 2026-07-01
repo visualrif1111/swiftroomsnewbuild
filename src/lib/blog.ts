@@ -7,6 +7,7 @@
 //
 // Sanity posts are normalised into the existing `BlogPost` shape so all the
 // rendering code works unchanged.
+import { stegaClean } from "next-sanity";
 import { blogPosts, type BlogPost } from "@/lib/data";
 
 // Article = the normalised BlogPost, plus the raw Portable Text body for
@@ -78,17 +79,25 @@ async function normalize(p: RawSanityPost): Promise<Article> {
       image = "";
     }
   }
+  // In Draft Mode, Sanity strings arrive stega-encoded (invisible characters
+  // that power click-to-edit overlays). Strip it from any value used for
+  // routing, keys, sorting or matching so links and logic never break; keep it
+  // on the *displayed* rich text (title, excerpt, Portable Text body) so those
+  // fields remain clickable in Visual Editing.
   return {
-    slug: p.slug,
-    date: formatDate(p.publishedAt),
-    category: p.category ?? "Insight",
+    slug: stegaClean(p.slug),
+    date: formatDate(stegaClean(p.publishedAt)),
+    category: stegaClean(p.category) ?? "Insight",
     title: p.title,
     excerpt: p.excerpt ?? "",
-    readTime: p.readTime ?? "",
+    readTime: stegaClean(p.readTime) ?? "",
     image,
     body: portableTextToSections(p.body),
     portableText: Array.isArray(p.body) ? p.body : undefined,
-    relatedProducts: p.relatedProducts,
+    relatedProducts: p.relatedProducts?.map((rp) => ({
+      name: rp.name,
+      href: stegaClean(rp.href),
+    })),
   };
 }
 

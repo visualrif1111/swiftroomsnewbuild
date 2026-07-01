@@ -1,5 +1,7 @@
 import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
+import { VisualEditing } from "next-sanity/visual-editing";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +9,7 @@ import LenisProvider from "@/components/layout/LenisProvider";
 import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
 import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
+import { SanityLive } from "@/sanity/lib/live";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -120,7 +123,11 @@ const webSiteSchema = {
   publisher: { "@id": `${BASE}/#business` },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Reading isEnabled keeps every route STATIC/ISR for normal visitors and only
+  // switches to dynamic rendering when the Draft Mode cookie is present, so
+  // Visual Editing + live updates load exclusively inside Presentation/preview.
+  const { isEnabled: isDraft } = await draftMode();
   return (
     <html lang="en">
       <head>
@@ -147,6 +154,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <WhatsAppFloat />
           </LenisProvider>
         </CTAFormProvider>
+        {/* Visual Editing overlays + live preview — only mounted in Draft Mode
+            (inside the Presentation tool). No effect on the published site. */}
+        {isDraft && (
+          <>
+            <VisualEditing />
+            <SanityLive />
+          </>
+        )}
       </body>
     </html>
   );
