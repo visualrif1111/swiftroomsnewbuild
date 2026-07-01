@@ -6,7 +6,8 @@
 // ProductCategory/Product shape the pages already use, preserving the curated
 // order from data.ts, and falls back to data.ts if Sanity is unavailable.
 import { cache } from "react";
-import { groq } from "next-sanity";
+import { groq, stegaClean } from "next-sanity";
+import { draftMode } from "next/headers";
 import { productCategories as dataCategories, type ProductCategory, type Product } from "@/lib/data";
 
 const sanityConfigured = () => Boolean(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
@@ -47,17 +48,50 @@ function toProduct(p: RawProd, categorySlug: string): Product {
   };
 }
 
-async function sanityCategories(): Promise<ProductCategory[]> {
+async function isDraft(): Promise<boolean> {
+  try {
+    return (await draftMode()).isEnabled;
+  } catch {
+    return false;
+  }
+}
+
+// Fetch + reconstruct nested categories. `draft` selects the source: sanityFetch
+// (drafts + stega click-to-edit overlays) in Draft Mode, else the CDN + 60s ISR
+// client. Slugs / image URLs are stega-stripped before reconstruction because
+// they drive matching, ordering, keys and hrefs; displayed prose keeps stega.
+async function fetchCategories(draft: boolean): Promise<ProductCategory[]> {
   if (!sanityConfigured()) return [];
   try {
-    const { client } = await import("@/sanity/lib/client");
-    const opt = { next: { revalidate: 60 } } as const;
-    const [cats, prods, faqs] = await Promise.all([
-      client.fetch<RawCat[]>(CATS_QUERY, {}, opt),
-      client.fetch<RawProd[]>(PRODS_QUERY, {}, opt),
-      client.fetch<RawFaq[]>(FAQS_QUERY, {}, opt),
-    ]);
+    let cats: RawCat[];
+    let prods: RawProd[];
+    let faqs: RawFaq[];
+    if (draft) {
+      const { sanityFetch } = await import("@/sanity/lib/live");
+      [cats, prods, faqs] = await Promise.all([
+        sanityFetch({ query: CATS_QUERY }).then((r) => (r.data as RawCat[]) ?? []),
+        sanityFetch({ query: PRODS_QUERY }).then((r) => (r.data as RawProd[]) ?? []),
+        sanityFetch({ query: FAQS_QUERY }).then((r) => (r.data as RawFaq[]) ?? []),
+      ]);
+    } else {
+      const { client } = await import("@/sanity/lib/client");
+      const opt = { next: { revalidate: 60 } } as const;
+      [cats, prods, faqs] = await Promise.all([
+        client.fetch<RawCat[]>(CATS_QUERY, {}, opt),
+        client.fetch<RawProd[]>(PRODS_QUERY, {}, opt),
+        client.fetch<RawFaq[]>(FAQS_QUERY, {}, opt),
+      ]);
+    }
     if (!cats?.length) return [];
+
+    cats = cats.map((c) => ({ ...c, slug: stegaClean(c.slug), image: c.image ? stegaClean(c.image) : c.image }));
+    prods = prods.map((p) => ({
+      ...p,
+      slug: stegaClean(p.slug),
+      categorySlug: p.categorySlug ? stegaClean(p.categorySlug) : p.categorySlug,
+      image: p.image ? stegaClean(p.image) : p.image,
+    }));
+    faqs = faqs.map((f) => ({ ...f, catSlug: f.catSlug ? stegaClean(f.catSlug) : f.catSlug }));
 
     const result: ProductCategory[] = cats.map((c) => {
       const products = prods
@@ -83,16 +117,22 @@ async function sanityCategories(): Promise<ProductCategory[]> {
   }
 }
 
-/** All categories (with nested products + faqs) — Sanity first, else data.ts. */
+function mergeWithData(sanity: ProductCategory[]): ProductCategory[] {
+  if (!sanity.length) return dataCategories;
+  const slugs = new Set(sanity.map((c) => c.slug));
+  const merged = [...sanity, ...dataCategories.filter((c) => !slugs.has(c.slug))];
+  return merged.sort((a, b) => (catOrder.get(a.slug) ?? 999) - (catOrder.get(b.slug) ?? 999));
+}
+
+/** All categories (with nested products + faqs) — Sanity first (draft-aware), else data.ts. */
 export const getCategories = cache(async (): Promise<ProductCategory[]> => {
-  const sanity = await sanityCategories();
-  if (sanity.length) {
-    const slugs = new Set(sanity.map((c) => c.slug));
-    const merged = [...sanity, ...dataCategories.filter((c) => !slugs.has(c.slug))];
-    return merged.sort((a, b) => (catOrder.get(a.slug) ?? 999) - (catOrder.get(b.slug) ?? 999));
-  }
-  return dataCategories;
+  return mergeWithData(await fetchCategories(await isDraft()));
 });
+
+// Non-draft merged categories — safe for generateStaticParams (never touches draftMode).
+async function publishedMerged(): Promise<ProductCategory[]> {
+  return mergeWithData(await fetchCategories(false));
+}
 
 export async function getCategory(slug: string): Promise<ProductCategory | null> {
   return (await getCategories()).find((c) => c.slug === slug) ?? null;
@@ -105,10 +145,10 @@ export async function getProduct(categorySlug: string, productSlug: string) {
 }
 
 export async function getCategorySlugs(): Promise<string[]> {
-  return (await getCategories()).map((c) => c.slug);
+  return (await publishedMerged()).map((c) => c.slug);
 }
 
 export async function getProductParams(): Promise<{ slug: string; product: string }[]> {
-  const cats = await getCategories();
+  const cats = await publishedMerged();
   return cats.flatMap((c) => c.products.map((p) => ({ slug: c.slug, product: p.slug })));
 }
