@@ -250,7 +250,7 @@ export default function HomeClient({
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-label text-[#4dd9c0] mb-5 tracking-[0.2em]"
           >
-            Dubai · Abu Dhabi · UAE — Built for the UAE Climate
+            {settings.hero.eyebrow}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
@@ -342,8 +342,8 @@ export default function HomeClient({
               <div className="flex justify-center mb-5">
                 <div className="divider-brand" />
               </div>
-              <p className="text-label text-[#007969] mb-3">From common problems to premium solutions</p>
-              <h2 className="text-headline text-[#1c1c1e]">The Swiftrooms Solution</h2>
+              <p className="text-label text-[#007969] mb-3">{settings.sections.solutionEyebrow}</p>
+              <h2 className="text-headline text-[#1c1c1e]">{settings.sections.solutionHeading}</h2>
             </div>
           </ScrollReveal>
 
@@ -407,15 +407,12 @@ export default function HomeClient({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
               <div>
                 <div className="divider-brand mb-6" />
-                <p className="text-label text-[#007969] mb-4">Transform Your Space</p>
-                <h2 className="text-headline text-[#1c1c1e] mb-6">
-                  Transform unused space
-                  <br />into living space.
+                <p className="text-label text-[#007969] mb-4">{settings.sections.transformEyebrow}</p>
+                <h2 className="text-headline text-[#1c1c1e] mb-6 whitespace-pre-line">
+                  {settings.sections.transformHeading}
                 </h2>
                 <p className="text-body-lg text-[#6b7280] mb-8">
-                  From panoramic sliding doors connecting living rooms to pools, to glass garden rooms
-                  transforming unused plots — Swiftrooms turns architectural ambition into reality
-                  across every UAE climate zone.
+                  {settings.sections.transformBody}
                 </p>
                 <div className="space-y-4 mb-10">
                   {[
@@ -466,8 +463,8 @@ export default function HomeClient({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-14">
               <div>
                 <div className="divider-brand mb-5" />
-                <p className="text-label text-[#007969] mb-3">Our Premium Products</p>
-                <h2 className="text-headline text-[#1c1c1e]">The complete<br />product range</h2>
+                <p className="text-label text-[#007969] mb-3">{settings.sections.productsEyebrow}</p>
+                <h2 className="text-headline text-[#1c1c1e] whitespace-pre-line">{settings.sections.productsHeading}</h2>
               </div>
               <Link href="/catalogue" className="btn-outline self-start md:self-auto">
                 View All Products →
@@ -574,7 +571,7 @@ export default function HomeClient({
           <ScrollReveal>
             <div className="text-center mb-8 md:mb-12">
               <div className="flex justify-center mb-5"><div className="divider-brand" /></div>
-              <p className="text-label text-[#007969] mb-2">Brands We Work With</p>
+              <p className="text-label text-[#007969] mb-2">{settings.sections.brandsEyebrow}</p>
             </div>
           </ScrollReveal>
 
@@ -637,8 +634,8 @@ export default function HomeClient({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-14">
               <div>
                 <div className="divider-brand mb-5" />
-                <p className="text-label text-[#007969] mb-3">Selected Work</p>
-                <h2 className="text-headline text-[#1c1c1e]">Portfolio<br />across the UAE</h2>
+                <p className="text-label text-[#007969] mb-3">{settings.sections.portfolioEyebrow}</p>
+                <h2 className="text-headline text-[#1c1c1e] whitespace-pre-line">{settings.sections.portfolioHeading}</h2>
               </div>
               <Link href="/portfolio" className="btn-outline self-start md:self-auto">All Projects →</Link>
             </div>
@@ -737,8 +734,8 @@ export default function HomeClient({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 md:mb-12">
               <div>
                 <div className="divider-brand mb-5" />
-                <p className="text-label text-[#007969] mb-3">Start Your Swiftrooms Journey</p>
-                <h2 className="text-title text-[#1c1c1e]">From first call to<br />completed project</h2>
+                <p className="text-label text-[#007969] mb-3">{settings.sections.processEyebrow}</p>
+                <h2 className="text-title text-[#1c1c1e] whitespace-pre-line">{settings.sections.processHeading}</h2>
               </div>
               <Link href="/technical/process" className="text-label text-[#007969] hover:underline self-start">
                 Full process detail →
@@ -818,8 +815,8 @@ export default function HomeClient({
           <ScrollReveal>
             <div className="flex items-end justify-between mb-10 md:mb-14">
               <div>
-                <p className="text-label text-[#007969] mb-3">Technical Insights</p>
-                <h2 className="text-title text-[#1c1c1e]">From the Swiftrooms blog.</h2>
+                <p className="text-label text-[#007969] mb-3">{settings.sections.blogEyebrow}</p>
+                <h2 className="text-title text-[#1c1c1e]">{settings.sections.blogHeading}</h2>
               </div>
               <Link
                 href="/technical/blog"
@@ -881,8 +878,8 @@ export default function HomeClient({
           <ScrollReveal>
             <div className="flex items-end justify-between mb-10 md:mb-14">
               <div>
-                <p className="text-label text-[#007969] mb-3">Client Feedback</p>
-                <h2 className="text-title text-[#1c1c1e]">What clients say.</h2>
+                <p className="text-label text-[#007969] mb-3">{settings.sections.testimonialsEyebrow}</p>
+                <h2 className="text-title text-[#1c1c1e]">{settings.sections.testimonialsHeading}</h2>
               </div>
               <Link
                 href="/portfolio"
@@ -932,8 +929,7 @@ export default function HomeClient({
             </div>
             <h2 className="text-headline text-white mb-5 max-w-2xl mx-auto">{settings.cta.heading}</h2>
             <p className="text-white/50 text-body-lg max-w-lg mx-auto mb-10">
-              Experience our full product range at full scale. Free consultation, no obligation.
-              Jebel Ali, Dubai — open Sunday to Thursday.
+              {settings.cta.body}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <QuoteButton className="btn-brand">{settings.cta.primaryLabel}</QuoteButton>

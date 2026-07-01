@@ -14,6 +14,11 @@ import { defineDocuments, defineLocations } from "sanity/presentation";
 // URL -> document (used when clicking around the live preview iframe)
 export const mainDocuments = defineDocuments([
   {
+    // Homepage singleton lives at the site root.
+    route: "/",
+    filter: `_type == "homepage"`,
+  },
+  {
     route: "/technical/blog/:slug",
     filter: `_type == "post" && slug.current == $slug`,
   },
