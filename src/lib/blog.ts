@@ -112,6 +112,20 @@ async function sanityList(): Promise<BlogPost[]> {
   }
 }
 
+// Slugs only — deliberately does NOT go through the draft-aware `getPosts`, so it
+// is safe to call from `generateStaticParams` and `sitemap`, where the dynamic
+// `draftMode()` API is unavailable. Uses the plain published client.
+async function sanitySlugList(): Promise<string[]> {
+  if (!sanityConfigured()) return [];
+  try {
+    const { getPostSlugs } = await import("@/sanity/lib/posts");
+    const rows = await getPostSlugs();
+    return rows.map((r) => r.slug).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 /** All articles — Sanity merged over data.ts (Sanity wins on slug), newest first. */
 export async function getArticles(): Promise<BlogPost[]> {
   const sanity = await sanityList();
@@ -122,8 +136,8 @@ export async function getArticles(): Promise<BlogPost[]> {
 
 /** Union of Sanity + data.ts slugs, for generateStaticParams. */
 export async function getArticleSlugs(): Promise<string[]> {
-  const sanity = await sanityList();
-  return [...new Set([...sanity.map((p) => p.slug), ...blogPosts.map((p) => p.slug)])];
+  const sanity = await sanitySlugList();
+  return [...new Set([...sanity, ...blogPosts.map((p) => p.slug)])];
 }
 
 /** Single article by slug — Sanity first, then data.ts. */

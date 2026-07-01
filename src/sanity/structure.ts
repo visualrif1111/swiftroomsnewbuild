@@ -10,6 +10,7 @@ export const structure: StructureResolver = (S) =>
     .items([
       // ── Content ─────────────────────────────────────────────
       S.listItem()
+        .id("content")
         .title("Content")
         .child(
           S.list()
@@ -27,6 +28,7 @@ export const structure: StructureResolver = (S) =>
 
       // ── Support ─────────────────────────────────────────────
       S.listItem()
+        .id("support")
         .title("Support")
         .child(
           S.list()
@@ -39,6 +41,7 @@ export const structure: StructureResolver = (S) =>
 
       // ── About / Company ─────────────────────────────────────
       S.listItem()
+        .id("aboutCompany")
         .title("About & Company")
         .child(
           S.list()
