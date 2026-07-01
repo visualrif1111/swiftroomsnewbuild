@@ -9,7 +9,9 @@ export const siteSettingsType = defineType({
   groups: [
     { name: "company", title: "Company & Contact", default: true },
     { name: "showroom", title: "Showroom" },
+    { name: "header", title: "Navigation" },
     { name: "nav", title: "Footer & Social" },
+    { name: "footer", title: "Footer content" },
     { name: "cta", title: "CTA" },
   ],
   fields: [
@@ -115,6 +117,81 @@ export const siteSettingsType = defineType({
           ],
           preview: { select: { title: "heading" } },
         }),
+      ],
+    }),
+    defineField({
+      name: "navigation",
+      title: "Header navigation",
+      type: "object",
+      group: "header",
+      description: "Header menu labels & links. Leave blank to keep the current defaults.",
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({ name: "catalogueBlurb", title: "Catalogue menu — blurb", type: "text", rows: 2 }),
+        defineField({
+          name: "catalogue",
+          title: "Catalogue menu — links",
+          type: "array",
+          of: [
+            defineField({
+              name: "navLink",
+              type: "object",
+              fields: [
+                defineField({ name: "label", title: "Label", type: "string" }),
+                defineField({ name: "href", title: "Link", type: "string" }),
+              ],
+              preview: { select: { title: "label", subtitle: "href" } },
+            }),
+          ],
+        }),
+        defineField({ name: "technicalBlurb", title: "Technical menu — blurb", type: "text", rows: 2 }),
+        defineField({
+          name: "technical",
+          title: "Technical menu — links",
+          type: "array",
+          of: [
+            defineField({
+              name: "navLink",
+              type: "object",
+              fields: [
+                defineField({ name: "label", title: "Label", type: "string" }),
+                defineField({ name: "href", title: "Link", type: "string" }),
+              ],
+              preview: { select: { title: "label", subtitle: "href" } },
+            }),
+          ],
+        }),
+        defineField({
+          name: "mobile",
+          title: "Mobile menu — links",
+          type: "array",
+          of: [
+            defineField({
+              name: "navLink",
+              type: "object",
+              fields: [
+                defineField({ name: "label", title: "Label", type: "string" }),
+                defineField({ name: "href", title: "Link", type: "string" }),
+              ],
+              preview: { select: { title: "label", subtitle: "href" } },
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: "footer",
+      title: "Footer content",
+      type: "object",
+      group: "footer",
+      description: "Editable footer text. Leave blank to keep the current defaults.",
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({ name: "brandBlurb", title: "Brand blurb", type: "text", rows: 3 }),
+        defineField({ name: "ctaHeading", title: "CTA strip — heading", type: "string" }),
+        defineField({ name: "ctaSubtext", title: "CTA strip — subtext", type: "string" }),
+        defineField({ name: "brandPartners", title: "Brand partners", type: "array", of: [{ type: "string" }] }),
+        defineField({ name: "bottomTagline", title: "Bottom bar tagline", type: "string" }),
       ],
     }),
     defineField({

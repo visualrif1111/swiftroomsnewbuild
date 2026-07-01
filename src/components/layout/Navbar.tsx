@@ -37,7 +37,25 @@ const mobileNavItems = [
   { label: "Technical", href: "/technical" },
 ];
 
-export default function Navbar() {
+type NavLink = { label: string; href: string };
+type NavData = {
+  catalogue?: NavLink[];
+  technical?: NavLink[];
+  mobile?: NavLink[];
+  catalogueBlurb?: string;
+  technicalBlurb?: string;
+};
+
+export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?: string } = {}) {
+  // Sanity-driven menus with the hardcoded arrays as defaults, so the header is
+  // byte-identical when Site Settings is blank.
+  const catalogue = nav?.catalogue?.length ? nav.catalogue : catalogueItems;
+  const technical = nav?.technical?.length ? nav.technical : technicalItems;
+  const mobile = nav?.mobile?.length ? nav.mobile : mobileNavItems;
+  const catalogueBlurb =
+    nav?.catalogueBlurb || "Premium aluminium, uPVC and glazing systems from Europe's leading manufacturers.";
+  const technicalBlurb = nav?.technicalBlurb || "Resources, guides and expertise from first enquiry to aftercare.";
+  const quoteCta = quoteLabel || "Get a Quote";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaMenu, setMegaMenu] = useState<"catalogue" | "technical" | null>(null);
@@ -183,7 +201,7 @@ export default function Navbar() {
                   : "btn-brand"
               }`}
             >
-              Get a Quote
+              {quoteCta}
             </QuoteButton>
           </div>
 
@@ -231,7 +249,7 @@ export default function Navbar() {
                   <div className="divider-brand mb-4" />
                   <p className="text-label text-[#007969] mb-3">Product Range</p>
                   <p className="text-[#6b7280] text-sm leading-relaxed">
-                    Premium aluminium, uPVC and glazing systems from Europe&apos;s leading manufacturers.
+                    {catalogueBlurb}
                   </p>
                   <Link
                     href="/catalogue"
@@ -242,7 +260,7 @@ export default function Navbar() {
                   </Link>
                 </div>
                 <div className="col-span-3 grid grid-cols-3 gap-1">
-                  {catalogueItems.map((item) => (
+                  {catalogue.map((item) => (
                     <Link
                       key={item.href + item.label}
                       href={item.href}
@@ -275,11 +293,11 @@ export default function Navbar() {
                   <div className="divider-brand mb-4" />
                   <p className="text-label text-[#007969] mb-3">Technical Hub</p>
                   <p className="text-[#6b7280] text-sm leading-relaxed">
-                    Resources, guides and expertise from first enquiry to aftercare.
+                    {technicalBlurb}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  {technicalItems.map((item) => (
+                  {technical.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
@@ -333,7 +351,7 @@ export default function Navbar() {
 
             {/* Nav links — vertically centred */}
             <nav className="flex-1 flex flex-col justify-center px-6" aria-label="Mobile navigation">
-              {mobileNavItems.map((item, i) => {
+              {mobile.map((item, i) => {
                 const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                 return (
                   <motion.div

@@ -10,6 +10,7 @@ import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
 import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
 import { SanityLive } from "@/sanity/lib/live";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -128,6 +129,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // switches to dynamic rendering when the Draft Mode cookie is present, so
   // Visual Editing + live updates load exclusively inside Presentation/preview.
   const { isEnabled: isDraft } = await draftMode();
+  const settings = await getSiteSettings();
   return (
     <html lang="en">
       <head>
@@ -147,7 +149,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         <CTAFormProvider>
           <LenisProvider>
-            <Navbar />
+            <Navbar nav={settings.navigation} quoteLabel={settings.cta.quoteLabel} />
             <main>{children}</main>
             <Footer />
             <StickyMobileCTA />
