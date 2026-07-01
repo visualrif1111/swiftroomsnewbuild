@@ -16,6 +16,7 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Content")
             .items([
+              S.documentTypeListItem("page").title("Pages (Builder)"),
               S.documentTypeListItem("post").title("Blog Posts"),
               S.documentTypeListItem("project").title("Portfolio Projects"),
               S.documentTypeListItem("productCategory").title("Product Categories"),

@@ -18,6 +18,11 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "post" && slug.current == $slug`,
   },
   {
+    // Page-builder pages live at arbitrary paths (catch-all route).
+    route: "/:slug",
+    filter: `_type == "page" && slug.current == $slug`,
+  },
+  {
     route: "/portfolio/:slug",
     filter: `_type == "project" && slug.current == $slug`,
   },
@@ -33,6 +38,15 @@ export const mainDocuments = defineDocuments([
 
 // document -> URL(s) (used from the document pane "open preview" affordance)
 export const locations = {
+  page: defineLocations({
+    select: { title: "title", slug: "slug.current" },
+    resolve: (doc) => ({
+      locations: doc?.slug
+        ? [{ title: doc?.title || "Page", href: `/${doc.slug}` }]
+        : [],
+    }),
+  }),
+
   post: defineLocations({
     select: { title: "title", slug: "slug.current" },
     resolve: (doc) => ({
