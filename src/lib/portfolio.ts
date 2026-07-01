@@ -5,7 +5,8 @@
 //   (the net-new ones not migrated) are kept.
 // - If Sanity isn't configured or a fetch fails, everything falls back to
 //   data.ts so the build/site never breaks.
-import { groq } from "next-sanity";
+import { groq, stegaClean } from "next-sanity";
+import { draftMode } from "next/headers";
 import { portfolioProjects as dataProjects, portfolioMedia, type PortfolioProject } from "@/lib/data";
 
 export type PortfolioItem = {
@@ -108,28 +109,33 @@ type RawSanityProject = {
 };
 
 function fromSanity(p: RawSanityProject): PortfolioItem {
+  // In Draft Mode, Sanity strings arrive stega-encoded. Strip it from anything
+  // used for routing, keys, filtering (tags), image/video URLs and hrefs so the
+  // page never breaks in preview; keep it on displayed prose (name, description,
+  // brief/challenge/solution/outcome, location, type, area, year) so those stay
+  // click-to-editable in Presentation.
   return {
     id: p.id,
     name: p.title,
-    slug: p.slug,
+    slug: stegaClean(p.slug),
     location: p.location ?? "",
     area: p.area ?? "",
     year: p.year ?? "",
     type: p.projectType ?? "",
     description: p.description ?? "",
-    products: p.productsUsed ?? [],
+    products: (p.productsUsed ?? []).map((x) => stegaClean(x)),
     productLinks: (p.productRefs ?? [])
       .filter((r): r is { name: string; slug: string; categorySlug: string } => Boolean(r?.name && r?.slug && r?.categorySlug))
-      .map((r) => ({ name: r.name, href: `/catalogue/${r.categorySlug}/${r.slug}` })),
-    tags: p.tags ?? [],
+      .map((r) => ({ name: r.name, href: stegaClean(`/catalogue/${r.categorySlug}/${r.slug}`) })),
+    tags: (p.tags ?? []).map((x) => stegaClean(x)),
     brief: p.brief,
     challenge: p.challenge,
     solution: p.solution,
     outcome: p.outcome,
-    image: p.image ?? undefined,
-    gallery: (p.gallery ?? []).filter((x): x is string => Boolean(x)),
-    video: p.video ?? undefined,
-    videoPoster: p.videoPoster ?? undefined,
+    image: p.image ? stegaClean(p.image) : undefined,
+    gallery: (p.gallery ?? []).filter((x): x is string => Boolean(x)).map((x) => stegaClean(x)),
+    video: p.video ? stegaClean(p.video) : undefined,
+    videoPoster: p.videoPoster ? stegaClean(p.videoPoster) : undefined,
   };
 }
 
@@ -145,13 +151,41 @@ const PROJECT_FIELDS = `
 `;
 const PROJECTS_QUERY = groq`*[_type == "project" && defined(slug.current)]{${PROJECT_FIELDS}}`;
 const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{${PROJECT_FIELDS}}`;
+const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)]{ "slug": slug.current }`;
 
+async function isDraft(): Promise<boolean> {
+  try {
+    return (await draftMode()).isEnabled;
+  } catch {
+    return false;
+  }
+}
+
+// Draft-aware list: published visitors use CDN + 60s ISR; in Draft Mode we route
+// through sanityFetch so project cards get drafts + stega click-to-edit overlays.
 async function sanityList(): Promise<PortfolioItem[]> {
   if (!sanityConfigured()) return [];
   try {
+    if (await isDraft()) {
+      const { sanityFetch } = await import("@/sanity/lib/live");
+      const { data } = await sanityFetch({ query: PROJECTS_QUERY });
+      return ((data as RawSanityProject[]) ?? []).map(fromSanity);
+    }
     const { client } = await import("@/sanity/lib/client");
     const rows: RawSanityProject[] = await client.fetch(PROJECTS_QUERY, {}, { next: { revalidate: 60 } });
     return rows.map(fromSanity);
+  } catch {
+    return [];
+  }
+}
+
+// Slugs only — never draft-aware, safe for generateStaticParams (plain client).
+async function sanitySlugList(): Promise<string[]> {
+  if (!sanityConfigured()) return [];
+  try {
+    const { client } = await import("@/sanity/lib/client");
+    const rows = await client.fetch<{ slug: string }[]>(PROJECT_SLUGS_QUERY, {}, { next: { revalidate: 60 } });
+    return rows.map((r) => r.slug).filter(Boolean);
   } catch {
     return [];
   }
@@ -166,16 +200,22 @@ export async function getPortfolioProjects(): Promise<PortfolioItem[]> {
 
 /** Union of Sanity + data.ts slugs, for generateStaticParams. */
 export async function getPortfolioSlugs(): Promise<string[]> {
-  const sanity = await sanityList();
-  return [...new Set([...sanity.map((p) => p.slug), ...dataProjects.map((p) => p.slug)])];
+  const sanity = await sanitySlugList();
+  return [...new Set([...sanity, ...dataProjects.map((p) => p.slug)])];
 }
 
-/** Single project by slug — Sanity first, then data.ts. */
+/** Single project by slug — Sanity first (draft-aware), then data.ts. */
 export async function getPortfolioProject(slug: string): Promise<PortfolioItem | null> {
   if (sanityConfigured()) {
     try {
-      const { client } = await import("@/sanity/lib/client");
-      const row: RawSanityProject | null = await client.fetch(PROJECT_QUERY, { slug }, { next: { revalidate: 60 } });
+      let row: RawSanityProject | null;
+      if (await isDraft()) {
+        const { sanityFetch } = await import("@/sanity/lib/live");
+        row = (await sanityFetch({ query: PROJECT_QUERY, params: { slug } })).data as RawSanityProject | null;
+      } else {
+        const { client } = await import("@/sanity/lib/client");
+        row = await client.fetch(PROJECT_QUERY, { slug }, { next: { revalidate: 60 } });
+      }
       if (row && row.slug) return fromSanity(row);
     } catch {
       // fall through to data.ts
