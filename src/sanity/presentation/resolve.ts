@@ -100,6 +100,39 @@ export const locations = {
         : { message: "Add a category and slug to preview this product." },
   }),
 
+  faq: defineLocations({
+    select: { question: "question" },
+    resolve: (doc) => ({
+      locations: [
+        { title: doc?.question || "FAQ", href: "/technical/faq" },
+      ],
+    }),
+  }),
+
+  resource: defineLocations({
+    select: { title: "title" },
+    resolve: (doc) => ({
+      locations: [{ title: doc?.title || "Resource", href: "/technical/resources" }],
+    }),
+  }),
+
+  testimonial: defineLocations({
+    select: { author: "author" },
+    resolve: (doc) => ({
+      locations: [
+        { title: doc?.author ? `${doc.author} (review)` : "Testimonial", href: "/reviews" },
+        { title: "Homepage", href: "/" },
+      ],
+    }),
+  }),
+
+  teamMember: defineLocations({
+    select: { name: "name" },
+    resolve: (doc) => ({
+      locations: [{ title: doc?.name || "Team member", href: "/about" }],
+    }),
+  }),
+
   homepage: defineLocations({
     select: { title: "title" },
     resolve: () => ({ locations: [{ title: "Homepage", href: "/" }] }),

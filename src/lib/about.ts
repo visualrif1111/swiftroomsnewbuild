@@ -4,7 +4,8 @@
 // scripts/migrate-misc-to-sanity.ts. If Sanity isn't configured or a fetch
 // fails, everything falls back to data.ts so the build/site never breaks.
 import { cache } from "react";
-import { groq } from "next-sanity";
+import { groq, stegaClean } from "next-sanity";
+import { draftMode } from "next/headers";
 import {
   testimonials as dataTestimonials,
   teamMembers as dataTeam,
@@ -31,13 +32,29 @@ const dataCertifications: Certification[] = [
   { name: "ISO 9001:2015", detail: "Quality management system" },
 ];
 
+async function isDraft(): Promise<boolean> {
+  try {
+    return (await draftMode()).isEnabled;
+  } catch {
+    return false;
+  }
+}
+
 // Shared Sanity-first reader: returns the projected rows when non-empty,
-// otherwise the data.ts fallback.
+// otherwise the data.ts fallback. Draft-aware — in Draft Mode / Presentation it
+// routes through sanityFetch so this content gets stega click-to-edit overlays;
+// published stays on CDN + 60s ISR.
 async function fromSanity<T>(query: string, fallback: T[]): Promise<T[]> {
   if (sanityConfigured()) {
     try {
-      const { client } = await import("@/sanity/lib/client");
-      const rows: T[] = await client.fetch(query, {}, { next: { revalidate: 60 } });
+      let rows: T[];
+      if (await isDraft()) {
+        const { sanityFetch } = await import("@/sanity/lib/live");
+        rows = ((await sanityFetch({ query })).data as T[]) ?? [];
+      } else {
+        const { client } = await import("@/sanity/lib/client");
+        rows = await client.fetch(query, {}, { next: { revalidate: 60 } });
+      }
       if (rows?.length) return rows;
     } catch {
       // fall through to data.ts
@@ -55,8 +72,16 @@ const CERTIFICATIONS_QUERY = groq`*[_type == "certification"]|order(order asc){ 
 export const getTestimonials = cache((): Promise<Testimonial[]> =>
   fromSanity(TESTIMONIALS_QUERY, dataTestimonials));
 
-export const getTeamMembers = cache((): Promise<TeamMember[]> =>
-  fromSanity(TEAM_QUERY, dataTeam));
+export const getTeamMembers = cache(async (): Promise<TeamMember[]> => {
+  const rows = await fromSanity<TeamMember>(TEAM_QUERY, dataTeam);
+  // `group` drives the team grouping and `image` is a URL — strip stega so both
+  // work in Draft Mode; names/roles/bios keep stega for click-to-edit.
+  return rows.map((m) => ({
+    ...m,
+    group: m.group ? stegaClean(m.group) : m.group,
+    image: m.image ? stegaClean(m.image) : m.image,
+  }));
+});
 
 export const getTimeline = cache((): Promise<TimelineEntry[]> =>
   fromSanity(TIMELINE_QUERY, dataTimeline));

@@ -1,10 +1,19 @@
 // Resources data layer: Sanity-first with a data.ts fallback.
 // Maps Sanity's category labels back to the data.ts keys the client groups by.
 import { cache } from "react";
-import { groq } from "next-sanity";
+import { groq, stegaClean } from "next-sanity";
+import { draftMode } from "next/headers";
 import { resources as dataResources, type Resource } from "@/lib/data";
 
 const sanityConfigured = () => Boolean(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
+
+async function isDraft(): Promise<boolean> {
+  try {
+    return (await draftMode()).isEnabled;
+  } catch {
+    return false;
+  }
+}
 
 const LABEL_TO_KEY: Record<string, string> = {
   "Guides & Knowledge": "guides",
@@ -22,15 +31,22 @@ const QUERY = groq`*[_type == "resource"]{ "id": _id, title, description, catego
 export const getResources = cache(async (): Promise<Resource[]> => {
   if (sanityConfigured()) {
     try {
-      const { client } = await import("@/sanity/lib/client");
-      const rows: Raw[] = await client.fetch(QUERY, {}, { next: { revalidate: 60 } });
+      let rows: Raw[];
+      if (await isDraft()) {
+        const { sanityFetch } = await import("@/sanity/lib/live");
+        rows = ((await sanityFetch({ query: QUERY })).data as Raw[]) ?? [];
+      } else {
+        const { client } = await import("@/sanity/lib/client");
+        rows = await client.fetch(QUERY, {}, { next: { revalidate: 60 } });
+      }
       if (rows?.length) {
         return rows
           .map((r): Resource => ({
             id: r.id,
             title: r.title,
             description: r.description ?? "",
-            category: (LABEL_TO_KEY[r.category ?? ""] ?? "guides") as Resource["category"],
+            // category drives filtering/grouping — strip stega before the key lookup.
+            category: (LABEL_TO_KEY[stegaClean(r.category ?? "")] ?? "guides") as Resource["category"],
             fileType: r.fileType ?? "",
             fileSize: r.fileSize ?? "",
           }))
