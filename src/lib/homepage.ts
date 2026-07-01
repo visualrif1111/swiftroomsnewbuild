@@ -37,6 +37,10 @@ export type HomeSettings = {
     testimonialsHeading: string;
   };
   cta: { heading: string; body: string; primaryLabel: string; secondaryLabel: string };
+  usps: { icon: string; text: string }[];
+  problems: { problem: string; solution: string }[];
+  transformFeatures: { title: string; desc: string }[];
+  brandCards: { name: string; country: string; tagline: string }[];
 };
 
 const DEFAULTS: HomeSettings = {
@@ -74,14 +78,42 @@ const DEFAULTS: HomeSettings = {
     primaryLabel: "Get a Free Quote",
     secondaryLabel: "Book Showroom Visit",
   },
+  usps: [
+    { icon: "🌍", text: "European quality systems from AED 800/sqm" },
+    { icon: "⏱", text: "Free quote & site visit within 24 hours" },
+    { icon: "☀️", text: "Heat & dust insulation for UAE climate" },
+    { icon: "🛡", text: "Professional installation with 10-year warranty" },
+  ],
+  problems: [
+    { problem: "Skyrocketing AC bills", solution: "Thermally broken aluminium profiles minimise heat transfer" },
+    { problem: "Excessive heat penetration", solution: "Advanced solar-control glazing reduces heat penetration" },
+    { problem: "Poor air tightness & noise", solution: "Multi-point locking and triple gasket systems enhance sealing" },
+    { problem: "Wasted outdoor space", solution: "Garden rooms & extensions transform space into living areas" },
+  ],
+  transformFeatures: [
+    { title: "Panoramic Slim Sliding Systems", desc: "Ultra-slim profiles. Seamless design. Maximum light." },
+    { title: "Garden Rooms & Extensions", desc: "Transform unused space into valuable living areas." },
+    { title: "Performance Windows & Doors", desc: "Engineered to perform. Built to outlast." },
+  ],
+  brandCards: [
+    { name: "Schüco", country: "Germany", tagline: "German engineering excellence" },
+    { name: "Deceuninck", country: "Belgium", tagline: "Belgian uPVC innovation" },
+    { name: "Gulf Extrusions", country: "UAE", tagline: "Built for the Gulf climate" },
+    { name: "Vetromax", country: "UAE", tagline: "Frameless & ultra-slim glazing" },
+    { name: "Cortizo", country: "Spain", tagline: "European precision systems" },
+  ],
 };
 
-const QUERY = groq`*[_id == "homepage"][0]{ hero, sections, cta }`;
+const QUERY = groq`*[_id == "homepage"][0]{ hero, sections, cta, usps, problems, transformFeatures, brandCards }`;
 
 type RawHome = {
   hero?: Partial<HomeSettings["hero"]>;
   sections?: Partial<HomeSettings["sections"]>;
   cta?: Partial<HomeSettings["cta"]>;
+  usps?: HomeSettings["usps"];
+  problems?: HomeSettings["problems"];
+  transformFeatures?: HomeSettings["transformFeatures"];
+  brandCards?: HomeSettings["brandCards"];
 } | null;
 
 // merge: use the Sanity value when present, else the default (keeps stega on
@@ -122,6 +154,15 @@ export const getHomeSettings = cache(async (): Promise<HomeSettings> => {
       hero,
       sections: pick(d.sections, DEFAULTS.sections),
       cta: pick(d.cta, DEFAULTS.cta),
+      usps: d.usps?.length ? d.usps : DEFAULTS.usps,
+      problems: d.problems?.length ? d.problems : DEFAULTS.problems,
+      transformFeatures: d.transformFeatures?.length ? d.transformFeatures : DEFAULTS.transformFeatures,
+      // Brand `name` is used to match a logo — strip stega so the lookup works in
+      // preview; country/tagline keep stega for click-to-edit.
+      brandCards: (d.brandCards?.length ? d.brandCards : DEFAULTS.brandCards).map((b) => ({
+        ...b,
+        name: stegaClean(b.name),
+      })),
     };
   } catch {
     return DEFAULTS;

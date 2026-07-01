@@ -9,6 +9,7 @@ export const homepageType = defineType({
   groups: [
     { name: "hero", title: "Hero", default: true },
     { name: "sections", title: "Section headings" },
+    { name: "lists", title: "Section lists" },
     { name: "featured", title: "Featured" },
     { name: "cta", title: "CTA & Trust" },
   ],
@@ -70,6 +71,79 @@ export const homepageType = defineType({
         defineField({ name: "blogHeading", title: "Blog — heading", type: "string" }),
         defineField({ name: "testimonialsEyebrow", title: "Testimonials — eyebrow", type: "string" }),
         defineField({ name: "testimonialsHeading", title: "Testimonials — heading", type: "string" }),
+      ],
+    }),
+    defineField({
+      name: "usps",
+      title: "USP strip",
+      type: "array",
+      group: "lists",
+      description: "The green bar of selling points under the hero. Leave blank to keep defaults.",
+      of: [
+        defineField({
+          name: "usp",
+          type: "object",
+          fields: [
+            defineField({ name: "icon", title: "Icon (emoji)", type: "string" }),
+            defineField({ name: "text", title: "Text", type: "string" }),
+          ],
+          preview: { select: { title: "text", subtitle: "icon" } },
+        }),
+      ],
+    }),
+    defineField({
+      name: "problems",
+      title: "Problem → Solution pairs",
+      type: "array",
+      group: "lists",
+      description: "The Swiftrooms Solution section: each row shows the frustration (left) and the advantage (right).",
+      of: [
+        defineField({
+          name: "problem",
+          type: "object",
+          fields: [
+            defineField({ name: "problem", title: "Frustration", type: "string" }),
+            defineField({ name: "solution", title: "Advantage", type: "text", rows: 2 }),
+          ],
+          preview: { select: { title: "problem", subtitle: "solution" } },
+        }),
+      ],
+    }),
+    defineField({
+      name: "transformFeatures",
+      title: "Transform section — features",
+      type: "array",
+      group: "lists",
+      description: "The three bullet points in the “Transform Your Space” section.",
+      of: [
+        defineField({
+          name: "feature",
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Title", type: "string" }),
+            defineField({ name: "desc", title: "Description", type: "string" }),
+          ],
+          preview: { select: { title: "title", subtitle: "desc" } },
+        }),
+      ],
+    }),
+    defineField({
+      name: "brandCards",
+      title: "Brand cards",
+      type: "array",
+      group: "lists",
+      description: "The “Brands We Work With” cards. Logos are matched by name for known brands (Cortizo, Schüco, Deceuninck, Vetromax, Gulf Extrusions).",
+      of: [
+        defineField({
+          name: "brandCard",
+          type: "object",
+          fields: [
+            defineField({ name: "name", title: "Name", type: "string" }),
+            defineField({ name: "country", title: "Country", type: "string" }),
+            defineField({ name: "tagline", title: "Tagline", type: "string" }),
+          ],
+          preview: { select: { title: "name", subtitle: "tagline" } },
+        }),
       ],
     }),
     defineField({

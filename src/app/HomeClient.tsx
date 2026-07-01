@@ -57,28 +57,6 @@ const sortByDateDesc = (posts: BlogPost[]) =>
     return (parseInt(bY) * 100 + (MONTHS[bM] ?? 0)) - (parseInt(aY) * 100 + (MONTHS[aM] ?? 0));
   });
 
-const usps = [
-  { icon: "🌍", text: "European quality systems from AED 800/sqm" },
-  { icon: "⏱", text: "Free quote & site visit within 24 hours" },
-  { icon: "☀️", text: "Heat & dust insulation for UAE climate" },
-  { icon: "🛡", text: "Professional installation with 10-year warranty" },
-];
-
-const problems = [
-  { problem: "Skyrocketing AC bills", solution: "Thermally broken aluminium profiles minimise heat transfer" },
-  { problem: "Excessive heat penetration", solution: "Advanced solar-control glazing reduces heat penetration" },
-  { problem: "Poor air tightness & noise", solution: "Multi-point locking and triple gasket systems enhance sealing" },
-  { problem: "Wasted outdoor space", solution: "Garden rooms & extensions transform space into living areas" },
-];
-
-const brands = [
-  { name: "Schüco", country: "Germany", tagline: "German engineering excellence" },
-  { name: "Deceuninck", country: "Belgium", tagline: "Belgian uPVC innovation" },
-  { name: "Gulf Extrusions", country: "UAE", tagline: "Built for the Gulf climate" },
-  { name: "Vetromax", country: "UAE", tagline: "Frameless & ultra-slim glazing" },
-  { name: "Cortizo", country: "Spain", tagline: "European precision systems" },
-];
-
 /* ── Dot indicator component ──────────────────────────────────────────────── */
 function Dots({ count, active, onDotClick }: { count: number; active: number; onDotClick: (i: number) => void }) {
   return (
@@ -113,6 +91,11 @@ export default function HomeClient({
   testimonials: Testimonial[];
 }) {
   const sortedBlogPosts = sortByDateDesc(blogPosts);
+  // Editable section lists (Sanity-driven, defaults baked into getHomeSettings).
+  const usps = settings.usps;
+  const problems = settings.problems;
+  const transformFeatures = settings.transformFeatures;
+  const brands = settings.brandCards;
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -415,11 +398,7 @@ export default function HomeClient({
                   {settings.sections.transformBody}
                 </p>
                 <div className="space-y-4 mb-10">
-                  {[
-                    { title: "Panoramic Slim Sliding Systems", desc: "Ultra-slim profiles. Seamless design. Maximum light." },
-                    { title: "Garden Rooms & Extensions", desc: "Transform unused space into valuable living areas." },
-                    { title: "Performance Windows & Doors", desc: "Engineered to perform. Built to outlast." },
-                  ].map((item, i) => (
+                  {transformFeatures.map((item, i) => (
                     <div key={i} className="flex items-start gap-4">
                       <div className="w-10 h-10 rounded-xl bg-[#f0fdf4] flex items-center justify-center flex-shrink-0 mt-0.5">
                         <div className="w-2 h-2 rounded-full bg-[#007969]" />
