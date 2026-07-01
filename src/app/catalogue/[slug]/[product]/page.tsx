@@ -8,6 +8,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getProduct, getProductParams } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticles } from "@/lib/blog";
+import { getProductPageSettings } from "@/lib/product-page-settings";
 
 interface Props {
   params: Promise<{ slug: string; product: string }>;
@@ -40,6 +41,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const found = await getProduct(slug, productSlug);
   if (!found) notFound();
   const { category: cat, product } = found;
+  const chrome = await getProductPageSettings();
 
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
@@ -128,10 +130,10 @@ export default async function ProductDetailPage({ params }: Props) {
               <ScrollReveal delay={0.2}>
                 <div className="flex flex-col sm:flex-row gap-3 mt-8">
                   <QuoteButton className="btn-brand">
-                    Enquire About This Product
+                    {chrome.heroEnquireLabel}
                   </QuoteButton>
                   <ShowroomButton className="btn-outline">
-                    See It In Our Showroom
+                    {chrome.heroShowroomLabel}
                   </ShowroomButton>
                 </div>
               </ScrollReveal>
@@ -176,7 +178,7 @@ export default async function ProductDetailPage({ params }: Props) {
       <section className="py-16 md:py-24 border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Product Introduction</p>
+            <p className="text-label text-[#007969] mb-4">{chrome.introEyebrow}</p>
             <h2 className="text-title text-[#1c1c1e] mb-6">{product.name}</h2>
             <p className="text-[#6b7280] leading-relaxed text-lg">{product.description}</p>
           </ScrollReveal>
@@ -204,9 +206,9 @@ export default async function ProductDetailPage({ params }: Props) {
         <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
             <ScrollReveal>
-              <p className="text-label text-[#007969] mb-4">Technical Specifications</p>
+              <p className="text-label text-[#007969] mb-4">{chrome.specsEyebrow}</p>
               <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">
-                Performance data.
+                {chrome.specsHeading}
               </h2>
             </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-200">
@@ -221,7 +223,7 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
             <ScrollReveal>
               <p className="text-[#6b7280] text-sm mt-6">
-                Specifications shown are manufacturer-published values. Contact our technical team for project-specific performance data or independent test reports.
+                {chrome.specsFootnote}
               </p>
             </ScrollReveal>
           </div>
@@ -232,9 +234,9 @@ export default async function ProductDetailPage({ params }: Props) {
       <section className="py-16 md:py-24">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Key Features</p>
+            <p className="text-label text-[#007969] mb-4">{chrome.featuresEyebrow}</p>
             <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">
-              What sets it apart.
+              {chrome.featuresHeading}
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
@@ -260,9 +262,9 @@ export default async function ProductDetailPage({ params }: Props) {
       <section className="py-14 md:py-20 bg-[#f8f9fa] border-y border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Gallery</p>
+            <p className="text-label text-[#007969] mb-4">{chrome.galleryEyebrow}</p>
             <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">
-              Installed &amp; at scale.
+              {chrome.galleryHeading}
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
@@ -294,8 +296,8 @@ export default async function ProductDetailPage({ params }: Props) {
       <section className="py-14 md:py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Downloads</p>
-            <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">Technical documentation.</h2>
+            <p className="text-label text-[#007969] mb-4">{chrome.downloadsEyebrow}</p>
+            <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">{chrome.downloadsHeading}</h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
@@ -336,9 +338,9 @@ export default async function ProductDetailPage({ params }: Props) {
             <ScrollReveal>
               <div className="flex items-end justify-between mb-8 md:mb-12">
                 <div>
-                  <p className="text-label text-[#007969] mb-3">Installed Projects</p>
+                  <p className="text-label text-[#007969] mb-3">{chrome.installedEyebrow}</p>
                   <h2 className="text-title text-[#1c1c1e]">
-                    See it in completed projects.
+                    {chrome.installedHeading}
                   </h2>
                 </div>
                 <Link
@@ -451,8 +453,8 @@ export default async function ProductDetailPage({ params }: Props) {
               <ScrollReveal>
                 <div className="flex items-end justify-between mb-8 md:mb-12">
                   <div>
-                    <p className="text-label text-[#007969] mb-3">Technical Insights</p>
-                    <h2 className="text-title text-[#1c1c1e]">Further reading.</h2>
+                    <p className="text-label text-[#007969] mb-3">{chrome.readingEyebrow}</p>
+                    <h2 className="text-title text-[#1c1c1e]">{chrome.readingHeading}</h2>
                   </div>
                   <Link href="/technical/blog" className="hidden sm:inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors">
                     All articles →
@@ -488,17 +490,17 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
             <p className="text-label text-white/70 mb-4">Interested in {product.name}?</p>
             <h2 className="text-title text-white mb-6 max-w-2xl mx-auto">
-              Get a specification and quote
+              {chrome.ctaHeading}
             </h2>
             <p className="text-white/70 mb-10 max-w-md mx-auto">
-              Our team will assess your project requirements and provide a detailed quotation for this system.
+              {chrome.ctaBody}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <QuoteButton className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
-                Enquire Now
+                {chrome.ctaEnquireLabel}
               </QuoteButton>
               <ShowroomButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
-                Book Showroom Visit
+                {chrome.ctaShowroomLabel}
               </ShowroomButton>
             </div>
           </div>

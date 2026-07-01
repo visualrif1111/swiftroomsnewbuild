@@ -10,6 +10,7 @@ import { faqType } from "./faqType";
 import { resourceType } from "./resourceType";
 import { homepageType } from "./homepageType";
 import { siteSettingsType } from "./siteSettingsType";
+import { productPageSettingsType } from "./productPageSettingsType";
 import { testimonialType } from "./testimonialType";
 import { teamMemberType } from "./teamMemberType";
 import { timelineEntryType } from "./timelineEntryType";
@@ -35,7 +36,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     seoType, postType, locationType, projectType,
     productCategoryType, productType, brandType, faqType, resourceType,
-    homepageType, siteSettingsType,
+    homepageType, siteSettingsType, productPageSettingsType,
     testimonialType, teamMemberType, timelineEntryType, processStepType, certificationType,
     // Page builder
     pageType,
