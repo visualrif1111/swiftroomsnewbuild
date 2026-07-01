@@ -293,7 +293,7 @@ export default function ShowroomVisitForm({ onClose }: { onClose: () => void }) 
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
           <span className="text-label text-[#007969]">Showroom Visit</span>
-          <button onClick={onClose} className="text-[#6b7280] hover:text-[#1c1c1e] transition-colors p-1" aria-label="Close">
+          <button onClick={onClose} className="text-[#6b7280] hover:text-[#1c1c1e] transition-colors p-2.5 -m-1.5" aria-label="Close">
             <CloseIcon />
           </button>
         </div>
@@ -336,7 +336,7 @@ export default function ShowroomVisitForm({ onClose }: { onClose: () => void }) 
           </div>
           <button
             onClick={onClose}
-            className="text-[#6b7280] hover:text-[#1c1c1e] transition-colors p-1"
+            className="text-[#6b7280] hover:text-[#1c1c1e] transition-colors p-2.5 -m-1.5"
             aria-label="Close"
           >
             <CloseIcon />
