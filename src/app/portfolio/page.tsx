@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PortfolioClient from "./PortfolioClient";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
+import PageBuilder from "@/components/blocks/PageBuilder";
 
 const baseMetadata: Metadata = {
   title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
@@ -53,6 +54,7 @@ export default async function PortfolioPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       <PortfolioClient projects={projects} hero={ps?.hero} />
+      <PageBuilder sections={ps?.sections} />
     </>
   );
 }

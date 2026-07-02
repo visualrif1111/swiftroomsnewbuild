@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 
 // Landing-page settings — one document per hard-coded route (e.g. "/about",
 // "/technical", "/catalogue"). These pages are composed from many collections
@@ -15,6 +15,7 @@ export const pageSettingsType = defineType({
   type: "document",
   groups: [
     { name: "hero", title: "Hero", default: true },
+    { name: "sections", title: "Sections" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
@@ -47,6 +48,27 @@ export const pageSettingsType = defineType({
         defineField({ name: "eyebrow", title: "Eyebrow / label", type: "string" }),
         defineField({ name: "heading", title: "Heading", type: "text", rows: 2 }),
         defineField({ name: "subheading", title: "Subheading", type: "text", rows: 3 }),
+      ],
+    }),
+    defineField({
+      name: "sections",
+      title: "Sections",
+      type: "array",
+      group: "sections",
+      description:
+        "Optional extra content blocks rendered below this page's built-in content. Drag to reorder, or use the ⋮ menu to add, duplicate, hide or remove. Leave empty to keep the page exactly as it is.",
+      of: [
+        defineArrayMember({ type: "heroBlock" }),
+        defineArrayMember({ type: "richTextBlock" }),
+        defineArrayMember({ type: "imageBlock" }),
+        defineArrayMember({ type: "galleryBlock" }),
+        defineArrayMember({ type: "videoBlock" }),
+        defineArrayMember({ type: "statsBlock" }),
+        defineArrayMember({ type: "featureGridBlock" }),
+        defineArrayMember({ type: "testimonialsBlock" }),
+        defineArrayMember({ type: "logosBlock" }),
+        defineArrayMember({ type: "faqBlock" }),
+        defineArrayMember({ type: "ctaBlock" }),
       ],
     }),
     defineField({ name: "seo", title: "SEO", type: "seo", group: "seo" }),

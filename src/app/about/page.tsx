@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 import { getTeamMembers, getTimeline, getTestimonials, getCertifications } from "@/lib/about";
 import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
+import PageBuilder from "@/components/blocks/PageBuilder";
 
 const baseMetadata: Metadata = {
   title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
@@ -81,6 +82,7 @@ export default async function AboutPage() {
         certifications={certifications}
         hero={ps?.hero}
       />
+      <PageBuilder sections={ps?.sections} />
     </>
   );
 }

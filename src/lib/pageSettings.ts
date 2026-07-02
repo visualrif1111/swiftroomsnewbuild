@@ -14,6 +14,7 @@ import { draftMode } from "next/headers";
 import { stegaClean } from "next-sanity";
 import { SITE_URL } from "@/lib/site";
 import { urlFor } from "@/sanity/lib/image";
+import type { PageSection } from "@/lib/page";
 
 export type PageHero = {
   eyebrow?: string;
@@ -31,11 +32,28 @@ type RawSeo = {
 
 export type PageSettings = {
   hero: PageHero;
+  sections: PageSection[];
   seo: RawSeo;
 };
 
+// Mirrors the reference expansions in PAGE_QUERY (src/sanity/lib/pageQueries.ts)
+// so blocks that reference other documents (testimonials, faqs, brand logos)
+// resolve inside pageSettings sections too.
 const QUERY = `*[_type == "pageSettings" && route == $route][0]{
-  hero, seo
+  hero,
+  seo,
+  sections[]{
+    ...,
+    _type == "testimonialsBlock" => {
+      testimonials[]->{ _id, quote, author, location, project }
+    },
+    _type == "faqBlock" => {
+      faqs[]->{ _id, question, answer }
+    },
+    _type == "logosBlock" => {
+      brands[]->{ _id, title, logo }
+    }
+  }
 }`;
 
 async function isDraft(): Promise<boolean> {
@@ -59,7 +77,7 @@ export const getPageSettings = cache(
         d = await client.fetch<PageSettings | null>(QUERY, { route }, { next: { revalidate: 60 } });
       }
       if (!d) return null;
-      return { hero: d.hero ?? {}, seo: d.seo ?? {} };
+      return { hero: d.hero ?? {}, sections: d.sections ?? [], seo: d.seo ?? {} };
     } catch {
       return null;
     }

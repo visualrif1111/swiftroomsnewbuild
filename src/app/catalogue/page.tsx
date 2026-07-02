@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/site";
 import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
+import PageBuilder from "@/components/blocks/PageBuilder";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -205,6 +206,7 @@ export default async function CataloguePage() {
           </div>
         </div>
       </section>
+      <PageBuilder sections={ps?.sections} />
     </>
   );
 }
