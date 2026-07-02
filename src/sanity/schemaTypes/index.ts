@@ -16,6 +16,7 @@ import { teamMemberType } from "./teamMemberType";
 import { timelineEntryType } from "./timelineEntryType";
 import { processStepType } from "./processStepType";
 import { certificationType } from "./certificationType";
+import { pageSettingsType } from "./pageSettingsType";
 
 // Page-builder: modular page document + reusable section blocks.
 import { pageType } from "./documents/pageType";
@@ -38,6 +39,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     productCategoryType, productType, brandType, faqType, resourceType,
     homepageType, siteSettingsType, productPageSettingsType,
     testimonialType, teamMemberType, timelineEntryType, processStepType, certificationType,
+    pageSettingsType,
     // Page builder
     pageType,
     buttonType,

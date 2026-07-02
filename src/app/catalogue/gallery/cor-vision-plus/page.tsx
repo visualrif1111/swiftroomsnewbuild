@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Cor Vision Plus Gallery",
   description:
     "Photography from completed Cor Vision Plus lift-and-slide installations across UAE villas — flush thresholds, frameless aesthetics and barrier-free indoor-outdoor living.",
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
     images: [{ url: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Plus Gallery" }],
   },
 };
+
+export const generateMetadata = () => pageMetadata("/catalogue/gallery/cor-vision-plus", baseMetadata);
 
 const images = [
   { src: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Plus — Al Barari Villa", caption: "Al Barari Villa · Dubai" },
@@ -36,7 +39,8 @@ const images = [
 
 const heights = [320, 240, 400, 280, 360, 220, 300, 380, 260, 340, 280, 320];
 
-export default function CorVisionPlusGalleryPage() {
+export default async function CorVisionPlusGalleryPage() {
+  const ps = await getPageSettings("/catalogue/gallery/cor-vision-plus");
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -64,16 +68,15 @@ export default function CorVisionPlusGalleryPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Gallery</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Gallery"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-6">
-              Cor Vision Plus Gallery
+              {ps?.hero?.heading ?? "Cor Vision Plus Gallery"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Photography from completed Cor Vision Plus installations across UAE villas — flush
-              thresholds, frameless aesthetics and the barrier-free indoor-outdoor living this system
-              was engineered to deliver.
+              {ps?.hero?.subheading ??
+                "Photography from completed Cor Vision Plus installations across UAE villas — flush thresholds, frameless aesthetics and the barrier-free indoor-outdoor living this system was engineered to deliver."}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.25}>

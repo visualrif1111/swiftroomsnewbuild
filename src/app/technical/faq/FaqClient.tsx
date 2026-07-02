@@ -6,8 +6,9 @@ import { QuoteButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import type { FAQ } from "@/lib/data";
+import type { PageHero } from "@/lib/pageSettings";
 
-export default function FaqClient({ faqs }: { faqs: FAQ[] }) {
+export default function FaqClient({ faqs, hero }: { faqs: FAQ[]; hero?: PageHero }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [open, setOpen] = useState<number | null>(0);
   const [search, setSearch] = useState("");
@@ -49,13 +50,13 @@ export default function FaqClient({ faqs }: { faqs: FAQ[] }) {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              Frequently asked questions.
+              {hero?.heading ?? "Frequently asked questions."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl mb-8">
-              Answers to the questions we hear most often. Use the filters below to find your topic, or
-              contact our team directly.
+              {hero?.subheading ??
+                "Answers to the questions we hear most often. Use the filters below to find your topic, or contact our team directly."}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>

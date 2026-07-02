@@ -4,8 +4,9 @@ import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getTestimonials } from "@/lib/about";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Reviews | Swift Rooms UAE — Client Testimonials Dubai & Abu Dhabi",
   description:
     "Read what Swift Rooms clients across Dubai, Abu Dhabi and the wider UAE say about our premium aluminium windows, doors and glazing systems — exceptional results and a commitment to excellence.",
@@ -18,8 +19,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/reviews", baseMetadata);
+
 export default async function ReviewsPage() {
-  const testimonials = await getTestimonials();
+  const [testimonials, ps] = await Promise.all([getTestimonials(), getPageSettings("/reviews")]);
   const base = SITE_URL;
 
   const reviewSchema = {
@@ -66,13 +69,13 @@ export default async function ReviewsPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Client Testimonials</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Client Testimonials"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-8">
-              Exceptional results and a commitment to excellence
+              {ps?.hero?.heading ?? "Exceptional results and a commitment to excellence"}
             </h1>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              From Emirates Hills to Al Barari, architects, developers and homeowners across the UAE
-              trust Swift Rooms for premium glazing engineered to perform in the Gulf climate.
+              {ps?.hero?.subheading ??
+                "From Emirates Hills to Al Barari, architects, developers and homeowners across the UAE trust Swift Rooms for premium glazing engineered to perform in the Gulf climate."}
             </p>
           </ScrollReveal>
         </div>

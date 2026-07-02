@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
@@ -7,7 +8,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getBrands } from "@/lib/brands";
 import { getCategories } from "@/lib/catalogue";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Cortizo, Vetromax & Gulf Extrusions — Authorised Brand Partners UAE",
   description:
     "Swiftrooms is an authorised partner for Cortizo, Vetromax, Vetro and Gulf Extrusions — Europe and the UAE's leading aluminium systems manufacturers.",
@@ -20,9 +21,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/catalogue/brands", baseMetadata);
+
 export default async function BrandsPage() {
-  const brands = await getBrands();
-  const productCategories = await getCategories();
+  const [brands, productCategories, ps] = await Promise.all([
+    getBrands(),
+    getCategories(),
+    getPageSettings("/catalogue/brands"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -66,16 +72,15 @@ export default async function BrandsPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Our Brand Partners</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Our Brand Partners"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              Authorised partners for the world&apos;s best.
+              {ps?.hero?.heading ?? "Authorised partners for the world's best."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Swiftrooms is an authorised dealer and installation partner for the UAE&apos;s most
-              sought-after aluminium and glazing system brands. Each brand we carry has been
-              rigorously assessed for quality, performance and suitability for Gulf climates.
+              {ps?.hero?.subheading ??
+                "Swiftrooms is an authorised dealer and installation partner for the UAE's most sought-after aluminium and glazing system brands. Each brand we carry has been rigorously assessed for quality, performance and suitability for Gulf climates."}
             </p>
           </ScrollReveal>
         </div>

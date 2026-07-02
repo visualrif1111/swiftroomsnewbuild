@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { stats, type TeamMember, type TimelineEntry, type Testimonial } from "@/lib/data";
 import type { Certification } from "@/lib/about";
+import type { PageHero } from "@/lib/pageSettings";
 
 const values = [
   {
@@ -51,11 +52,13 @@ export default function AboutClient({
   timeline,
   testimonials,
   certifications,
+  hero,
 }: {
   teamMembers: TeamMember[];
   timeline: TimelineEntry[];
   testimonials: Testimonial[];
   certifications: Certification[];
+  hero?: PageHero;
 }) {
   const [activeYear, setActiveYear] = useState(0);
   const teamGroups = [...new Set(teamMembers.map((m) => m.group))];
@@ -66,19 +69,17 @@ export default function AboutClient({
       <section className="pt-32 pb-12 md:pt-44 md:pb-24 lg:pt-52 lg:pb-32">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">About Swiftrooms</p>
+            <p className="text-label text-[#007969] mb-6">{hero?.eyebrow ?? "About Swiftrooms"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-4xl">
-              The UAE&apos;s trusted authority in premium glazing.
+              {hero?.heading ?? "The UAE's trusted authority in premium glazing."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain
-              wall systems across the UAE since 2009. We are authorised partners for Cortizo,
-              Vetromax, Vetro and Gulf Extrusions — four of the world&apos;s leading aluminium and glazing
-              systems manufacturers.
+              {hero?.subheading ??
+                "Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE since 2009. We are authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions — four of the world's leading aluminium and glazing systems manufacturers."}
             </p>
           </ScrollReveal>
         </div>

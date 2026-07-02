@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ShowroomBookingForm from "./ShowroomBookingForm";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Showroom — Jebel Ali, Dubai",
   description:
     "Visit the Swiftrooms 4900 showroom in Jebel Ali, Dubai. The UAE's only space where you can experience Cortizo Cor Vision, Cor Vision Plus and TP52 curtain wall at full scale, in working condition.",
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/showroom`,
   },
 };
+
+export const generateMetadata = () => pageMetadata("/showroom", baseMetadata);
 
 const displays = [
   {
@@ -70,7 +73,8 @@ const visitSteps = [
   { num: "04", text: "Leave with a written specification and budgetary estimate if your project is ready." },
 ];
 
-export default function ShowroomPage() {
+export default async function ShowroomPage() {
+  const ps = await getPageSettings("/showroom");
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -126,20 +130,19 @@ export default function ShowroomPage() {
       <section className="pt-32 pb-0 md:pt-44 lg:pt-52">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Experience in person</p>
+            <p className="text-label text-[#007969] mb-6">{ps?.hero?.eyebrow ?? "Experience in person"}</p>
           </ScrollReveal>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end">
             <div>
               <ScrollReveal delay={0.1}>
                 <h1 className="text-headline text-[#1c1c1e] mb-6 max-w-xl">
-                  The 4900 Showroom, Jebel Ali.
+                  {ps?.hero?.heading ?? "The 4900 Showroom, Jebel Ali."}
                 </h1>
               </ScrollReveal>
               <ScrollReveal delay={0.2}>
                 <p className="text-body-lg text-[#6b7280]">
-                  The only way to truly understand a window or door system is to operate it yourself.
-                  Our Jebel Ali showroom features full-scale working displays of every major system
-                  we carry — open by appointment, no obligation.
+                  {ps?.hero?.subheading ??
+                    "The only way to truly understand a window or door system is to operate it yourself. Our Jebel Ali showroom features full-scale working displays of every major system we carry — open by appointment, no obligation."}
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={0.3}>

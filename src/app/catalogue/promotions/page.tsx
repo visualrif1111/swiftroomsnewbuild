@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Current Promotions — Windows & Doors Offers UAE",
   description: "Current promotions and seasonal offers on premium aluminium windows, doors and glazing systems from Swiftrooms UAE. Free survey, hardware upgrades and trade pricing.",
   alternates: { canonical: `${SITE_URL}/catalogue/promotions` },
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/catalogue/promotions`,
   },
 };
+
+export const generateMetadata = () => pageMetadata("/catalogue/promotions", baseMetadata);
 
 const promotions = [
   {
@@ -52,7 +55,8 @@ const promotions = [
   },
 ];
 
-export default function PromotionsPage() {
+export default async function PromotionsPage() {
+  const ps = await getPageSettings("/catalogue/promotions");
   const base = SITE_URL;
 
   const offersSchema = {
@@ -99,9 +103,9 @@ export default function PromotionsPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Special Offers</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Special Offers"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-8">
-              Current promotions
+              {ps?.hero?.heading ?? "Current promotions"}
             </h1>
           </ScrollReveal>
         </div>

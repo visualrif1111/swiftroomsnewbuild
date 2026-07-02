@@ -5,44 +5,69 @@
 // - `locations` maps a Sanity document to the frontend URL(s) where it appears,
 //   so editors can jump from a document to its live page.
 //
-// Blog is wired end-to-end today. Portfolio / Product / Category are scaffolded
-// against their real routes and activate automatically once that content is
-// migrated. Add new types by extending the two blocks below — the plumbing
-// (draft mode, stega, overlays) is already generic.
+// Route order matters: Presentation matches the FIRST route pattern whose query
+// resolves a document, and a matched pattern with an empty result shows the
+// "Missing a main document" notice (it does NOT fall through). So the resolution
+// order below is deliberate:
+//   1. Landing routes (exact literals)  → pageSettings, keyed by `route`.
+//      Listed first so e.g. "/catalogue/brands" resolves here instead of being
+//      captured by the "/catalogue/:slug" productCategory pattern.
+//   2. Collection detail routes (params) → their owning document.
+//   3. A nested-slug-aware catch-all      → page-builder `page` documents. This
+//      also covers arbitrarily deep page slugs ("/a/b/c"), which the previous
+//      single-segment "/:slug" rule missed.
 import { defineDocuments, defineLocations } from "sanity/presentation";
+import { LANDING_ROUTES } from "@/lib/landingRoutes";
 
 // URL -> document (used when clicking around the live preview iframe)
 export const mainDocuments = defineDocuments([
+  // 1. Homepage singleton lives at the site root.
   {
-    // Homepage singleton lives at the site root.
     route: "/",
     filter: `_type == "homepage"`,
   },
+  // 1b. Composed landing/index pages -> their pageSettings document. Exact
+  //     literal routes, so they only match their own URL and win over the
+  //     parameterised collection routes below.
+  ...LANDING_ROUTES.map(({ route }) => ({
+    route,
+    filter: `_type == "pageSettings" && route == "${route}"`,
+  })),
+  // 2. Collection detail pages -> the individual document.
   {
     route: "/technical/blog/:slug",
     filter: `_type == "post" && slug.current == $slug`,
-  },
-  {
-    // Page-builder pages live at arbitrary paths (catch-all route).
-    route: "/:slug",
-    filter: `_type == "page" && slug.current == $slug`,
   },
   {
     route: "/portfolio/:slug",
     filter: `_type == "project" && slug.current == $slug`,
   },
   {
+    route: "/catalogue/:category/:slug",
+    filter: `_type == "product" && slug.current == $slug`,
+  },
+  {
     route: "/catalogue/:slug",
     filter: `_type == "productCategory" && slug.current == $slug`,
   },
+  // 3. Page-builder pages at arbitrary (possibly nested) paths.
   {
-    route: "/catalogue/:category/:slug",
-    filter: `_type == "product" && slug.current == $slug`,
+    route: "/:slug(.*)",
+    filter: `_type == "page" && slug.current == $slug`,
   },
 ]);
 
 // document -> URL(s) (used from the document pane "open preview" affordance)
 export const locations = {
+  pageSettings: defineLocations({
+    select: { label: "label", route: "route" },
+    resolve: (doc) => ({
+      locations: doc?.route
+        ? [{ title: doc?.label || doc.route, href: doc.route }]
+        : [],
+    }),
+  }),
+
   page: defineLocations({
     select: { title: "title", slug: "slug.current" },
     resolve: (doc) => ({
@@ -100,6 +125,13 @@ export const locations = {
         : { message: "Add a category and slug to preview this product." },
   }),
 
+  brand: defineLocations({
+    select: { name: "name" },
+    resolve: (doc) => ({
+      locations: [{ title: doc?.name || "Brand", href: "/catalogue/brands" }],
+    }),
+  }),
+
   faq: defineLocations({
     select: { question: "question" },
     resolve: (doc) => ({
@@ -113,6 +145,30 @@ export const locations = {
     select: { title: "title" },
     resolve: (doc) => ({
       locations: [{ title: doc?.title || "Resource", href: "/technical/resources" }],
+    }),
+  }),
+
+  processStep: defineLocations({
+    select: { title: "title" },
+    resolve: (doc) => ({
+      locations: [
+        { title: doc?.title || "Process step", href: "/technical/process" },
+        { title: "Homepage", href: "/" },
+      ],
+    }),
+  }),
+
+  certification: defineLocations({
+    select: { name: "name" },
+    resolve: (doc) => ({
+      locations: [{ title: doc?.name || "Certification", href: "/about" }],
+    }),
+  }),
+
+  timelineEntry: defineLocations({
+    select: { title: "title", year: "year" },
+    resolve: (doc) => ({
+      locations: [{ title: doc?.title || doc?.year || "Timeline entry", href: "/about" }],
     }),
   }),
 
@@ -142,6 +198,13 @@ export const locations = {
     select: { title: "title" },
     resolve: () => ({
       locations: [{ title: "Home (site-wide settings)", href: "/" }],
+    }),
+  }),
+
+  productPageSettings: defineLocations({
+    select: { title: "title" },
+    resolve: () => ({
+      locations: [{ title: "Catalogue (affects all product pages)", href: "/catalogue" }],
     }),
   }),
 };

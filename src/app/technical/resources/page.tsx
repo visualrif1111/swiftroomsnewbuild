@@ -2,8 +2,9 @@ import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import ResourcesClient from "./ResourcesClient";
 import { getResources } from "@/lib/resources";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Glazing Technical Resources — Guides, Specifications & Downloads UAE",
   description:
     "Product guides, project inspiration, planning tools and technical documentation for Swiftrooms glazing systems. Request any document directly from our team.",
@@ -16,8 +17,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/technical/resources", baseMetadata);
+
 export default async function ResourcesPage() {
-  const resources = await getResources();
+  const [resources, ps] = await Promise.all([
+    getResources(),
+    getPageSettings("/technical/resources"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -47,7 +53,7 @@ export default async function ResourcesPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <ResourcesClient resources={resources} />
+      <ResourcesClient resources={resources} hero={ps?.hero} />
     </>
   );
 }

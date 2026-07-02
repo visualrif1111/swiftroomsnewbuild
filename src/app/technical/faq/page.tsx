@@ -2,8 +2,9 @@ import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import FaqClient from "./FaqClient";
 import { getGeneralFaqs } from "@/lib/faqs";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Glazing FAQ — Windows, Doors & Aluminium Systems UAE",
   description:
     "Answers to the most common questions about premium aluminium windows, doors and glazing systems in the UAE. Get clear, expert answers from the Swiftrooms team.",
@@ -16,8 +17,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/technical/faq", baseMetadata);
+
 export default async function FaqPage() {
-  const faqs = await getGeneralFaqs();
+  const [faqs, ps] = await Promise.all([getGeneralFaqs(), getPageSettings("/technical/faq")]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -48,7 +51,7 @@ export default async function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <FaqClient faqs={faqs} />
+      <FaqClient faqs={faqs} hero={ps?.hero} />
     </>
   );
 }

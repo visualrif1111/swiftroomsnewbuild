@@ -2,8 +2,9 @@ import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import PortfolioClient from "./PortfolioClient";
 import { getPortfolioProjects } from "@/lib/portfolio";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Project Portfolio — UAE Villas, Commercial & Curtain Wall",
   description:
     "Over 500 completed glazing projects across Dubai, Abu Dhabi and the wider UAE. Browse our portfolio of premium aluminium windows, doors and curtain wall installations.",
@@ -16,8 +17,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/portfolio", baseMetadata);
+
 export default async function PortfolioPage() {
-  const projects = await getPortfolioProjects();
+  const [projects, ps] = await Promise.all([
+    getPortfolioProjects(),
+    getPageSettings("/portfolio"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -46,7 +52,7 @@ export default async function PortfolioPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <PortfolioClient projects={projects} />
+      <PortfolioClient projects={projects} hero={ps?.hero} />
     </>
   );
 }

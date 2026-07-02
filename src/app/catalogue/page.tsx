@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +8,7 @@ import { getCategories } from "@/lib/catalogue";
 import PartnerBrands from "@/components/PartnerBrands";
 import ProductSelector from "@/components/ProductSelector";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Aluminium Windows, Doors & Glazing Systems — Full Product Range UAE",
   description:
     "Browse the complete Swiftrooms product range — aluminium sliding doors, bi-fold doors, curtain wall, windows, uPVC systems, skylights, garden rooms and insect screens for UAE projects.",
@@ -20,8 +21,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/catalogue", baseMetadata);
+
 export default async function CataloguePage() {
-  const productCategories = await getCategories();
+  const [productCategories, ps] = await Promise.all([
+    getCategories(),
+    getPageSettings("/catalogue"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -53,17 +59,17 @@ export default async function CataloguePage() {
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Catalogue</p>
+            <p className="text-label text-[#007969] mb-6">{ps?.hero?.eyebrow ?? "Catalogue"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              The complete product range
+              {ps?.hero?.heading ?? "The complete product range"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Premium aluminium windows, doors, curtain wall, bi-fold and uPVC systems.
-              Engineered in Europe, installed to the highest standards across the UAE.
+              {ps?.hero?.subheading ??
+                "Premium aluminium windows, doors, curtain wall, bi-fold and uPVC systems. Engineered in Europe, installed to the highest standards across the UAE."}
             </p>
           </ScrollReveal>
         </div>

@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -6,7 +7,7 @@ import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getPortfolioProjects } from "@/lib/portfolio";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Product Gallery — Cor Vision, Bi-Fold & Curtain Wall UAE",
   description:
     "Product photography and installation photography from Swiftrooms projects across the UAE. Cor Vision lift-and-slide, bi-folding doors, curtain wall and more at full scale.",
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/catalogue/gallery`,
   },
 };
+
+export const generateMetadata = () => pageMetadata("/catalogue/gallery", baseMetadata);
 
 const galleries = [
   {
@@ -50,7 +53,10 @@ const galleries = [
 ];
 
 export default async function GalleryPage() {
-  const portfolioProjects = await getPortfolioProjects();
+  const [portfolioProjects, ps] = await Promise.all([
+    getPortfolioProjects(),
+    getPageSettings("/catalogue/gallery"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -75,15 +81,15 @@ export default async function GalleryPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Inspiration</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Inspiration"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-8">
-              Gallery
+              {ps?.hero?.heading ?? "Gallery"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Photography from completed Swiftrooms installations and our Jebel Ali showroom. Three
-              dedicated galleries — each focused on a specific system.
+              {ps?.hero?.subheading ??
+                "Photography from completed Swiftrooms installations and our Jebel Ali showroom. Three dedicated galleries — each focused on a specific system."}
             </p>
           </ScrollReveal>
         </div>

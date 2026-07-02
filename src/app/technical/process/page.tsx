@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -6,7 +7,7 @@ import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getProcessSteps } from "@/lib/about";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Our Installation Process — From Survey to Handover UAE",
   description:
     "How Swiftrooms works — from initial consultation and survey through manufacture, installation and aftercare. Six steps, zero surprises.",
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/technical/process`,
   },
 };
+
+export const generateMetadata = () => pageMetadata("/technical/process", baseMetadata);
 
 const stepDetails: Record<string, { duration: string; youDo: string; weDo: string; image: string }> = {
   "01": {
@@ -59,7 +62,10 @@ const stepDetails: Record<string, { duration: string; youDo: string; weDo: strin
 };
 
 export default async function ProcessPage() {
-  const processSteps = await getProcessSteps();
+  const [processSteps, ps] = await Promise.all([
+    getProcessSteps(),
+    getPageSettings("/technical/process"),
+  ]);
   const base = SITE_URL;
 
   const howToSchema = {
@@ -108,16 +114,15 @@ export default async function ProcessPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start">
             <div>
               <ScrollReveal delay={0.1}>
-                <p className="text-label text-[#007969] mb-4">How we work</p>
+                <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "How we work"}</p>
                 <h1 className="text-headline text-[#1c1c1e] mb-8">
-                  Six steps, zero surprises.
+                  {ps?.hero?.heading ?? "Six steps, zero surprises."}
                 </h1>
               </ScrollReveal>
               <ScrollReveal delay={0.2}>
                 <p className="text-body-lg text-[#6b7280] max-w-xl">
-                  Every Swiftrooms project follows the same disciplined process — ensuring consistent
-                  quality, clear communication and a result that meets or exceeds your expectations.
-                  From first enquiry to final walkthrough, you&apos;ll know exactly what happens and when.
+                  {ps?.hero?.subheading ??
+                    "Every Swiftrooms project follows the same disciplined process — ensuring consistent quality, clear communication and a result that meets or exceeds your expectations. From first enquiry to final walkthrough, you'll know exactly what happens and when."}
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={0.3}>

@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -6,7 +7,7 @@ import EnquireForm from "./EnquireForm";
 import { getCategories } from "@/lib/catalogue";
 import { getTestimonials } from "@/lib/about";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Get a Free Quote — Windows, Doors & Glazing UAE",
   description:
     "Request a free quotation for aluminium windows, doors and glazing systems from Swiftrooms UAE.",
@@ -19,8 +20,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/enquire", baseMetadata);
+
 export default async function EnquirePage() {
-  const [categories, testimonials] = await Promise.all([getCategories(), getTestimonials()]);
+  const [categories, testimonials, ps] = await Promise.all([
+    getCategories(),
+    getTestimonials(),
+    getPageSettings("/enquire"),
+  ]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -37,17 +44,17 @@ export default async function EnquirePage() {
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Free Quotation</p>
+            <p className="text-label text-[#007969] mb-6">{ps?.hero?.eyebrow ?? "Free Quotation"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              Get a quote
+              {ps?.hero?.heading ?? "Get a quote"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Complete the form below and a member of our team will contact you within one business
-              day to discuss your project requirements and arrange a free site survey.
+              {ps?.hero?.subheading ??
+                "Complete the form below and a member of our team will contact you within one business day to discuss your project requirements and arrange a free site survey."}
             </p>
           </ScrollReveal>
         </div>

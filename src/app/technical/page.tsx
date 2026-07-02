@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -7,7 +8,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getArticles } from "@/lib/blog";
 import { getGeneralFaqs } from "@/lib/faqs";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Technical Hub — Glazing Guides, Process & FAQ for UAE Projects",
   description:
     "Swiftrooms technical resources — our process, blog articles, downloadable guides, FAQ and everything you need to specify, plan and manage your glazing project in the UAE.",
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/technical`,
   },
 };
+
+export const generateMetadata = () => pageMetadata("/technical", baseMetadata);
 
 const buildSections = (articleCount: number, faqCount: number) => [
   {
@@ -72,7 +75,11 @@ const MONTHS: Record<string, number> = {
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
 };
 export default async function TechnicalPage() {
-  const [articles, faqs] = await Promise.all([getArticles(), getGeneralFaqs()]);
+  const [articles, faqs, ps] = await Promise.all([
+    getArticles(),
+    getGeneralFaqs(),
+    getPageSettings("/technical"),
+  ]);
   const sections = buildSections(articles.length, faqs.length);
   const recentPosts = [...articles]
     .sort((a, b) => {
@@ -98,18 +105,17 @@ export default async function TechnicalPage() {
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Knowledge Hub</p>
+            <p className="text-label text-[#007969] mb-6">{ps?.hero?.eyebrow ?? "Knowledge Hub"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              Everything you need to know before you buy.
+              {ps?.hero?.heading ?? "Everything you need to know before you buy."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Our technical hub covers the full journey — from understanding how our systems
-              perform in the UAE climate, to specifying the right product, managing your
-              installation and protecting your investment with aftercare.
+              {ps?.hero?.subheading ??
+                "Our technical hub covers the full journey — from understanding how our systems perform in the UAE climate, to specifying the right product, managing your installation and protecting your investment with aftercare."}
             </p>
           </ScrollReveal>
         </div>

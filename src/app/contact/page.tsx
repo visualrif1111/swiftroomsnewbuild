@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ContactForm from "./ContactForm";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Contact Swiftrooms — Dubai Showroom & Glazing Enquiries",
   description:
     "Contact Swiftrooms UAE — call, email or visit our Jebel Ali showroom to discuss your windows and doors project.",
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
+export const generateMetadata = () => pageMetadata("/contact", baseMetadata);
+
+export default async function ContactPage() {
+  const ps = await getPageSettings("/contact");
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -35,17 +39,17 @@ export default function ContactPage() {
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Get in Touch</p>
+            <p className="text-label text-[#007969] mb-6">{ps?.hero?.eyebrow ?? "Get in Touch"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8 max-w-3xl">
-              Contact Swiftrooms.
+              {ps?.hero?.heading ?? "Contact Swiftrooms."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Call, email or visit our Jebel Ali showroom. Our team responds to all enquiries within
-              one business day — typically within a few hours during office hours.
+              {ps?.hero?.subheading ??
+                "Call, email or visit our Jebel Ali showroom. Our team responds to all enquiries within one business day — typically within a few hours during office hours."}
             </p>
           </ScrollReveal>
         </div>

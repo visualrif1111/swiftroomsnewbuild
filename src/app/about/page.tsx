@@ -2,8 +2,9 @@ import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 import { getTeamMembers, getTimeline, getTestimonials, getCertifications } from "@/lib/about";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
   description:
     "Fifteen years supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE. Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions.",
@@ -16,12 +17,15 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/about", baseMetadata);
+
 export default async function AboutPage() {
-  const [teamMembers, timeline, testimonials, certifications] = await Promise.all([
+  const [teamMembers, timeline, testimonials, certifications, ps] = await Promise.all([
     getTeamMembers(),
     getTimeline(),
     getTestimonials(),
     getCertifications(),
+    getPageSettings("/about"),
   ]);
 
   const organizationSchema = {
@@ -75,6 +79,7 @@ export default async function AboutPage() {
         timeline={timeline}
         testimonials={testimonials}
         certifications={certifications}
+        hero={ps?.hero}
       />
     </>
   );

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import type { PortfolioItem } from "@/lib/portfolio";
+import type { PageHero } from "@/lib/pageSettings";
 
 // Location-based grouping per spec
 const locationGroups = [
@@ -34,7 +35,7 @@ const locationGroups = [
 
 const typeTags = ["All", "Villa", "Apartment", "Townhouse", "Commercial", "Garden Room", "Hospitality"];
 
-export default function PortfolioClient({ projects }: { projects: PortfolioItem[] }) {
+export default function PortfolioClient({ projects, hero }: { projects: PortfolioItem[]; hero?: PageHero }) {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [activeType, setActiveType] = useState("All");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -63,17 +64,17 @@ export default function PortfolioClient({ projects }: { projects: PortfolioItem[
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4 md:mb-6">Selected Work</p>
+            <p className="text-label text-[#007969] mb-4 md:mb-6">{hero?.eyebrow ?? "Selected Work"}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-5 md:mb-8 max-w-3xl">
-              Portfolio across the UAE.
+              {hero?.heading ?? "Portfolio across the UAE."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              {projects.length} completed projects spanning Dubai, Abu Dhabi and the wider UAE.
-              From intimate villa renovations to large commercial installations.
+              {hero?.subheading ??
+                `${projects.length} completed projects spanning Dubai, Abu Dhabi and the wider UAE. From intimate villa renovations to large commercial installations.`}
             </p>
           </ScrollReveal>
         </div>

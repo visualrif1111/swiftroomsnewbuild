@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Cor Vision Gallery",
   description:
     "Photography from completed Cor Vision 4600 and 4700 lift-and-slide installations across UAE villas — minimal sightlines, maximum glass area.",
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
     images: [{ url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision Gallery" }],
   },
 };
+
+export const generateMetadata = () => pageMetadata("/catalogue/gallery/cor-vision", baseMetadata);
 
 const images = [
   { src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", alt: "Cor Vision 4700 — Emirates Hills", caption: "Emirates Hills · Cor Vision 4700" },
@@ -42,7 +45,8 @@ const images = [
 
 const heights = [300, 380, 260, 340, 220, 300, 360, 280, 400, 240, 320, 280, 360, 240, 300, 380, 260, 340];
 
-export default function CorVisionGalleryPage() {
+export default async function CorVisionGalleryPage() {
+  const ps = await getPageSettings("/catalogue/gallery/cor-vision");
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -70,16 +74,15 @@ export default function CorVisionGalleryPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Gallery</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Gallery"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-6">
-              Cor Vision Gallery
+              {ps?.hero?.heading ?? "Cor Vision Gallery"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Photography from completed Cor Vision 4600 and 4700 installations across UAE villas.
-              Minimal sightlines. Maximum glass area. The lift-and-slide system that defines the
-              Swiftrooms product range.
+              {ps?.hero?.subheading ??
+                "Photography from completed Cor Vision 4600 and 4700 installations across UAE villas. Minimal sightlines. Maximum glass area. The lift-and-slide system that defines the Swiftrooms product range."}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.25}>

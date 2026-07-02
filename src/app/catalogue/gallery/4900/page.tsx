@@ -1,11 +1,12 @@
 import { SITE_URL } from "@/lib/site";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "4900 Showroom Gallery",
   description:
     "The Swiftrooms 4900 showroom in Jebel Ali — the UAE's only space where you can experience the Cor Vision, Cor Vision Plus and TP52 curtain wall range at full scale, in working condition.",
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
     images: [{ url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80", alt: "4900 Showroom Gallery" }],
   },
 };
+
+export const generateMetadata = () => pageMetadata("/catalogue/gallery/4900", baseMetadata);
 
 const images = [
   { src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80", alt: "4900 Showroom — main entrance", caption: "4900 Showroom · Jebel Ali" },
@@ -39,7 +42,8 @@ const images = [
 
 const heights = [340, 260, 400, 280, 360, 240, 300, 380, 260, 320, 280, 360, 240, 300, 380];
 
-export default function ShowroomGalleryPage() {
+export default async function ShowroomGalleryPage() {
+  const ps = await getPageSettings("/catalogue/gallery/4900");
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -67,16 +71,15 @@ export default function ShowroomGalleryPage() {
             </nav>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-label text-[#007969] mb-4">Showroom</p>
+            <p className="text-label text-[#007969] mb-4">{ps?.hero?.eyebrow ?? "Showroom"}</p>
             <h1 className="text-headline text-[#1c1c1e] mb-6">
-              4900 Gallery
+              {ps?.hero?.heading ?? "4900 Gallery"}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              The UAE&apos;s only space where you can experience the Cor Vision, Cor Vision Plus and TP52
-              curtain wall range at full scale, in full working condition. Visit us at Jebel Ali
-              to touch, open, and close every system before you specify.
+              {ps?.hero?.subheading ??
+                "The UAE's only space where you can experience the Cor Vision, Cor Vision Plus and TP52 curtain wall range at full scale, in full working condition. Visit us at Jebel Ali to touch, open, and close every system before you specify."}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.25}>

@@ -2,8 +2,9 @@ import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import BlogClient from "./BlogClient";
 import { getArticles } from "@/lib/blog";
+import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Glazing Blog — Expert Guides for UAE Windows & Doors",
   description:
     "Expert guides, product deep-dives and technical advice on premium aluminium windows, doors and glazing systems from the Swiftrooms team.",
@@ -16,8 +17,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const generateMetadata = () => pageMetadata("/technical/blog", baseMetadata);
+
 export default async function BlogPage() {
-  const posts = await getArticles();
+  const [posts, ps] = await Promise.all([getArticles(), getPageSettings("/technical/blog")]);
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -48,7 +51,7 @@ export default async function BlogPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <BlogClient posts={posts} />
+      <BlogClient posts={posts} hero={ps?.hero} />
     </>
   );
 }

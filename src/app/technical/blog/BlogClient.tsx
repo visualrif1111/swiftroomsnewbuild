@@ -7,6 +7,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import type { BlogPost } from "@/lib/data";
+import type { PageHero } from "@/lib/pageSettings";
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
@@ -23,7 +24,7 @@ function sortedByDate(posts: BlogPost[]) {
   });
 }
 
-export default function BlogClient({ posts }: { posts: BlogPost[] }) {
+export default function BlogClient({ posts, hero }: { posts: BlogPost[]; hero?: PageHero }) {
   const [active, setActive] = useState("All");
 
   const sorted = sortedByDate(posts);
@@ -43,12 +44,13 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8">
-              Insights &amp; expertise.
+              {hero?.heading ?? "Insights & expertise."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Guides, product deep-dives and technical advice from the Swiftrooms team.
+              {hero?.subheading ??
+                "Guides, product deep-dives and technical advice from the Swiftrooms team."}
             </p>
           </ScrollReveal>
         </div>

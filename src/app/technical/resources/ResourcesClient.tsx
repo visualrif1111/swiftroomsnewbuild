@@ -6,6 +6,7 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import type { Resource } from "@/lib/data";
+import type { PageHero } from "@/lib/pageSettings";
 
 const categoryLabels: Record<string, string> = {
   guides: "Guides & Knowledge",
@@ -24,7 +25,7 @@ const tabs = [
 
 type TabKey = "all" | "guides" | "projects" | "planning";
 
-export default function ResourcesClient({ resources }: { resources: Resource[] }) {
+export default function ResourcesClient({ resources, hero }: { resources: Resource[]; hero?: PageHero }) {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [requested, setRequested] = useState<Set<string>>(new Set());
 
@@ -66,13 +67,13 @@ export default function ResourcesClient({ resources }: { resources: Resource[] }
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-headline text-[#1c1c1e] mb-8">
-              Resources &amp; downloads.
+              {hero?.heading ?? "Resources & downloads."}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Product guides, project inspiration, planning tools and technical documentation. Request
-              any document and we&apos;ll send it to you directly.
+              {hero?.subheading ??
+                "Product guides, project inspiration, planning tools and technical documentation. Request any document and we'll send it to you directly."}
             </p>
           </ScrollReveal>
         </div>
