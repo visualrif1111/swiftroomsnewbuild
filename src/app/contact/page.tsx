@@ -1,10 +1,22 @@
 import { SITE_URL } from "@/lib/site";
 import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
+import { getSiteSettings } from "@/lib/site-settings";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ContactForm from "./ContactForm";
+
+const DEFAULT_HOURS = [
+  { days: "Sunday – Thursday", value: "8:30 – 17:30" },
+  { days: "Saturday", value: "10:00 – 14:00" },
+  { days: "Friday", value: "Closed" },
+];
+
+const DEFAULT_QUICK_LINKS = [
+  { href: "/enquire", label: "Get a Free Quote", description: "Submit your project details and we'll provide a written quotation." },
+  { href: "/showroom", label: "Book a Showroom Visit", description: "See our full product range at full scale, in working condition." },
+  { href: "/portfolio", label: "Browse Portfolio", description: "Completed projects across the UAE — villas, apartments, commercial." },
+];
 
 const baseMetadata: Metadata = {
   title: "Contact Swiftrooms — Dubai Showroom & Glazing Enquiries",
@@ -22,7 +34,10 @@ const baseMetadata: Metadata = {
 export const generateMetadata = () => pageMetadata("/contact", baseMetadata);
 
 export default async function ContactPage() {
-  const ps = await getPageSettings("/contact");
+  const [ps, site] = await Promise.all([getPageSettings("/contact"), getSiteSettings()]);
+  const c = ps?.contact;
+  const hours = c?.hours?.length ? c.hours : DEFAULT_HOURS;
+  const quickLinks = c?.quickLinks?.length ? c.quickLinks : DEFAULT_QUICK_LINKS;
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -66,39 +81,33 @@ export default async function ContactPage() {
             <div>
               <div className="space-y-10">
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Showroom & Office</p>
+                  <p className="text-label text-[#007969] mb-4">{c?.showroomLabel ?? "Showroom & Office"}</p>
                   <p className="text-[#6b7280] leading-relaxed">
-                    Jebel Ali Industrial Area 1<br />
-                    Dubai, UAE
+                    {site.showroom.addressLine1}<br />
+                    {site.showroom.city}, {site.showroom.country}
                   </p>
                 </div>
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Telephone</p>
-                  <a href="tel:+971505269149" className="text-[#3a3a3c] hover:text-[#007969] transition-colors text-lg">
-                    +971 505 269 149
+                  <p className="text-label text-[#007969] mb-4">{c?.phoneLabel ?? "Telephone"}</p>
+                  <a href={`tel:${site.contact.phoneRaw}`} className="text-[#3a3a3c] hover:text-[#007969] transition-colors text-lg">
+                    {site.contact.phone}
                   </a>
                 </div>
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Email</p>
-                  <a href="mailto:info@swiftrooms.ae" className="text-[#3a3a3c] hover:text-[#007969] transition-colors">
-                    info@swiftrooms.ae
+                  <p className="text-label text-[#007969] mb-4">{c?.emailLabel ?? "Email"}</p>
+                  <a href={`mailto:${site.contact.email}`} className="text-[#3a3a3c] hover:text-[#007969] transition-colors">
+                    {site.contact.email}
                   </a>
                 </div>
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Business Hours</p>
+                  <p className="text-label text-[#007969] mb-4">{c?.hoursLabel ?? "Business Hours"}</p>
                   <div className="space-y-1.5 text-[#6b7280]">
-                    <div className="flex justify-between max-w-xs">
-                      <span>Sunday – Thursday</span>
-                      <span>8:30 – 17:30</span>
-                    </div>
-                    <div className="flex justify-between max-w-xs">
-                      <span>Saturday</span>
-                      <span>10:00 – 14:00</span>
-                    </div>
-                    <div className="flex justify-between max-w-xs">
-                      <span>Friday</span>
-                      <span>Closed</span>
-                    </div>
+                    {hours.map((row, i) => (
+                      <div key={i} className="flex justify-between max-w-xs">
+                        <span>{row.days}</span>
+                        <span>{row.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -116,25 +125,9 @@ export default async function ContactPage() {
       <section className="py-12 md:py-16 border-t border-gray-100 bg-[#f8f9fa]">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">Or explore first</p>
+            <p className="text-label text-[#007969] mb-6">{c?.quickLinksEyebrow ?? "Or explore first"}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-gray-200">
-              {[
-                {
-                  href: "/enquire",
-                  label: "Get a Free Quote",
-                  description: "Submit your project details and we'll provide a written quotation.",
-                },
-                {
-                  href: "/showroom",
-                  label: "Book a Showroom Visit",
-                  description: "See our full product range at full scale, in working condition.",
-                },
-                {
-                  href: "/portfolio",
-                  label: "Browse Portfolio",
-                  description: "Completed projects across the UAE — villas, apartments, commercial.",
-                },
-              ].map((link) => (
+              {quickLinks.map((link) => (
                 <CTALink
                   key={link.href}
                   href={link.href}

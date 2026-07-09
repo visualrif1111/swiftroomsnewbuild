@@ -1,9 +1,11 @@
 import { SITE_URL } from "@/lib/site";
 import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
+import { getSiteSettings } from "@/lib/site-settings";
 import PageBuilder from "@/components/blocks/PageBuilder";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { stegaClean } from "next-sanity";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ShowroomBookingForm from "./ShowroomBookingForm";
 
@@ -74,8 +76,25 @@ const visitSteps = [
   { num: "04", text: "Leave with a written specification and budgetary estimate if your project is ready." },
 ];
 
+const DEFAULT_HOURS = [
+  { days: "Sunday – Thursday", value: "8:30 – 17:30" },
+  { days: "Saturday", value: "10:00 – 14:00" },
+  { days: "Friday", value: "Closed" },
+];
+
+const DEFAULT_ALSO_LIST = [
+  "uPVC Casement and Sliding — side-by-side comparison",
+  "Full finish library — powder coat, anodised and RAL samples",
+  "Hardware library — all standard and optional hardware ranges",
+];
+
 export default async function ShowroomPage() {
-  const ps = await getPageSettings("/showroom");
+  const [ps, site] = await Promise.all([getPageSettings("/showroom"), getSiteSettings()]);
+  const sr = ps?.showroom;
+  const displayCards = sr?.displays?.length ? sr.displays : displays;
+  const steps = sr?.visitSteps?.length ? sr.visitSteps : visitSteps;
+  const hours = sr?.hours?.length ? sr.hours : DEFAULT_HOURS;
+  const alsoList = sr?.alsoList?.length ? sr.alsoList : DEFAULT_ALSO_LIST;
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -116,10 +135,10 @@ export default async function ShowroomPage() {
         closes: "14:00",
       },
     ],
-    amenityFeature: displays.map((d) => ({
+    amenityFeature: displayCards.map((d) => ({
       "@type": "LocationFeatureSpecification",
-      name: d.name,
-      value: d.type,
+      name: stegaClean(d.name),
+      value: stegaClean(d.type),
     })),
   };
 
@@ -148,8 +167,8 @@ export default async function ShowroomPage() {
               </ScrollReveal>
               <ScrollReveal delay={0.3}>
                 <div className="flex gap-4 mt-8 flex-wrap">
-                  <a href="#book" className="btn-brand">Book a Visit</a>
-                  <Link href="/catalogue/gallery/4900" className="btn-outline">See Gallery</Link>
+                  <a href="#book" className="btn-brand">{sr?.bookLabel ?? "Book a Visit"}</a>
+                  <Link href="/catalogue/gallery/4900" className="btn-outline">{sr?.galleryLabel ?? "See Gallery"}</Link>
                 </div>
               </ScrollReveal>
             </div>
@@ -194,7 +213,7 @@ export default async function ShowroomPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               <div className="absolute bottom-6 left-6 md:bottom-8 md:left-10">
-                <p className="text-[0.6rem] tracking-widest uppercase text-white/80">4900 Showroom · Jebel Ali Industrial Area 1, Dubai</p>
+                <p className="text-[0.6rem] tracking-widest uppercase text-white/80">{sr?.fullBleedCaption ?? "4900 Showroom · Jebel Ali Industrial Area 1, Dubai"}</p>
               </div>
             </div>
           </ScrollReveal>
@@ -209,13 +228,13 @@ export default async function ShowroomPage() {
       <section className="py-16 md:py-24">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-3">What&apos;s on display</p>
+            <p className="text-label text-[#007969] mb-3">{sr?.displaysEyebrow ?? "What's on display"}</p>
             <h2 className="text-title text-[#1c1c1e] mb-10 max-w-xl">
-              Seven full-scale working systems.
+              {sr?.displaysHeading ?? "Seven full-scale working systems."}
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100">
-            {displays.map((display, i) => (
+            {displayCards.map((display, i) => (
               <ScrollReveal key={display.name} delay={i * 0.07}>
                 <Link href={display.link} className="group block bg-white hover:bg-[#f0fdf4] transition-colors overflow-hidden">
                   <div className="h-40 relative overflow-hidden">
@@ -244,14 +263,14 @@ export default async function ShowroomPage() {
             <ScrollReveal delay={0.42}>
               <div className="bg-[#f8f9fa] p-6 md:p-8 flex flex-col justify-between">
                 <div>
-                  <p className="text-label text-[#007969] mb-4">Finish & Hardware Libraries</p>
+                  <p className="text-label text-[#007969] mb-4">{sr?.librariesLabel ?? "Finish & Hardware Libraries"}</p>
                   <p className="text-[#6b7280] text-sm leading-relaxed mb-6">
-                    Browse our complete finish library — powder coat and anodised RAL samples, plus
-                    every standard and optional hardware range across all product categories.
+                    {sr?.librariesBody ??
+                      "Browse our complete finish library — powder coat and anodised RAL samples, plus every standard and optional hardware range across all product categories."}
                   </p>
                 </div>
                 <Link href="/enquire" className="btn-brand self-start">
-                  Book to Browse
+                  {sr?.librariesButtonLabel ?? "Book to Browse"}
                 </Link>
               </div>
             </ScrollReveal>
@@ -265,23 +284,19 @@ export default async function ShowroomPage() {
 
           {/* Visit steps */}
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-6">What to expect on your visit</p>
+            <p className="text-label text-[#007969] mb-6">{sr?.visitEyebrow ?? "What to expect on your visit"}</p>
             <div className="space-y-6">
-              {visitSteps.map((vs) => (
-                <div key={vs.num} className="flex gap-5">
+              {steps.map((vs, i) => (
+                <div key={i} className="flex gap-5">
                   <span className="text-[#007969] text-xs font-bold flex-shrink-0 mt-0.5 w-6">{vs.num}</span>
                   <p className="text-[#6b7280] leading-relaxed text-sm">{vs.text}</p>
                 </div>
               ))}
             </div>
             <div className="mt-10 border-t border-gray-200 pt-8">
-              <p className="text-label text-[#007969] mb-4">Also on display</p>
+              <p className="text-label text-[#007969] mb-4">{sr?.alsoLabel ?? "Also on display"}</p>
               <ul className="space-y-2">
-                {[
-                  "uPVC Casement and Sliding — side-by-side comparison",
-                  "Full finish library — powder coat, anodised and RAL samples",
-                  "Hardware library — all standard and optional hardware ranges",
-                ].map((item) => (
+                {alsoList.map((item) => (
                   <li key={item} className="flex items-start gap-2 text-[#6b7280] text-sm">
                     <div className="w-1 h-1 rounded-full bg-[#007969] flex-shrink-0 mt-2" />
                     {item}
@@ -295,45 +310,39 @@ export default async function ShowroomPage() {
           <ScrollReveal delay={0.15}>
             <div className="space-y-8">
               <div>
-                <p className="text-label text-[#007969] mb-4">Location</p>
+                <p className="text-label text-[#007969] mb-4">{sr?.locationLabel ?? "Location"}</p>
                 <p className="text-[#3a3a3c] leading-relaxed">
-                  Jebel Ali Industrial Area 1<br />
-                  Dubai, UAE
+                  {site.showroom.addressLine1}<br />
+                  {site.showroom.city}, {site.showroom.country}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  Full address and directions sent on appointment confirmation.
+                  {sr?.locationNote ?? "Full address and directions sent on appointment confirmation."}
                 </p>
               </div>
 
               <div>
-                <p className="text-label text-[#007969] mb-4">Opening Hours</p>
+                <p className="text-label text-[#007969] mb-4">{sr?.hoursLabel ?? "Opening Hours"}</p>
                 <div className="space-y-2 text-[#6b7280] text-sm">
-                  <div className="flex justify-between max-w-xs">
-                    <span>Sunday – Thursday</span>
-                    <span>8:30 – 17:30</span>
-                  </div>
-                  <div className="flex justify-between max-w-xs">
-                    <span>Saturday</span>
-                    <span>10:00 – 14:00</span>
-                  </div>
-                  <div className="flex justify-between max-w-xs">
-                    <span>Friday</span>
-                    <span>Closed</span>
-                  </div>
+                  {hours.map((row, i) => (
+                    <div key={i} className="flex justify-between max-w-xs">
+                      <span>{row.days}</span>
+                      <span>{row.value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div>
-                <p className="text-label text-[#007969] mb-4">Call us</p>
-                <a href="tel:+971505269149" className="text-[#1c1c1e] text-lg hover:text-[#007969] transition-colors">
-                  +971 505 269 149
+                <p className="text-label text-[#007969] mb-4">{sr?.callLabel ?? "Call us"}</p>
+                <a href={`tel:${site.contact.phoneRaw}`} className="text-[#1c1c1e] text-lg hover:text-[#007969] transition-colors">
+                  {site.contact.phone}
                 </a>
-                <p className="text-gray-400 text-xs mt-1">Sun–Thu 8:30–17:30, Sat 10:00–14:00</p>
+                <p className="text-gray-400 text-xs mt-1">{sr?.callNote ?? "Sun–Thu 8:30–17:30, Sat 10:00–14:00"}</p>
               </div>
 
               {/* Booking form */}
               <div id="book" className="border-t border-gray-200 pt-8">
-                <p className="text-label text-[#007969] mb-6">Book a Visit</p>
+                <p className="text-label text-[#007969] mb-6">{sr?.bookFormLabel ?? "Book a Visit"}</p>
                 <ShowroomBookingForm />
               </div>
             </div>
@@ -347,15 +356,15 @@ export default async function ShowroomPage() {
           <ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div>
-                <p className="text-label text-[#007969] mb-3">Can&apos;t visit in person?</p>
+                <p className="text-label text-[#007969] mb-3">{sr?.galleryEyebrow ?? "Can't visit in person?"}</p>
                 <p className="text-[#6b7280] leading-relaxed">
-                  Browse photography from our showroom and completed installations — product images,
-                  detail shots and project case studies all available in our galleries.
+                  {sr?.galleryBody ??
+                    "Browse photography from our showroom and completed installations — product images, detail shots and project case studies all available in our galleries."}
                 </p>
               </div>
               <div className="flex gap-4 flex-wrap">
-                <Link href="/catalogue/gallery/4900" className="btn-brand">View Showroom Gallery</Link>
-                <Link href="/portfolio" className="btn-outline">See Completed Projects</Link>
+                <Link href="/catalogue/gallery/4900" className="btn-brand">{sr?.galleryViewLabel ?? "View Showroom Gallery"}</Link>
+                <Link href="/portfolio" className="btn-outline">{sr?.galleryProjectsLabel ?? "See Completed Projects"}</Link>
               </div>
             </div>
           </ScrollReveal>

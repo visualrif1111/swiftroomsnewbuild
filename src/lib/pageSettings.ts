@@ -30,10 +30,105 @@ type RawSeo = {
   noIndex?: boolean;
 };
 
+// Deeper per-page "chrome" (section labels, list content, CTA copy) beyond the
+// shared hero. Every field is optional — a blank field keeps the page's built-in
+// value, so pages render byte-identically until an editor fills something in.
+// These live under route-gated object fields on the pageSettings document, so an
+// editor only ever sees the block for the route they're editing.
+export type HoursRow = { days: string; value: string };
+
+export type ContactChrome = {
+  showroomLabel?: string;
+  phoneLabel?: string;
+  emailLabel?: string;
+  hoursLabel?: string;
+  hours?: HoursRow[];
+  quickLinksEyebrow?: string;
+  quickLinks?: { label: string; description: string; href: string }[];
+};
+
+export type ShowroomChrome = {
+  bookLabel?: string;
+  galleryLabel?: string;
+  fullBleedCaption?: string;
+  displaysEyebrow?: string;
+  displaysHeading?: string;
+  displays?: { name: string; type: string; description: string; image: string; link: string }[];
+  librariesLabel?: string;
+  librariesBody?: string;
+  librariesButtonLabel?: string;
+  visitEyebrow?: string;
+  visitSteps?: { num: string; text: string }[];
+  alsoLabel?: string;
+  alsoList?: string[];
+  locationLabel?: string;
+  locationNote?: string;
+  hoursLabel?: string;
+  hours?: HoursRow[];
+  callLabel?: string;
+  callNote?: string;
+  bookFormLabel?: string;
+  galleryEyebrow?: string;
+  galleryBody?: string;
+  galleryViewLabel?: string;
+  galleryProjectsLabel?: string;
+};
+
+export type EnquireChrome = {
+  stats?: { value: string; label: string }[];
+  nextLabel?: string;
+  nextSteps?: { step: string; text: string }[];
+  clientsLabel?: string;
+  callLabel?: string;
+  callNote?: string;
+  visitLabel?: string;
+  visitLinkLabel?: string;
+};
+
+export type ReviewsChrome = {
+  ctaEyebrow?: string;
+  ctaHeading?: string;
+  ctaBody?: string;
+  ctaButtonLabel?: string;
+};
+
+export type CatalogueChrome = {
+  brandsLabel?: string;
+  promotionsLabel?: string;
+  partnersHeading?: string;
+  promoEyebrow?: string;
+  promoTitle?: string;
+  promoText?: string;
+  galleryEyebrow?: string;
+  galleryTitle?: string;
+  galleryText?: string;
+};
+
+export type TechnicalChrome = {
+  blogEyebrow?: string;
+  blogHeading?: string;
+  blogAllLabel?: string;
+  faqEyebrow?: string;
+  faqHeading?: string;
+  faqBody?: string;
+  faqButtonLabel?: string;
+  ctaEyebrow?: string;
+  ctaHeading?: string;
+  ctaBody?: string;
+  ctaQuoteLabel?: string;
+  ctaShowroomLabel?: string;
+};
+
 export type PageSettings = {
   hero: PageHero;
   sections: PageSection[];
   seo: RawSeo;
+  contact?: ContactChrome;
+  showroom?: ShowroomChrome;
+  enquire?: EnquireChrome;
+  reviews?: ReviewsChrome;
+  catalogue?: CatalogueChrome;
+  technical?: TechnicalChrome;
 };
 
 // Mirrors the reference expansions in PAGE_QUERY (src/sanity/lib/pageQueries.ts)
@@ -42,6 +137,12 @@ export type PageSettings = {
 const QUERY = `*[_type == "pageSettings" && route == $route][0]{
   hero,
   seo,
+  contact,
+  showroom,
+  enquire,
+  reviews,
+  catalogue,
+  technical,
   sections[]{
     ...,
     _type == "testimonialsBlock" => {
@@ -55,6 +156,27 @@ const QUERY = `*[_type == "pageSettings" && route == $route][0]{
     }
   }
 }`;
+
+// Chrome fields are rendered as plain text (stega overlays give click-to-edit),
+// so most keep their encoding. Only values used as an href or an <Image> src must
+// be stripped, or the URL would carry invisible stega characters and break.
+function cleanContact(c: ContactChrome): ContactChrome {
+  return {
+    ...c,
+    quickLinks: c.quickLinks?.map((l) => ({ ...l, href: stegaClean(l.href) })),
+  };
+}
+
+function cleanShowroom(s: ShowroomChrome): ShowroomChrome {
+  return {
+    ...s,
+    displays: s.displays?.map((d) => ({
+      ...d,
+      image: stegaClean(d.image),
+      link: stegaClean(d.link),
+    })),
+  };
+}
 
 async function isDraft(): Promise<boolean> {
   try {
@@ -77,7 +199,17 @@ export const getPageSettings = cache(
         d = await client.fetch<PageSettings | null>(QUERY, { route }, { next: { revalidate: 60 } });
       }
       if (!d) return null;
-      return { hero: d.hero ?? {}, sections: d.sections ?? [], seo: d.seo ?? {} };
+      return {
+        hero: d.hero ?? {},
+        sections: d.sections ?? [],
+        seo: d.seo ?? {},
+        contact: d.contact ? cleanContact(d.contact) : undefined,
+        showroom: d.showroom ? cleanShowroom(d.showroom) : undefined,
+        enquire: d.enquire,
+        reviews: d.reviews,
+        catalogue: d.catalogue,
+        technical: d.technical,
+      };
     } catch {
       return null;
     }
