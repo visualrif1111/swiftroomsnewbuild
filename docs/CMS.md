@@ -63,6 +63,17 @@ only switches to dynamic rendering when the preview cookie is present.
   Hero, Rich text, Image, Gallery, Video, Statistics, Feature grid, Testimonials,
   Brand logos, FAQ, Call-to-action. Each block supports **hide**, **anchor id**
   and **background** controls.
+- `pageSettings` — **Landing Pages**: one document per hard-coded route (About,
+  Contact, Showroom, Enquire, Reviews, Catalogue, Technical, and their index
+  sub-pages). These pages are composed from many collections, so they have no
+  single owning document; `pageSettings` holds their editable **hero**, their
+  **Page content** (section labels, list content and CTA copy — only the block
+  for that route is shown), optional appended **sections** (the same 11 blocks),
+  and **SEO**. Every field is optional: **blank keeps the page's built-in copy**,
+  so nothing changes until an editor fills a field in. Seeding one doc per route
+  also gives the Presentation tool a main document to resolve (removing the
+  "Missing a main document" notice). Contact details (phone/email/address) are
+  single-sourced from `siteSettings`, not duplicated here.
 
 **Content**
 - `post` — blog posts (title, slug, category, excerpt, cover image, Portable Text
@@ -98,9 +109,15 @@ Managed under **Site Management** in the Studio:
   hero video id, bottom CTA.
 - **Site Settings** (`siteSettings` singleton) — company info, contact
   (phone/email), showroom address + hours, footer link groups, social links.
+- **Landing Pages** (`pageSettings`) — per-route hero, Page content chrome,
+  appended sections and SEO for the composed pages (see §2). Edit under
+  **Content → Landing Pages**, or click any headline/label on the page inside
+  **Live Preview**. Run `scripts/migrate-page-settings-to-sanity.ts` once to seed
+  the (blank) documents.
 
-These feed the global Navbar/Footer and homepage. (Announcement bar, mega-menu-
-as-data and design-system tokens are candidates for the next phase — see §8.)
+These feed the global Navbar/Footer, homepage and the individual landing pages.
+(Announcement bar, mega-menu-as-data and design-system tokens are candidates for
+the next phase — see §8.)
 
 ---
 
