@@ -23,6 +23,7 @@ export const generateMetadata = () => pageMetadata("/reviews", baseMetadata);
 
 export default async function ReviewsPage() {
   const [testimonials, ps] = await Promise.all([getTestimonials(), getPageSettings("/reviews")]);
+  const r = ps?.reviews;
   const base = SITE_URL;
 
   const reviewSchema = {
@@ -111,13 +112,13 @@ export default async function ReviewsPage() {
             <div className="mt-20 p-8 md:p-12 bg-[#007969]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div>
-                  <p className="text-label text-white/70 mb-4">Start Your Project</p>
+                  <p className="text-label text-white/70 mb-4">{r?.ctaEyebrow ?? "Start Your Project"}</p>
                   <h2 className="text-title text-white mb-4">
-                    Join our list of satisfied clients
+                    {r?.ctaHeading ?? "Join our list of satisfied clients"}
                   </h2>
                   <p className="text-white/70 leading-relaxed">
-                    Tell us about your project and our technical team will specify the right glazing
-                    system for your villa, apartment or commercial development.
+                    {r?.ctaBody ??
+                      "Tell us about your project and our technical team will specify the right glazing system for your villa, apartment or commercial development."}
                   </p>
                 </div>
                 <div className="flex flex-col gap-4">
@@ -125,7 +126,7 @@ export default async function ReviewsPage() {
                     href="/enquire"
                     className="inline-flex items-center justify-center gap-3 bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors"
                   >
-                    Get a Free Quote
+                    {r?.ctaButtonLabel ?? "Get a Free Quote"}
                   </CTALink>
                 </div>
               </div>
