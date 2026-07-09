@@ -29,6 +29,7 @@ export default async function CataloguePage() {
     getCategories(),
     getPageSettings("/catalogue"),
   ]);
+  const cs = ps?.catalogue;
   const base = SITE_URL;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -98,13 +99,13 @@ export default async function CataloguePage() {
                 href="/catalogue/brands"
                 className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap flex-shrink-0"
               >
-                Brands
+                {cs?.brandsLabel ?? "Brands"}
               </Link>
               <Link
                 href="/catalogue/promotions"
                 className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] border border-gray-200 px-4 py-2 hover:border-[#007969] hover:text-[#007969] transition-all whitespace-nowrap flex-shrink-0"
               >
-                Promotions
+                {cs?.promotionsLabel ?? "Promotions"}
               </Link>
             </div>
           </ScrollReveal>
@@ -173,7 +174,7 @@ export default async function CataloguePage() {
           {/* Manufacturer partners */}
           <ScrollReveal>
             <div className="mt-16 md:mt-24 border-t border-gray-100 pt-12 md:pt-16">
-              <PartnerBrands heading="Engineered with the world's leading systems" />
+              <PartnerBrands heading={cs?.partnersHeading ?? "Engineered with the world's leading systems"} />
             </div>
           </ScrollReveal>
 
@@ -184,11 +185,11 @@ export default async function CataloguePage() {
                 href="/catalogue/promotions"
                 className="group block bg-white p-5 sm:p-8 md:p-10 hover:bg-[#f0fdf4] transition-colors duration-300"
               >
-                <span className="text-label text-[#007969] mb-4 block">Special Offers</span>
+                <span className="text-label text-[#007969] mb-4 block">{cs?.promoEyebrow ?? "Special Offers"}</span>
                 <h2 className="text-xl font-semibold text-[#1c1c1e] mb-3 group-hover:text-[#007969] transition-colors">
-                  Promotions
+                  {cs?.promoTitle ?? "Promotions"}
                 </h2>
-                <p className="text-gray-400 text-sm">Current offers and seasonal promotions</p>
+                <p className="text-gray-400 text-sm">{cs?.promoText ?? "Current offers and seasonal promotions"}</p>
               </Link>
             </ScrollReveal>
             <ScrollReveal delay={0.1}>
@@ -196,11 +197,11 @@ export default async function CataloguePage() {
                 href="/catalogue/gallery"
                 className="group block bg-white p-5 sm:p-8 md:p-10 hover:bg-[#f0fdf4] transition-colors duration-300"
               >
-                <span className="text-label text-[#007969] mb-4 block">Inspiration</span>
+                <span className="text-label text-[#007969] mb-4 block">{cs?.galleryEyebrow ?? "Inspiration"}</span>
                 <h2 className="text-xl font-semibold text-[#1c1c1e] mb-3 group-hover:text-[#007969] transition-colors">
-                  Gallery
+                  {cs?.galleryTitle ?? "Gallery"}
                 </h2>
-                <p className="text-gray-400 text-sm">Product photography and installation photography</p>
+                <p className="text-gray-400 text-sm">{cs?.galleryText ?? "Product photography and installation photography"}</p>
               </Link>
             </ScrollReveal>
           </div>

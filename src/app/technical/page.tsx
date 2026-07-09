@@ -81,6 +81,7 @@ export default async function TechnicalPage() {
     getPageSettings("/technical"),
   ]);
   const sections = buildSections(articles.length, faqs.length);
+  const t = ps?.technical;
   const recentPosts = [...articles]
     .sort((a, b) => {
       const [aM, aY] = a.date.split(" ");
@@ -176,13 +177,13 @@ export default async function TechnicalPage() {
           <ScrollReveal>
             <div className="flex items-end justify-between mb-10">
               <div>
-                <p className="text-label text-[#007969] mb-3">Latest from the blog</p>
+                <p className="text-label text-[#007969] mb-3">{t?.blogEyebrow ?? "Latest from the blog"}</p>
                 <h2 className="text-title text-[#1c1c1e] max-w-md">
-                  Technical articles from our team.
+                  {t?.blogHeading ?? "Technical articles from our team."}
                 </h2>
               </div>
               <Link href="/technical/blog" className="btn-outline hidden md:inline-flex">
-                All articles →
+                {t?.blogAllLabel ?? "All articles →"}
               </Link>
             </div>
           </ScrollReveal>
@@ -223,7 +224,7 @@ export default async function TechnicalPage() {
           <ScrollReveal>
             <div className="mt-px md:hidden">
               <Link href="/technical/blog" className="btn-outline w-full justify-center mt-4">
-                All articles →
+                {t?.blogAllLabel ?? "All articles →"}
               </Link>
             </div>
           </ScrollReveal>
@@ -236,15 +237,15 @@ export default async function TechnicalPage() {
           <ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
               <div>
-                <p className="text-label text-[#007969] mb-3">Common questions</p>
+                <p className="text-label text-[#007969] mb-3">{t?.faqEyebrow ?? "Common questions"}</p>
                 <h2 className="text-title text-[#1c1c1e] mb-4 max-w-sm">
-                  Quick answers.
+                  {t?.faqHeading ?? "Quick answers."}
                 </h2>
                 <p className="text-[#6b7280] leading-relaxed mb-6">
-                  We've answered the most common questions about working with Swiftrooms across
-                  8 categories — from pricing and timelines to guarantees and aftercare.
+                  {t?.faqBody ??
+                    "We've answered the most common questions about working with Swiftrooms across 8 categories — from pricing and timelines to guarantees and aftercare."}
                 </p>
-                <Link href="/technical/faq" className="btn-brand">Browse all FAQs</Link>
+                <Link href="/technical/faq" className="btn-brand">{t?.faqButtonLabel ?? "Browse all FAQs"}</Link>
               </div>
               <div className="space-y-0 border-t border-gray-100">
                 {faqs.slice(0, 5).map((faq, i) => (
@@ -267,20 +268,19 @@ export default async function TechnicalPage() {
         <ScrollReveal>
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
-              <p className="text-label text-white/70 mb-4">Ready to move from research to reality?</p>
-              <h2 className="text-title text-white mb-4">Start your project today.</h2>
+              <p className="text-label text-white/70 mb-4">{t?.ctaEyebrow ?? "Ready to move from research to reality?"}</p>
+              <h2 className="text-title text-white mb-4">{t?.ctaHeading ?? "Start your project today."}</h2>
               <p className="text-white/70 leading-relaxed">
-                Get a free quotation and site survey within 24 hours. No obligation —
-                just an expert conversation about your project and a written specification
-                you can use however you like.
+                {t?.ctaBody ??
+                  "Get a free quotation and site survey within 24 hours. No obligation — just an expert conversation about your project and a written specification you can use however you like."}
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <QuoteButton className="inline-flex items-center justify-center bg-white text-[#007969] px-8 py-4 text-[0.75rem] tracking-widest uppercase font-semibold hover:bg-gray-50 transition-colors">
-                Get a Free Quote
+                {t?.ctaQuoteLabel ?? "Get a Free Quote"}
               </QuoteButton>
               <ShowroomButton className="inline-flex items-center justify-center border border-white/40 text-white px-8 py-4 text-[0.75rem] tracking-widest uppercase hover:bg-white/10 transition-all">
-                Book Showroom Visit
+                {t?.ctaShowroomLabel ?? "Book Showroom Visit"}
               </ShowroomButton>
             </div>
           </div>
