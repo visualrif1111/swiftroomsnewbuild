@@ -4,7 +4,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import type { Metadata } from "next";
 import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import ContactForm from "./ContactForm";
+import LeadTypeform from "@/components/forms/LeadTypeform";
 
 const DEFAULT_HOURS = [
   { days: "Sunday – Thursday", value: "8:30 – 17:30" },
@@ -116,7 +116,11 @@ export default async function ContactPage() {
 
           {/* Contact form */}
           <ScrollReveal delay={0.15}>
-            <ContactForm />
+            <LeadTypeform
+              source="contact"
+              heading="Send us a message"
+              intro="Answer a few quick questions and our team will get back to you within 12 hours."
+            />
           </ScrollReveal>
         </div>
       </section>

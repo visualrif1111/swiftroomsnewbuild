@@ -4,8 +4,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import EnquireForm from "./EnquireForm";
-import { getCategories } from "@/lib/catalogue";
+import LeadTypeform from "@/components/forms/LeadTypeform";
 import { getTestimonials } from "@/lib/about";
 
 const DEFAULT_STATS = [
@@ -37,8 +36,7 @@ const baseMetadata: Metadata = {
 export const generateMetadata = () => pageMetadata("/enquire", baseMetadata);
 
 export default async function EnquirePage() {
-  const [categories, testimonials, ps, site] = await Promise.all([
-    getCategories(),
+  const [testimonials, ps, site] = await Promise.all([
     getTestimonials(),
     getPageSettings("/enquire"),
     getSiteSettings(),
@@ -84,7 +82,9 @@ export default async function EnquirePage() {
 
       <section className="py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
-          <EnquireForm categories={categories} />
+          <div className="lg:col-span-2">
+            <LeadTypeform source="enquire" />
+          </div>
 
           {/* Side info */}
           <div>

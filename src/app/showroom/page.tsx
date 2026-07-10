@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { stegaClean } from "next-sanity";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import ShowroomBookingForm from "./ShowroomBookingForm";
+import LeadTypeform from "@/components/forms/LeadTypeform";
 
 const baseMetadata: Metadata = {
   title: "Showroom — Jebel Ali, Dubai",
@@ -343,7 +343,11 @@ export default async function ShowroomPage() {
               {/* Booking form */}
               <div id="book" className="border-t border-gray-200 pt-8">
                 <p className="text-label text-[#007969] mb-6">{sr?.bookFormLabel ?? "Book a Visit"}</p>
-                <ShowroomBookingForm />
+                <LeadTypeform
+                  source="showroom"
+                  heading="Book a showroom visit"
+                  intro="Answer a few quick questions and we'll confirm your appointment within 12 hours."
+                />
               </div>
             </div>
           </ScrollReveal>
