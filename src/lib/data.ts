@@ -92,6 +92,9 @@ export type Resource = {
   category: "guides" | "projects" | "planning";
   fileType: string;
   fileSize: string;
+  // Direct download URL when a PDF has been uploaded in Sanity; absent for
+  // request-only resources (which keep the "Request" lead flow).
+  fileUrl?: string;
 };
 
 export type TimelineEntry = {

@@ -24,9 +24,34 @@ const LABEL_TO_KEY: Record<string, string> = {
 // Preserve the original order (Sanity docs have no inherent order).
 const order = new Map(dataResources.map((r, i) => [r.title, i]));
 
-type Raw = { id: string; title: string; description?: string; category?: string; fileType?: string; fileSize?: string };
+type Raw = {
+  id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  fileType?: string;
+  fileSize?: string;
+  fileUrl?: string;
+  fileSizeBytes?: number;
+  fileExt?: string;
+};
 
-const QUERY = groq`*[_type == "resource"]{ "id": _id, title, description, category, fileType, fileSize }`;
+// Pull the uploaded PDF's asset url + size + extension so the page can offer a
+// direct download and auto-fill the type/size badges when left blank.
+const QUERY = groq`*[_type == "resource"]{
+  "id": _id, title, description, category, fileType, fileSize,
+  "fileUrl": file.asset->url,
+  "fileSizeBytes": file.asset->size,
+  "fileExt": file.asset->extension
+}`;
+
+// "2411724" bytes -> "2.4 MB". Falls back to KB for small files.
+function humanSize(bytes?: number): string {
+  if (!bytes || bytes <= 0) return "";
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1) return `${mb.toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
 
 export const getResources = cache(async (): Promise<Resource[]> => {
   if (sanityConfigured()) {
@@ -41,15 +66,21 @@ export const getResources = cache(async (): Promise<Resource[]> => {
       }
       if (rows?.length) {
         return rows
-          .map((r): Resource => ({
-            id: r.id,
-            title: r.title,
-            description: r.description ?? "",
-            // category drives filtering/grouping — strip stega before the key lookup.
-            category: (LABEL_TO_KEY[stegaClean(r.category ?? "")] ?? "guides") as Resource["category"],
-            fileType: r.fileType ?? "",
-            fileSize: r.fileSize ?? "",
-          }))
+          .map((r): Resource => {
+            const fileUrl = stegaClean(r.fileUrl ?? "") || undefined;
+            const ext = stegaClean(r.fileExt ?? "");
+            return {
+              id: r.id,
+              title: r.title,
+              description: r.description ?? "",
+              // category drives filtering/grouping — strip stega before the key lookup.
+              category: (LABEL_TO_KEY[stegaClean(r.category ?? "")] ?? "guides") as Resource["category"],
+              // Manual badge wins; otherwise derive from the uploaded asset.
+              fileType: r.fileType?.trim() || (ext ? ext.toUpperCase() : ""),
+              fileSize: r.fileSize?.trim() || humanSize(r.fileSizeBytes),
+              fileUrl,
+            };
+          })
           .sort((a, b) => (order.get(a.title) ?? 999) - (order.get(b.title) ?? 999));
       }
     } catch {

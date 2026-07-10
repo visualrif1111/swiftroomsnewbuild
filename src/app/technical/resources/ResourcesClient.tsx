@@ -165,7 +165,20 @@ export default function ResourcesClient({ resources, hero }: { resources: Resour
                               </span>
                               <span className="text-gray-400 text-xs">{resource.fileSize}</span>
                             </div>
-                            {requested.has(resource.id) ? (
+                            {resource.fileUrl ? (
+                              <a
+                                href={resource.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                className="inline-flex items-center gap-1.5 text-[0.65rem] tracking-widest uppercase border border-[#007969] px-3 py-2 text-[#007969] hover:bg-[#007969] hover:text-white transition-all whitespace-nowrap"
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                </svg>
+                                Download
+                              </a>
+                            ) : requested.has(resource.id) ? (
                               <span className="text-[0.65rem] tracking-widest uppercase text-[#007969] font-semibold">
                                 Requested ✓
                               </span>
