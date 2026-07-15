@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 const BASE = SITE_URL;
 
-const localBusinessSchema = {
+const buildLocalBusinessSchema = (contact: { phoneRaw: string; email: string }) => ({
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "@id": `${BASE}/#business`,
@@ -67,9 +67,9 @@ const localBusinessSchema = {
   description:
     "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
   url: BASE,
-  telephone: "+971-4-000-0000",
-  email: "info@swiftrooms.ae",
-  logo: `${BASE}/brand/swiftrooms-logo.png`,
+  telephone: contact.phoneRaw,
+  email: contact.email,
+  logo: `${BASE}/brand/logo-color.png`,
   image: `${BASE}/brand/hero-villa-dubai.png`,
   address: {
     "@type": "PostalAddress",
@@ -99,7 +99,7 @@ const localBusinessSchema = {
   ],
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+971-4-000-0000",
+    telephone: contact.phoneRaw,
     contactType: "sales",
     areaServed: "AE",
     availableLanguage: ["English", "Arabic"],
@@ -113,7 +113,7 @@ const localBusinessSchema = {
     { "@type": "AdministrativeArea", name: "United Arab Emirates" },
   ],
   sameAs: [],
-};
+});
 
 const webSiteSchema = {
   "@context": "https://schema.org",
@@ -141,7 +141,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-white text-[#1c1c1e] antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildLocalBusinessSchema(settings.contact)) }}
         />
         <script
           type="application/ld+json"

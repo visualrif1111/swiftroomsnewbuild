@@ -111,8 +111,8 @@ export default async function ShowroomPage() {
     description:
       "The UAE's only showroom featuring full-scale working displays of Cortizo Cor Vision, Cor Vision Plus, TP52 curtain wall and Gulf Extrusions TB600. Open by appointment.",
     url: `${SITE_URL}/showroom`,
-    telephone: "+971-4-000-0000",
-    email: "info@swiftrooms.ae",
+    telephone: site.contact.phoneRaw,
+    email: site.contact.email,
     address: {
       "@type": "PostalAddress",
       streetAddress: "Jebel Ali Industrial Area 1",

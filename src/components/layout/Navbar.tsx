@@ -75,13 +75,17 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
     setMenuOpen(false);
   }, [pathname]);
 
-  // Escape key
+  // Escape key — closes the mobile menu and any open desktop mega menu
   useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setMegaMenu(null);
+      }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
+  }, []);
 
   // Scroll lock — position:fixed approach works on iOS Chrome
   useEffect(() => {
@@ -158,7 +162,15 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
               onMouseEnter={() => openMega("catalogue")}
               onMouseLeave={closeMega}
             >
-              <button className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+              <button
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={megaMenu === "catalogue"}
+                aria-controls="mega-catalogue"
+                onClick={() => setMegaMenu(megaMenu === "catalogue" ? null : "catalogue")}
+                onFocus={() => openMega("catalogue")}
+                className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}
+              >
                 Catalogue
                 <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -175,7 +187,14 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
               onMouseEnter={() => openMega("technical")}
               onMouseLeave={closeMega}
             >
-              <Link href="/technical" className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+              <Link
+                href="/technical"
+                aria-haspopup="true"
+                aria-expanded={megaMenu === "technical"}
+                aria-controls="mega-technical"
+                onFocus={() => openMega("technical")}
+                className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}
+              >
                 Technical
                 <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -236,6 +255,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
         <AnimatePresence>
           {megaMenu === "catalogue" && (
             <motion.div
+              id="mega-catalogue"
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
@@ -280,6 +300,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
         <AnimatePresence>
           {megaMenu === "technical" && (
             <motion.div
+              id="mega-technical"
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
