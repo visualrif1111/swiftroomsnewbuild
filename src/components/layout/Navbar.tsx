@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 const catalogueItems = [
   { label: "All Products", href: "/catalogue" },
@@ -87,28 +88,12 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Scroll lock — position:fixed approach works on iOS Chrome
+  // Scroll lock via the shared ref-counted helper so the menu and the form
+  // drawers never clobber each other's body styles (see lib/scroll-lock).
   useEffect(() => {
-    if (menuOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-    } else {
-      const savedTop = document.body.style.top;
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      if (savedTop) window.scrollTo(0, parseInt(savedTop) * -1);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-    };
+    if (!menuOpen) return;
+    lockScroll();
+    return () => unlockScroll();
   }, [menuOpen]);
 
   const openMega = (menu: "catalogue" | "technical") => {

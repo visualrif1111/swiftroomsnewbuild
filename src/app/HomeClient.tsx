@@ -182,7 +182,7 @@ export default function HomeClient({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative h-[100dvh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
+      <section ref={heroRef} className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
         {/* Poster image — LCP candidate, always visible */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
@@ -455,7 +455,7 @@ export default function HomeClient({
           <div className="md:hidden">
             <div
               ref={productCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
+              className="flex overflow-x-auto snap-x snap-proximity scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(productCarouselRef, setActiveProduct)}
             >
@@ -556,7 +556,7 @@ export default function HomeClient({
 
           {/* ── Mobile: 2-per-view snap carousel ── */}
           <div className="md:hidden">
-            <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-3 pb-2">
+            <div className="flex overflow-x-auto snap-x snap-proximity scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-3 pb-2">
               {brands.map((brand, i) => (
                 <Link
                   key={brand.name}
@@ -624,7 +624,7 @@ export default function HomeClient({
           <div className="md:hidden">
             <div
               ref={portfolioCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
+              className="flex overflow-x-auto snap-x snap-proximity scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-4 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(portfolioCarouselRef, setActivePortfolio)}
             >
@@ -726,7 +726,7 @@ export default function HomeClient({
           <div className="md:hidden">
             <div
               ref={processCarouselRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-0 pb-2"
+              className="flex overflow-x-auto snap-x snap-proximity scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-0 pb-2"
               style={{ scrollPaddingLeft: "1.25rem" }}
               onScroll={() => onScroll(processCarouselRef, setActiveProcess)}
             >

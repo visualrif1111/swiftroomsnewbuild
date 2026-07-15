@@ -312,7 +312,7 @@
   display: flex;
   overflow-x: auto;
   gap: 1rem;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
   -ms-overflow-style: none;
   scrollbar-width: none;

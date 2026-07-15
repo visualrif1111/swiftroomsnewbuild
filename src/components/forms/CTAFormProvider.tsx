@@ -10,6 +10,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import FreeQuoteForm from "./FreeQuoteForm";
 import ShowroomVisitForm from "./ShowroomVisitForm";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 type FormType = "quote" | "showroom";
 
@@ -38,11 +39,13 @@ export function CTAFormProvider({ children }: { children: React.ReactNode }) {
   const openShowroomVisitForm = useCallback(() => setActiveForm("showroom"), []);
   const closeForm = useCallback(() => setActiveForm(null), []);
 
+  // Lock body scroll while a drawer is open, via the shared ref-counted helper.
+  // On touch devices this uses the position:fixed technique so iOS Safari does
+  // not scroll the background behind the drawer.
   useEffect(() => {
-    document.body.style.overflow = activeForm ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (!activeForm) return;
+    lockScroll();
+    return () => unlockScroll();
   }, [activeForm]);
 
   useEffect(() => {
