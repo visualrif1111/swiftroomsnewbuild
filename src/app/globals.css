@@ -38,6 +38,23 @@
     background: var(--brand);
     color: #fff;
   }
+
+  /* Visible keyboard focus ring for all interactive elements (WCAG 2.4.7).
+     Mouse/touch clicks don't trigger :focus-visible, so this is keyboard-only. */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Prevent iOS Safari auto-zoom on focus — form controls must be >=16px. */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
 }
 
 @theme inline {

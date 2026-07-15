@@ -8,6 +8,21 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "cdn.sanity.io" },
     ],
   },
+  // Baseline security headers applied to every route. NOTE: a Content-Security-
+  // Policy is intentionally NOT set here yet — it must be authored and tested
+  // against the YouTube hero embed, Sanity Studio/CDN and inline JSON-LD before
+  // enabling, or it will break rendering. See HANDOFF.md.
+  async headers() {
+    const securityHeaders = [
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+      { key: "X-DNS-Prefetch-Control", value: "on" },
+    ];
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
   // SEO migration — preserve equity from EVERY legacy indexed URL on
   // www.swiftrooms.ae (211 incl. ~146 blog posts) by 301/308-redirecting
   // each to its closest new route. Source of truth: seo-migration/redirects.json
