@@ -1,5 +1,28 @@
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
+import { BRAND_ROUTE_ENTRIES } from "@/lib/brandRoutes";
+
+/*
+ * Contact details the live site publishes that the shared Sanity `contact`
+ * object has no field for — it holds a single unlabelled phone and the
+ * showroom address only. Kept here rather than added to that dataset, which
+ * swiftrooms.ae also reads. Move them into siteSettings once the schema gains
+ * service-phone and factory-address fields.
+ */
+const SERVICE_PHONE = "04 323 1625";
+const SERVICE_PHONE_RAW = "+97143231625";
+const FACTORY_ADDRESS_LINE1 = "Dubai Real Estate Centre Ind Park, Unit 1-B";
+const FACTORY_ADDRESS_LINE2 = "Jebel Ali, Ind Area 1";
+
+/** Display names for the brand footer column, keyed by Sanity brand slug. */
+const BRAND_LABELS: Record<string, string> = {
+  cortizo: "Cortizo",
+  deceuninck: "Deceuninck",
+  "gulf-extrusions": "Gulf Extrusions",
+  reynaers: "Reynaers",
+  schuco: "Sch\u00fcco",
+  ultraframe: "UltraFrame",
+};
 import { getSiteSettings } from "@/lib/site-settings";
 
 export default async function Footer() {
@@ -46,17 +69,52 @@ export default async function Footer() {
             <div className="space-y-1.5 text-sm">
               <p className="text-label text-[#007969] mb-3">Contact</p>
               <a href={`tel:${contact.phoneRaw}`} className="block text-white/50 hover:text-white transition-colors">
-                {contact.phone}
+                Sales: {contact.phone}
+              </a>
+              <a href={`tel:${SERVICE_PHONE_RAW}`} className="block text-white/50 hover:text-white transition-colors">
+                Service: {SERVICE_PHONE}
               </a>
               <a href={`mailto:${contact.email}`} className="block text-white/50 hover:text-white transition-colors">
                 {contact.email}
               </a>
               <p className="text-white/30 mt-3">
-                {showroom.addressLine1}
+                Showroom: {showroom.addressLine1}
                 <br />
                 {showroom.city}, {showroom.country}
               </p>
+              <p className="text-white/30 mt-2">
+                Factory: {FACTORY_ADDRESS_LINE1}
+                <br />
+                {FACTORY_ADDRESS_LINE2}
+              </p>
             </div>
+          </div>
+
+          {/* Shop By Brand — built from the brand route map rather than the
+              shared Sanity footerLinks, which swiftrooms.ae also reads. */}
+          <div>
+            {/* Title case, matching the live footer — the other group headings
+                use the uppercase label treatment, this one does not. */}
+            <p className="mb-5">
+              <Link
+                href="/brands"
+                className="font-accent font-semibold text-[0.7rem] tracking-[0.12em] text-[#007969] hover:text-white transition-colors"
+              >
+                Shop By Brand
+              </Link>
+            </p>
+            <ul className="space-y-2.5">
+              {BRAND_ROUTE_ENTRIES.map(([slug, route]) => (
+                <li key={slug}>
+                  <Link
+                    href={`/brands/${route}`}
+                    className="text-white/40 text-sm hover:text-white transition-colors"
+                  >
+                    {BRAND_LABELS[slug] ?? slug}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Link groups */}

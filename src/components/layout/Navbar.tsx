@@ -30,12 +30,15 @@ const technicalItems = [
   { label: "FAQ", href: "/technical/faq" },
 ];
 
+// Fallback only — src/lib/site-settings.ts DEFAULTS.navigation.mobile is what
+// actually renders. Kept in sync so the two cannot disagree.
 const mobileNavItems = [
-  { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  { label: "Catalogue", href: "/catalogue" },
+  { label: "Product Range", href: "/catalogue" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Technical", href: "/technical" },
+  { label: "Promotions", href: "/catalogue/promotions" },
+  { label: "Shop By Brand", href: "/brands" },
 ];
 
 type NavLink = { label: string; href: string };
@@ -133,11 +136,6 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
             }`}
           >
             <li>
-              <Link href="/" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
-                Home
-              </Link>
-            </li>
-            <li>
               <Link href="/about" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
                 About
               </Link>
@@ -156,7 +154,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
                 onFocus={() => openMega("catalogue")}
                 className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}
               >
-                Catalogue
+                Product Range
                 <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -184,6 +182,16 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
                 <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
+              </Link>
+            </li>
+            <li>
+              <Link href="/catalogue/promotions" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+                Promotions
+              </Link>
+            </li>
+            <li>
+              <Link href="/brands" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+                Shop By Brand
               </Link>
             </li>
           </ul>

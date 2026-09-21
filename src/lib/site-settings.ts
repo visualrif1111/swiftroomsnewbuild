@@ -110,12 +110,15 @@ const DEFAULTS: SiteSettings = {
       { label: "Technical Resources", href: "/technical/resources" },
       { label: "FAQ", href: "/technical/faq" },
     ],
+    // Mirrors the live site's primary navigation. No "Home" entry — the
+    // wordmark already links there, and the live nav omits it.
     mobile: [
-      { label: "Home", href: "/" },
       { label: "About Us", href: "/about" },
-      { label: "Catalogue", href: "/catalogue" },
+      { label: "Product Range", href: "/catalogue" },
       { label: "Portfolio", href: "/portfolio" },
       { label: "Technical", href: "/technical" },
+      { label: "Promotions", href: "/catalogue/promotions" },
+      { label: "Shop By Brand", href: "/brands" },
     ],
   },
   cta: {
