@@ -15,6 +15,7 @@ const complementaryMap: Record<string, string[]> = {
   "garden-rooms": ["aluminium-sliding-doors", "skylights", "insect-screens"],
   "insect-screens": ["aluminium-sliding-doors", "aluminium-windows"],
   "skylights": ["garden-rooms", "curtain-wall"],
+  "aluminium-glass-doors": ["aluminium-windows", "curtain-wall", "insect-screens"],
 };
 
 export default function WorksWellWith({

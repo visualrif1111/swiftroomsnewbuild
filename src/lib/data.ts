@@ -1075,11 +1075,33 @@ export const productCategories: ProductCategory[] = [
     slug: "aluminium-glass-doors",
     tagline: "More glass, less frame, built to last.",
     description:
-      "UAE heat, sand and coastal humidity punish a door daily. Aluminium holds its shape and its seal through all of it, where timber warps and uPVC softens under sustained sun — which is why it is the default on any opening where glass area actually matters.",
+      "UAE heat, sand, and coastal humidity punish a door daily, aluminium holds its shape and seal through it, where timber warps and uPVC softens under sustained sun.",
     relatedBlogSlugs: [
       "thermal-break-uae-climate",
       "upvc-vs-aluminium-windows-uae",
       "glass-specification-guide-uae",
+    ],
+    faqs: [
+      {
+        q: "What makes aluminium a better choice than timber or uPVC for a glass-heavy door?",
+        a: "Aluminium holds a slim, structurally rigid frame around a large glass panel without the swelling, warping, or repainting cycle timber needs, and without the bulk uPVC typically requires to match the same load-bearing capacity.",
+      },
+      {
+        q: "Do aluminium glass doors actually reduce cooling costs?",
+        a: "A thermally broken profile reduces heat transfer through the frame itself, separate from whatever the glazing is doing, the exact saving depends on the rest of the opening's spec, but the frame is contributing rather than working against the glass.",
+      },
+      {
+        q: "Are large glazed doors a security risk compared to a smaller, more traditional door?",
+        a: "Not if the locking hardware is specified correctly. Multi-point locking and laminated or toughened glazing give a large glazed opening resistance comparable to a smaller door, the glass area itself isn't the deciding factor.",
+      },
+      {
+        q: "Which door format suits a rear garden or patio opening best?",
+        a: "Sliding and bi-fold formats generally suit wide rear elevations best, since they open the wall up fully rather than requiring swing clearance, a hinged or pivot format tends to work better as a front entrance statement instead.",
+      },
+      {
+        q: "How much maintenance do aluminium doors need in the UAE?",
+        a: "Less than timber, but not zero. A seasonal routine covering track cleaning, seal inspection before summer, and hardware lubrication keeps most issues from becoming a service call, with coastal properties needing a slightly tighter schedule.",
+      },
     ],
     products: [],
   },

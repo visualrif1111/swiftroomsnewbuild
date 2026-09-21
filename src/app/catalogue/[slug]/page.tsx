@@ -16,12 +16,12 @@ export async function generateStaticParams() {
 
 const categoryMetaTitles: Record<string, string> = {
   "aluminium-sliding-doors": "Aluminium Sliding Door Suppliers",
-  "aluminium-bi-folding-doors": "Aluminium Bi-Folding Doors UAE — Cortizo Bi-fold Systems",
+  "aluminium-bi-folding-doors": "Aluminium Bi Fold Doors Dubai",
   "aluminium-windows": "Aluminium Windows Dubai & Abu Dhabi",
-  "aluminium-doors": "Aluminium Doors UAE — Front Entrance, Pivot & TB600 Systems",
-  "upvc": "uPVC Windows & Doors UAE — Casement & Sliding Systems",
-  "curtain-wall": "Curtain Wall Systems UAE — Cortizo TP52, Equity & Vetromax VF35",
-  "garden-rooms": "Glass Garden Rooms & Conservatories UAE",
+  "aluminium-doors": "Aluminium Doors Dubai | Aluminium Doors UAE",
+  "upvc": "uPVC Windows Dubai | uPVC Doors Dubai",
+  "curtain-wall": "Aluminium Curtain Wall | Curtain Wall Systems",
+  "garden-rooms": "Garden Rooms Dubai | Glass Conservatory Dubai",
   "insect-screens": "Retractable Insect Screens UAE — Fly Screen Systems",
   "skylights": "Skylights & Rooflights UAE — Fixed & Motorised Opening Systems",
   "aluminium-glass-doors": "Aluminium Glass Doors Dubai, UAE",
@@ -30,12 +30,22 @@ const categoryMetaTitles: Record<string, string> = {
 // Search-facing descriptions, where the on-page intro copy is not the right
 // length or emphasis for a SERP snippet. Falls back to category.description.
 const categoryMetaDescriptions: Record<string, string> = {
+  "aluminium-bi-folding-doors":
+    "Aluminium Folding Doors are the epitome of modern design and functionality, providing a seamless connection between indoor and outdoor living spaces",
+  "aluminium-doors":
+    "Our range of aluminium door in Dubai offers something for every style of property, from our distinctive European designs to high-quality local profiles",
+  "upvc":
+    "PVCu, uPVC Doors and Windows in Dubai offers a practical and energy-efficient solution for modern homes, combining durability with ease of use",
+  "curtain-wall":
+    "Aluminium Glass Curtain Wall by Swiftrooms offer superior aesthetics, durability, and thermal efficiency. Designed for both residential and commercial projects",
+  "garden-rooms":
+    "Create a modern outdoor retreat with a stylish Glass Room in Dubai. Call Swiftrooms on 04 347 4240 for professional service and quality results.",
+  "aluminium-glass-doors":
+    "Slim-frame aluminium glass doors by Swiftrooms built for UAE heat, sand & humidity. Hinged, pivot, sliding & bi-fold. Authorised Cortizo partner. Get a Free quote.",
   "aluminium-windows":
     "Swiftrooms LLC, specializes in providing high-quality Aluminium Windows in Dubai, outdoor glass rooms, garden rooms, premium windows, and door systems",
   "aluminium-sliding-doors":
     "Discover premium slim sliding doors by Swiftrooms, designed for style and durability. Contact our experts today for a free consultation",
-  "aluminium-glass-doors":
-    "Slim-frame aluminium glass doors by Swiftrooms built for UAE heat, sand & humidity. Hinged, pivot, sliding & bi-fold. Authorised Cortizo partner. Get a free quote.",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
