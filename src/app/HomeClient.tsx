@@ -6,6 +6,8 @@ import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import EditorialSection from "@/components/EditorialSection";
+import { homeEditorial } from "@/lib/homeEditorial";
 import CortizoLogo from "@/components/logos/CortizoLogo";
 import SchucoLogo from "@/components/logos/SchucoLogo";
 import DeceuninckLogo from "@/components/logos/DeceuninckLogo";
@@ -241,9 +243,9 @@ export default function HomeClient({
             transition={{ duration: 0.9, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-display text-white mb-6 max-w-5xl"
           >
-            Performance
+            Premium <span className="text-[#4dd9c0]">Aluminium</span>
             <br />
-            <span className="text-[#4dd9c0]">Windows</span>{" "}&amp; Doors
+            Doors &amp; Windows in Dubai, UAE
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 24 }}
@@ -285,6 +287,8 @@ export default function HomeClient({
           </motion.div>
         </motion.div>
       </section>
+
+      <EditorialSection section={homeEditorial.rethinkingGlazing} />
 
       {/* ── USP STRIP — desktop: grid | mobile: marquee ticker ───────────── */}
       <section className="bg-[#007969] overflow-hidden">
@@ -383,6 +387,8 @@ export default function HomeClient({
         </div>
       </section>
 
+      <EditorialSection section={homeEditorial.beyondTheFix} />
+
       {/* ── TRANSFORM YOUR SPACE ──────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
@@ -434,6 +440,8 @@ export default function HomeClient({
           </ScrollReveal>
         </div>
       </section>
+
+      <EditorialSection section={homeEditorial.worthTransforming} />
 
       {/* ── PRODUCTS ──────────────────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-[#f8f9fa]">
@@ -597,6 +605,8 @@ export default function HomeClient({
         </div>
       </section>
 
+      <EditorialSection section={homeEditorial.choosingASystem} />
+
       {/* ── GUIDED SELECTOR ───────────────────────────────────────────────── */}
       <section className="py-16 md:py-24">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
@@ -605,6 +615,8 @@ export default function HomeClient({
           </ScrollReveal>
         </div>
       </section>
+
+      <EditorialSection section={homeEditorial.realProjects} />
 
       {/* ── PORTFOLIO ─────────────────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-[#f8f9fa]">
@@ -706,6 +718,8 @@ export default function HomeClient({
         </div>
       </section>
 
+      <EditorialSection section={homeEditorial.behindThePhotos} />
+
       {/* ── PROCESS ───────────────────────────────────────────────────────── */}
       <section className="py-16 md:py-20 bg-white border-y border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
@@ -788,6 +802,12 @@ export default function HomeClient({
         </div>
       </section>
 
+      <EditorialSection section={homeEditorial.leadTime} />
+
+      <EditorialSection section={homeEditorial.afterYearOne} />
+
+      <EditorialSection section={homeEditorial.askForTheNumbers} />
+
       {/* ── BLOG PREVIEW ──────────────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-white border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -851,6 +871,8 @@ export default function HomeClient({
         </div>
       </section>
 
+      <EditorialSection section={homeEditorial.showroomVisit} />
+
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-[#f8f9fa] border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -859,6 +881,22 @@ export default function HomeClient({
               <div>
                 <p className="text-label text-[#007969] mb-3">{settings.sections.testimonialsEyebrow}</p>
                 <h2 className="text-title text-[#1c1c1e]">{settings.sections.testimonialsHeading}</h2>
+                {/* Mirrors the aggregateRating already published in this page's
+                    LocalBusiness structured data, so the two cannot disagree. */}
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="text-[#f5a623] text-base leading-none" aria-hidden="true">
+                    ★★★★★
+                  </span>
+                  <span className="font-heading font-bold text-[#1c1c1e]">4.9</span>
+                  <a
+                    href="https://www.google.com/search?q=Swiftrooms+Dubai+reviews"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors"
+                  >
+                    Read our Google reviews →
+                  </a>
+                </div>
               </div>
               <Link
                 href="/portfolio"

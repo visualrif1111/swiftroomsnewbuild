@@ -47,18 +47,18 @@ const DEFAULTS: HomeSettings = {
   hero: {
     eyebrow: "Dubai · Abu Dhabi · UAE — Built for the UAE Climate",
     subheading:
-      "Engineered to perform. Built to outlast. Premium aluminium, uPVC and glazing systems installed across the UAE by certified specialists.",
+      "Engineered to perform. Built to outlast. Premium aluminium doors and windows in Dubai and across the UAE, complemented by high-performance uPVC and glazing systems, installed by our certified specialists.",
     ctaPrimaryLabel: "Get a Free Quote",
     ctaSecondaryLabel: "Book Showroom Visit",
     videoId: "xpDcSdw--hg",
   },
   sections: {
     solutionEyebrow: "From common problems to premium solutions",
-    solutionHeading: "The Swiftrooms Solution",
+    solutionHeading: "The Swiftrooms Solutions to Aluminium Doors and Windows in Dubai",
     transformEyebrow: "Transform Your Space",
     transformHeading: "Transform unused space\ninto living space.",
     transformBody:
-      "From panoramic sliding doors connecting living rooms to pools, to glass garden rooms transforming unused plots — Swiftrooms turns architectural ambition into reality across every UAE climate zone.",
+      "From panoramic sliding doors connecting living rooms to pools, to glass garden rooms transforming unused plots, Swiftrooms turns architectural ambition into reality across every UAE climate zone.",
     productsEyebrow: "Our Premium Products",
     productsHeading: "The complete\nproduct range",
     brandsEyebrow: "Brands We Work With",

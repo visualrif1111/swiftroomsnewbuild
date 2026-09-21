@@ -7,15 +7,20 @@ import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticles } from "@/lib/blog";
 import { getProcessSteps, getTestimonials } from "@/lib/about";
 
+// The root layout's "%s | Swiftrooms" title template does not apply to this
+// page — a template never applies to the segment that defines it — so the
+// suffix is written out here.
+const TITLE = "Aluminium Doors and Windows Dubai | Swiftrooms";
+const DESCRIPTION =
+  "Our range of Aluminium Doors and Windows Dubai have something for every style of property, from our distinctive European designs to high-quality local profiles.";
+
 export const metadata: Metadata = {
-  title: "Swiftrooms — Performance Windows & Doors, UAE",
-  description:
-    "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: SITE_URL },
   openGraph: {
-    title: "Swiftrooms — Performance Windows & Doors, UAE",
-    description:
-      "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: SITE_URL,
   },
 };

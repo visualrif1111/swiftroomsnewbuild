@@ -103,7 +103,7 @@ export default function ProductSelector({ categories }: { categories: ProductCat
         <h2 className="text-title text-[#1c1c1e] mb-2">Which system is right for you?</h2>
         <p className="text-[#6b7280] text-sm md:text-base mb-8 max-w-lg">
           Answer a few quick questions and we&apos;ll point you to the Swiftrooms system that fits
-          your project — no obligation.
+          your project, no obligation.
         </p>
 
         {/* Progress */}
