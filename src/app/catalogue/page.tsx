@@ -144,7 +144,10 @@ export default async function CataloguePage() {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-[0.65rem] tracking-widest uppercase text-gray-400">
-                      {cat.products.length} products
+                      {/* Overview categories carry no products of their own. */}
+                      {cat.products.length === 0
+                        ? "Overview"
+                        : `${cat.products.length} product${cat.products.length === 1 ? "" : "s"}`}
                     </span>
                     <div className="flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-gray-400 group-hover:text-[#007969] transition-colors">
                       View range

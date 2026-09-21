@@ -24,6 +24,14 @@ const categoryMetaTitles: Record<string, string> = {
   "garden-rooms": "Glass Garden Rooms & Conservatories UAE",
   "insect-screens": "Retractable Insect Screens UAE — Fly Screen Systems",
   "skylights": "Skylights & Rooflights UAE — Fixed & Motorised Opening Systems",
+  "aluminium-glass-doors": "Aluminium Glass Doors Dubai, UAE",
+};
+
+// Search-facing descriptions, where the on-page intro copy is not the right
+// length or emphasis for a SERP snippet. Falls back to category.description.
+const categoryMetaDescriptions: Record<string, string> = {
+  "aluminium-glass-doors":
+    "Slim-frame aluminium glass doors by Swiftrooms built for UAE heat, sand & humidity. Hinged, pivot, sliding & bi-fold. Authorised Cortizo partner. Get a free quote.",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -31,13 +39,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = await getCategory(slug);
   if (!category) return {};
   const metaTitle = categoryMetaTitles[slug] ?? category.name;
+  const metaDescription = categoryMetaDescriptions[slug] ?? category.description;
   return {
     title: metaTitle,
-    description: category.description,
+    description: metaDescription,
     alternates: { canonical: `${SITE_URL}/catalogue/${slug}` },
     openGraph: {
       title: `${metaTitle} | Swiftrooms`,
-      description: category.description,
+      description: metaDescription,
       url: `${SITE_URL}/catalogue/${slug}`,
       ...(category.image ? { images: [{ url: category.image, alt: category.name }] } : {}),
     },

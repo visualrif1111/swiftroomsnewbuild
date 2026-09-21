@@ -1066,6 +1066,23 @@ export const productCategories: ProductCategory[] = [
       },
     ],
   },
+  {
+    // Overview category rather than a product range: the live site lists this
+    // tenth in the catalogue and it carries no products of its own, pointing
+    // instead at the specific door systems in the categories above.
+    id: "aluminium-glass-doors",
+    name: "Aluminium Glass Doors",
+    slug: "aluminium-glass-doors",
+    tagline: "More glass, less frame, built to last.",
+    description:
+      "UAE heat, sand and coastal humidity punish a door daily. Aluminium holds its shape and its seal through all of it, where timber warps and uPVC softens under sustained sun — which is why it is the default on any opening where glass area actually matters.",
+    relatedBlogSlugs: [
+      "thermal-break-uae-climate",
+      "upvc-vs-aluminium-windows-uae",
+      "glass-specification-guide-uae",
+    ],
+    products: [],
+  },
 ];
 
 // ─── Portfolio ──────────────────────────────────────────────────────────────
