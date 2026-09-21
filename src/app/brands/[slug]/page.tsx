@@ -1,13 +1,10 @@
-// Brand detail page — one page per `brand` document in Sanity.
+// Brand detail page — content from the `brand` documents in Sanity.
 //
-// Canonical URLs are keyed on the Sanity slug (/brands/cortizo). The longer
-// SEO-style paths that were previously indexed (/brands/cortizo-aluminium-
-// systems) permanently redirect here from next.config.ts — Next emits 308
-// rather than 301, which search engines treat the same — so there is exactly
-// one indexable URL per brand.
-//
-// /brands itself stays the existing catalogue index at /catalogue/brands — this
-// route only adds the per-brand detail pages that were missing.
+// URLs match the live site exactly and come from BRAND_ROUTES
+// (/brands/cortizo-aluminium-systems), not from the Sanity slug. Only brands
+// in that map get a page; anything else 404s, which is why Vetro and Vetromax
+// resolve here the same way they do on the live site — they appear on the
+// catalogue brand index but have no standalone page.
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,7 +14,8 @@ import { SITE_URL } from "@/lib/site";
 import { urlFor } from "@/sanity/lib/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
-import { getBrand, getBrands, getBrandSlugs } from "@/lib/brands";
+import { getBrandByRoute, getPublishedBrands } from "@/lib/brands";
+import { BRAND_ROUTE_SLUGS, brandHref } from "@/lib/brandRoutes";
 import { getCategories } from "@/lib/catalogue";
 
 interface Props {
@@ -25,8 +23,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getBrandSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return BRAND_ROUTE_SLUGS.map((slug) => ({ slug }));
 }
 
 /**
@@ -40,11 +37,11 @@ const normaliseBrand = (value: string) =>
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const brand = await getBrand(slug);
+  const brand = await getBrandByRoute(slug);
   if (!brand) return { title: "Not Found" };
 
   const seo = brand.seo ?? {};
-  const self = `${SITE_URL}/brands/${brand.slug}`;
+  const self = `${SITE_URL}/brands/${slug}`;
 
   // Every brand document currently stores canonicalUrl = <site>/catalogue/brands.
   // That was authored when a brand had no page of its own and only appeared on
@@ -95,10 +92,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BrandPage({ params }: Props) {
   const { slug } = await params;
-  const brand = await getBrand(slug);
+  const brand = await getBrandByRoute(slug);
   if (!brand) notFound();
 
-  const [categories, allBrands] = await Promise.all([getCategories(), getBrands()]);
+  const [categories, publishedBrands] = await Promise.all([
+    getCategories(),
+    getPublishedBrands(),
+  ]);
 
   const target = normaliseBrand(brand.name);
   const products = categories.flatMap((c) =>
@@ -107,7 +107,8 @@ export default async function BrandPage({ params }: Props) {
       .map((p) => ({ ...p, categorySlug: c.slug, categoryTitle: c.name }))
   );
 
-  const otherBrands = allBrands.filter((b) => b.slug !== brand.slug).slice(0, 4);
+  // Only brands that actually have a page, so the strip never dead-ends.
+  const otherBrands = publishedBrands.filter((b) => b.slug !== brand.slug).slice(0, 4);
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -115,8 +116,8 @@ export default async function BrandPage({ params }: Props) {
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: "Catalogue", item: `${SITE_URL}/catalogue` },
-      { "@type": "ListItem", position: 3, name: "Brand Partners", item: `${SITE_URL}/catalogue/brands` },
-      { "@type": "ListItem", position: 4, name: brand.name, item: `${SITE_URL}/brands/${brand.slug}` },
+      { "@type": "ListItem", position: 3, name: "Brand Partners", item: `${SITE_URL}/brands` },
+      { "@type": "ListItem", position: 4, name: brand.name, item: `${SITE_URL}/brands/${slug}` },
     ],
   };
 
@@ -125,7 +126,7 @@ export default async function BrandPage({ params }: Props) {
     "@type": "Brand",
     name: brand.name,
     description: brand.description || brand.tagline || undefined,
-    url: `${SITE_URL}/brands/${brand.slug}`,
+    url: `${SITE_URL}/brands/${slug}`,
     logo: brand.logo ?? undefined,
     ...(brand.country ? { foundingLocation: { "@type": "Place", name: brand.country } } : {}),
   };
@@ -140,9 +141,7 @@ export default async function BrandPage({ params }: Props) {
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-6 md:mb-8">
-              <Link href="/catalogue" className="hover:text-[#007969] transition-colors">Catalogue</Link>
-              <span>/</span>
-              <Link href="/catalogue/brands" className="hover:text-[#007969] transition-colors">Brands</Link>
+              <Link href="/brands" className="hover:text-[#007969] transition-colors">Shop By Brand</Link>
               <span>/</span>
               <span className="text-[#6b7280] truncate max-w-[160px]">{brand.name}</span>
             </nav>
@@ -287,7 +286,7 @@ export default async function BrandPage({ params }: Props) {
                       See it in the showroom
                     </ShowroomButton>
                     <Link
-                      href="/catalogue/brands"
+                      href="/brands"
                       className="block w-full text-center border border-gray-200 text-[#3a3a3c] py-3 text-[0.7rem] tracking-widest uppercase hover:border-[#007969] hover:text-[#007969] transition-all"
                     >
                       ← All brand partners
@@ -336,7 +335,7 @@ export default async function BrandPage({ params }: Props) {
               {otherBrands.map((other, i) => (
                 <ScrollReveal key={other.slug} delay={i * 0.08} className="w-[60vw] sm:w-[40vw] md:w-auto">
                   <Link
-                    href={`/brands/${other.slug}`}
+                    href={brandHref(other.slug) ?? "/brands"}
                     className="group block border border-gray-100 hover:border-[#007969]/30 transition-all bg-white p-5 md:p-6 h-full active:scale-[0.98]"
                   >
                     <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 mb-2">

@@ -2,6 +2,7 @@
 import { cache } from "react";
 import { groq, stegaClean } from "next-sanity";
 import { brands as dataBrands, type Brand } from "@/lib/data";
+import { brandRouteSlug, brandSlugFromRoute } from "@/lib/brandRoutes";
 
 export type BrandSeo = {
   seoTitle?: string;
@@ -98,14 +99,23 @@ export const getBrands = cache(async (): Promise<BrandItem[]> => {
   return dataBrands.map(fromData);
 });
 
-/** A single brand by slug, or null when nothing matches. */
+/** A single brand by its Sanity slug, or null when nothing matches. */
 export const getBrand = cache(async (slug: string): Promise<BrandItem | null> => {
   const brands = await getBrands();
   return brands.find((b) => b.slug === slug) ?? null;
 });
 
-/** Slugs for generateStaticParams on /brands/[slug]. */
-export const getBrandSlugs = cache(async (): Promise<string[]> => {
+/**
+ * A brand by its public URL segment (e.g. "cortizo-aluminium-systems").
+ * Returns null for brands that have no page, so unmapped slugs 404.
+ */
+export const getBrandByRoute = cache(async (routeSlug: string): Promise<BrandItem | null> => {
+  const sanitySlug = brandSlugFromRoute(routeSlug);
+  return sanitySlug ? getBrand(sanitySlug) : null;
+});
+
+/** Brands that have a public page, in the curated display order. */
+export const getPublishedBrands = cache(async (): Promise<BrandItem[]> => {
   const brands = await getBrands();
-  return brands.map((b) => b.slug).filter(Boolean);
+  return brands.filter((b) => brandRouteSlug(b.slug));
 });

@@ -18,6 +18,7 @@
 //      single-segment "/:slug" rule missed.
 import { defineDocuments, defineLocations } from "sanity/presentation";
 import { LANDING_ROUTES } from "@/lib/landingRoutes";
+import { BRAND_ROUTE_ENTRIES, brandHref } from "@/lib/brandRoutes";
 
 // URL -> document (used when clicking around the live preview iframe)
 export const mainDocuments = defineDocuments([
@@ -50,10 +51,12 @@ export const mainDocuments = defineDocuments([
     route: "/catalogue/:slug",
     filter: `_type == "productCategory" && slug.current == $slug`,
   },
-  {
-    route: "/brands/:slug",
-    filter: `_type == "brand" && slug.current == $slug`,
-  },
+  // Brand pages use externally-fixed URL segments that do not match the Sanity
+  // slug, so each is registered as an exact literal route.
+  ...BRAND_ROUTE_ENTRIES.map(([sanitySlug, routeSlug]) => ({
+    route: `/brands/${routeSlug}`,
+    filter: `_type == "brand" && slug.current == "${sanitySlug}"`,
+  })),
   // 3. Page-builder pages at arbitrary (possibly nested) paths.
   {
     route: "/:slug(.*)",
@@ -133,14 +136,16 @@ export const locations = {
     // The schema field is `title`, not `name` — selecting `name` returned
     // undefined and every brand showed as the generic "Brand".
     select: { title: "title", slug: "slug.current" },
-    resolve: (doc) => ({
-      locations: [
-        ...(doc?.slug
-          ? [{ title: doc?.title || "Brand", href: `/brands/${doc.slug}` }]
-          : []),
-        { title: "Brand partners index", href: "/catalogue/brands" },
-      ],
-    }),
+    resolve: (doc) => {
+      const href = doc?.slug ? brandHref(doc.slug) : null;
+      return {
+        locations: [
+          ...(href ? [{ title: doc?.title || "Brand", href }] : []),
+          { title: "Shop By Brand", href: "/brands" },
+          { title: "Catalogue brand index", href: "/catalogue/brands" },
+        ],
+      };
+    },
   }),
 
   faq: defineLocations({

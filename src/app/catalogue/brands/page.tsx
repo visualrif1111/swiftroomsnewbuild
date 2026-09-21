@@ -6,6 +6,7 @@ import { QuoteButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getBrands } from "@/lib/brands";
+import { brandHref } from "@/lib/brandRoutes";
 import { getCategories } from "@/lib/catalogue";
 
 const baseMetadata: Metadata = {
@@ -96,6 +97,9 @@ export default async function BrandsPage() {
             const brandProducts = productCategories.flatMap((c) =>
               c.products.filter((p) => p.brand === brand.name)
             );
+            // Vetro and Vetromax have no standalone page, so they stay as
+            // plain entries here rather than dead links.
+            const href = brandHref(brand.slug);
 
             return (
               <div key={brand.id} id={brand.id}>
@@ -104,12 +108,13 @@ export default async function BrandsPage() {
                     <div>
                       <span className="text-label text-[#007969] mb-4 block">{brand.country}</span>
                       <h2 className="text-title text-[#1c1c1e] mb-4">
-                        <Link
-                          href={`/brands/${brand.slug}`}
-                          className="hover:text-[#007969] transition-colors"
-                        >
-                          {brand.name}
-                        </Link>
+                        {href ? (
+                          <Link href={href} className="hover:text-[#007969] transition-colors">
+                            {brand.name}
+                          </Link>
+                        ) : (
+                          brand.name
+                        )}
                       </h2>
                       <p className="text-base sm:text-xl text-[#6b7280] italic mb-6 md:mb-8">
                         {brand.tagline}
@@ -175,15 +180,17 @@ export default async function BrandsPage() {
                       )}
 
                       <div className="mt-8 flex flex-wrap gap-3">
-                        <Link
-                          href={`/brands/${brand.slug}`}
-                          className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-white bg-[#007969] px-5 py-3 hover:bg-[#00594e] transition-all"
-                        >
-                          View {brand.name}
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
+                        {href && (
+                          <Link
+                            href={href}
+                            className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-white bg-[#007969] px-5 py-3 hover:bg-[#00594e] transition-all"
+                          >
+                            View {brand.name}
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        )}
                         <QuoteButton className="inline-flex items-center gap-2 text-[0.7rem] tracking-widest uppercase text-[#007969] border border-[#007969]/40 px-5 py-3 hover:bg-[#007969]/10 transition-all">
                           Enquire about {brand.name}
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

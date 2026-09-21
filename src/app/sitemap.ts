@@ -3,17 +3,16 @@ import type { MetadataRoute } from "next";
 import { getCategories } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticleSlugs } from "@/lib/blog";
-import { getBrandSlugs } from "@/lib/brands";
+import { BRAND_ROUTE_SLUGS } from "@/lib/brandRoutes";
 
 const BASE_URL = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const [productCategories, portfolioProjects, blogSlugs, brandSlugs] = await Promise.all([
+  const [productCategories, portfolioProjects, blogSlugs] = await Promise.all([
     getCategories(),
     getPortfolioProjects(),
     getArticleSlugs(),
-    getBrandSlugs(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -22,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/portfolio`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/catalogue`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/catalogue/brands`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/brands`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/catalogue/gallery`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/catalogue/gallery/cor-vision-plus`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${BASE_URL}/catalogue/gallery/cor-vision`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const brandRoutes: MetadataRoute.Sitemap = brandSlugs.map((slug) => ({
+  const brandRoutes: MetadataRoute.Sitemap = BRAND_ROUTE_SLUGS.map((slug) => ({
     url: `${BASE_URL}/brands/${slug}`,
     lastModified: now,
     changeFrequency: "monthly",

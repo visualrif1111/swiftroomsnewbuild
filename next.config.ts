@@ -28,20 +28,6 @@ const nextConfig: NextConfig = {
   // each to its closest new route. Source of truth: seo-migration/redirects.json
   async redirects() {
     return [
-      // ── Brand pages ──
-      // Brand detail pages are keyed on the Sanity slug (/brands/cortizo).
-      // These longer SEO-style paths were the previously indexed URLs, so they
-      // 308 to the canonical one — one indexable URL per brand.
-      { source: "/brands/cortizo-aluminium-systems", destination: "/brands/cortizo", permanent: true },
-      { source: "/brands/deceuninck-upvc-windows-doors", destination: "/brands/deceuninck", permanent: true },
-      { source: "/brands/gulf-extrusions-aluminium-systems", destination: "/brands/gulf-extrusions", permanent: true },
-      { source: "/brands/reynaers-aluminium-systems", destination: "/brands/reynaers", permanent: true },
-      { source: "/brands/schuco-aluminium-windows", destination: "/brands/schuco", permanent: true },
-      { source: "/brands/ultraframe-roof-systems", destination: "/brands/ultraframe", permanent: true },
-      // The brand index already exists inside the catalogue; /brands is the
-      // legacy entry point for it rather than a second competing index.
-      { source: "/brands", destination: "/catalogue/brands", permanent: true },
-
       // ── Structural: products, projects, categories, utility ──
       { source: "/4900-gallery", destination: "/catalogue/gallery/4900", permanent: true },
       { source: "/about-us", destination: "/about", permanent: true },
