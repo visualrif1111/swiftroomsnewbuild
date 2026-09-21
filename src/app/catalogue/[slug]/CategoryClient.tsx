@@ -8,6 +8,8 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import type { ProductCategory, BlogPost } from "@/lib/data";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import WorksWellWith from "@/components/WorksWellWith";
+import EditorialSection from "@/components/EditorialSection";
+import { editorialFor } from "@/lib/categoryEditorial";
 
 type Category = ProductCategory;
 type Product = Category["products"][0];
@@ -326,6 +328,8 @@ export default function CategoryClient({
   allCategories: ProductCategory[];
   blogPosts: BlogPost[];
 }) {
+  const editorial = editorialFor(category.slug);
+
   return (
     <>
       <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
@@ -352,6 +356,10 @@ export default function CategoryClient({
         <div className="divider-brand" />
       </div>
 
+      {editorial.beforeProducts?.map((section) => (
+        <EditorialSection key={section.id} section={section} />
+      ))}
+
       <section className="py-12 md:py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
@@ -364,9 +372,24 @@ export default function CategoryClient({
 
       <CompareTable category={category} />
 
+      {editorial.afterCompare?.map((section) => (
+        <EditorialSection key={section.id} section={section} />
+      ))}
+
+
       <WorksWellWith categorySlug={category.slug} categories={allCategories} />
 
+      {editorial.afterWorksWellWith?.map((section) => (
+        <EditorialSection key={section.id} section={section} />
+      ))}
+
+
       <CategoryFAQ category={category} />
+
+      {editorial.afterFaq?.map((section) => (
+        <EditorialSection key={section.id} section={section} />
+      ))}
+
 
       {category.relatedBlogSlugs && category.relatedBlogSlugs.length > 0 && (() => {
         const relatedPosts = category.relatedBlogSlugs!

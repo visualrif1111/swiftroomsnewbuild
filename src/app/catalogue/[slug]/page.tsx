@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 }
 
 const categoryMetaTitles: Record<string, string> = {
-  "aluminium-sliding-doors": "Aluminium Lift-and-Slide Doors UAE — Cor Vision 4600, 4700 & Plus",
+  "aluminium-sliding-doors": "Aluminium Sliding Door Suppliers",
   "aluminium-bi-folding-doors": "Aluminium Bi-Folding Doors UAE — Cortizo Bi-fold Systems",
   "aluminium-windows": "Thermally Broken Aluminium Windows UAE — Cortizo, Vetro & Gulf Extrusions",
   "aluminium-doors": "Aluminium Doors UAE — Front Entrance, Pivot & TB600 Systems",
@@ -30,6 +30,8 @@ const categoryMetaTitles: Record<string, string> = {
 // Search-facing descriptions, where the on-page intro copy is not the right
 // length or emphasis for a SERP snippet. Falls back to category.description.
 const categoryMetaDescriptions: Record<string, string> = {
+  "aluminium-sliding-doors":
+    "Discover premium slim sliding doors by Swiftrooms, designed for style and durability. Contact our experts today for a free consultation",
   "aluminium-glass-doors":
     "Slim-frame aluminium glass doors by Swiftrooms built for UAE heat, sand & humidity. Hinged, pivot, sliding & bi-fold. Authorised Cortizo partner. Get a free quote.",
 };
