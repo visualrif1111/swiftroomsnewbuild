@@ -9,7 +9,7 @@ import type { ProductCategory, BlogPost } from "@/lib/data";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import WorksWellWith from "@/components/WorksWellWith";
 import EditorialSection from "@/components/EditorialSection";
-import { editorialFor } from "@/lib/categoryEditorial";
+import { categoryHeading, editorialFor } from "@/lib/categoryEditorial";
 
 type Category = ProductCategory;
 type Product = Category["products"][0];
@@ -343,7 +343,9 @@ export default function CategoryClient({
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <p className="text-label text-[#007969] mb-3 md:mb-4">Product Range</p>
-            <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4 max-w-3xl">{category.name}</h1>
+            <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4 max-w-3xl">
+              {categoryHeading(category.slug, category.name)}
+            </h1>
             <p className="text-base md:text-xl text-[#6b7280] italic mb-6 md:mb-8">{category.tagline}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>

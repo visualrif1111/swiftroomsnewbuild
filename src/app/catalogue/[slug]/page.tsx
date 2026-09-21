@@ -17,7 +17,7 @@ export async function generateStaticParams() {
 const categoryMetaTitles: Record<string, string> = {
   "aluminium-sliding-doors": "Aluminium Sliding Door Suppliers",
   "aluminium-bi-folding-doors": "Aluminium Bi-Folding Doors UAE — Cortizo Bi-fold Systems",
-  "aluminium-windows": "Thermally Broken Aluminium Windows UAE — Cortizo, Vetro & Gulf Extrusions",
+  "aluminium-windows": "Aluminium Windows Dubai & Abu Dhabi",
   "aluminium-doors": "Aluminium Doors UAE — Front Entrance, Pivot & TB600 Systems",
   "upvc": "uPVC Windows & Doors UAE — Casement & Sliding Systems",
   "curtain-wall": "Curtain Wall Systems UAE — Cortizo TP52, Equity & Vetromax VF35",
@@ -30,6 +30,8 @@ const categoryMetaTitles: Record<string, string> = {
 // Search-facing descriptions, where the on-page intro copy is not the right
 // length or emphasis for a SERP snippet. Falls back to category.description.
 const categoryMetaDescriptions: Record<string, string> = {
+  "aluminium-windows":
+    "Swiftrooms LLC, specializes in providing high-quality Aluminium Windows in Dubai, outdoor glass rooms, garden rooms, premium windows, and door systems",
   "aluminium-sliding-doors":
     "Discover premium slim sliding doors by Swiftrooms, designed for style and durability. Contact our experts today for a free consultation",
   "aluminium-glass-doors":
