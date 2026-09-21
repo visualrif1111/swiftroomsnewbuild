@@ -3,15 +3,17 @@ import type { MetadataRoute } from "next";
 import { getCategories } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticleSlugs } from "@/lib/blog";
+import { getBrandSlugs } from "@/lib/brands";
 
 const BASE_URL = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const [productCategories, portfolioProjects, blogSlugs] = await Promise.all([
+  const [productCategories, portfolioProjects, blogSlugs, brandSlugs] = await Promise.all([
     getCategories(),
     getPortfolioProjects(),
     getArticleSlugs(),
+    getBrandSlugs(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -66,11 +68,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const brandRoutes: MetadataRoute.Sitemap = brandSlugs.map((slug) => ({
+    url: `${BASE_URL}/brands/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...productRoutes,
     ...portfolioRoutes,
     ...blogRoutes,
+    ...brandRoutes,
   ];
 }

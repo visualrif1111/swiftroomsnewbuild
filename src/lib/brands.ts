@@ -1,7 +1,15 @@
 // Brands data layer: Sanity-first with a data.ts fallback.
 import { cache } from "react";
-import { groq } from "next-sanity";
+import { groq, stegaClean } from "next-sanity";
 import { brands as dataBrands, type Brand } from "@/lib/data";
+
+export type BrandSeo = {
+  seoTitle?: string;
+  seoDescription?: string;
+  canonicalUrl?: string;
+  openGraphImage?: unknown;
+  noIndex?: boolean;
+};
 
 export type BrandItem = {
   id: string;
@@ -11,7 +19,10 @@ export type BrandItem = {
   tagline: string;
   description: string;
   logo?: string;
+  /** Editorial imagery for the brand detail page. */
+  gallery: string[];
   speciality: string[];
+  seo?: BrandSeo;
 };
 
 const sanityConfigured = () => Boolean(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
@@ -32,26 +43,45 @@ function fromData(b: Brand): BrandItem {
     country: b.country,
     tagline: b.tagline,
     description: b.description,
+    gallery: [],
     speciality: b.speciality ?? [],
   };
 }
 
-type Raw = { id: string; title: string; slug: string; country?: string; tagline?: string; description?: string; logo?: string | null };
+type Raw = {
+  id: string;
+  title: string;
+  slug: string;
+  country?: string;
+  tagline?: string;
+  description?: string;
+  logo?: string | null;
+  gallery?: (string | null)[] | null;
+  seo?: BrandSeo | null;
+};
 
 function fromSanity(b: Raw): BrandItem {
   return {
     id: b.slug,
     name: b.title,
-    slug: b.slug,
+    // Slugs drive routing, so strip any stega-encoded draft metadata.
+    slug: stegaClean(b.slug),
     country: b.country ?? "",
     tagline: b.tagline ?? "",
     description: b.description ?? "",
     logo: b.logo ?? undefined,
+    gallery: (b.gallery ?? []).filter((url): url is string => Boolean(url)),
     speciality: specByName.get((b.title ?? "").toLowerCase()) ?? [],
+    seo: b.seo ?? undefined,
   };
 }
 
-const BRANDS_QUERY = groq`*[_type == "brand"]{ "id": _id, title, "slug": slug.current, country, tagline, description, "logo": logo.asset->url }`;
+const BRANDS_QUERY = groq`*[_type == "brand"]{
+  "id": _id, title, "slug": slug.current, country, tagline, description,
+  "logo": logo.asset->url,
+  "gallery": gallery[].asset->url,
+  seo
+}`;
 
 export const getBrands = cache(async (): Promise<BrandItem[]> => {
   if (sanityConfigured()) {
@@ -66,4 +96,16 @@ export const getBrands = cache(async (): Promise<BrandItem[]> => {
     }
   }
   return dataBrands.map(fromData);
+});
+
+/** A single brand by slug, or null when nothing matches. */
+export const getBrand = cache(async (slug: string): Promise<BrandItem | null> => {
+  const brands = await getBrands();
+  return brands.find((b) => b.slug === slug) ?? null;
+});
+
+/** Slugs for generateStaticParams on /brands/[slug]. */
+export const getBrandSlugs = cache(async (): Promise<string[]> => {
+  const brands = await getBrands();
+  return brands.map((b) => b.slug).filter(Boolean);
 });

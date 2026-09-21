@@ -50,6 +50,10 @@ export const mainDocuments = defineDocuments([
     route: "/catalogue/:slug",
     filter: `_type == "productCategory" && slug.current == $slug`,
   },
+  {
+    route: "/brands/:slug",
+    filter: `_type == "brand" && slug.current == $slug`,
+  },
   // 3. Page-builder pages at arbitrary (possibly nested) paths.
   {
     route: "/:slug(.*)",
@@ -126,9 +130,16 @@ export const locations = {
   }),
 
   brand: defineLocations({
-    select: { name: "name" },
+    // The schema field is `title`, not `name` — selecting `name` returned
+    // undefined and every brand showed as the generic "Brand".
+    select: { title: "title", slug: "slug.current" },
     resolve: (doc) => ({
-      locations: [{ title: doc?.name || "Brand", href: "/catalogue/brands" }],
+      locations: [
+        ...(doc?.slug
+          ? [{ title: doc?.title || "Brand", href: `/brands/${doc.slug}` }]
+          : []),
+        { title: "Brand partners index", href: "/catalogue/brands" },
+      ],
     }),
   }),
 
