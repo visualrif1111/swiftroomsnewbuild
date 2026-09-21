@@ -11,17 +11,17 @@ import { SITE_URL } from "@/lib/site";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import { getPublishedBrands } from "@/lib/brands";
-import { brandHref } from "@/lib/brandRoutes";
+import { BRAND_CARDS, brandHref } from "@/lib/brandRoutes";
 
 export const metadata: Metadata = {
   title: { absolute: "Shop By Brand | Swiftrooms" },
   description:
-    "The aluminium and uPVC systems Swiftrooms supplies in the UAE — Cortizo, Reynaers, Schüco, Gulf Extrusions, Deceuninck and UltraFrame.",
+    "Dedicated system pages for our specialist manufacturer partners, engineered in Europe, re-specified for Gulf conditions.",
   alternates: { canonical: `${SITE_URL}/brands` },
   openGraph: {
     title: "Shop By Brand | Swiftrooms",
     description:
-      "The aluminium and uPVC systems Swiftrooms supplies in the UAE — Cortizo, Reynaers, Schüco, Gulf Extrusions, Deceuninck and UltraFrame.",
+      "Dedicated system pages for our specialist manufacturer partners, engineered in Europe, re-specified for Gulf conditions.",
     url: `${SITE_URL}/brands`,
   },
 };
@@ -65,14 +65,13 @@ export default async function ShopByBrandPage() {
       <section className="pt-32 pb-10 md:pt-44 md:pb-16 lg:pt-52 lg:pb-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Our Brand Partners</p>
+            <p className="text-label text-[#007969] mb-4">Brand Partners</p>
             <h1 className="text-headline text-[#1c1c1e] mb-6 max-w-2xl">Shop By Brand</h1>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
-              Swiftrooms is an authorised dealer and installation partner for the aluminium and
-              uPVC systems below. Each has been assessed for performance in Gulf conditions before
-              we put our name to it.
+              Dedicated system pages for our specialist manufacturer partners, engineered in
+              Europe, re-specified for Gulf conditions.
             </p>
           </ScrollReveal>
         </div>
@@ -85,46 +84,47 @@ export default async function ShopByBrandPage() {
       <section className="py-12 md:py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {brands.map((brand, i) => (
-              <ScrollReveal key={brand.slug} delay={(i % 3) * 0.08}>
-                <Link
-                  href={brandHref(brand.slug) ?? "/brands"}
-                  className="group flex h-full flex-col border border-gray-100 bg-white hover:border-[#007969]/40 transition-all active:scale-[0.99]"
-                >
-                  <div className="h-32 md:h-40 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-8">
-                    {brand.logo ? (
-                      <div className="relative w-full h-full">
-                        <Image
-                          src={brand.logo}
-                          alt={`${brand.name} logo`}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-label text-[#007969]/40">{brand.name}</span>
-                    )}
-                  </div>
-                  <div className="p-5 md:p-6 flex flex-col flex-1">
-                    {brand.country && (
+            {BRAND_CARDS.map((card, i) => {
+              const brand = brands.find((b) => b.slug === card.slug);
+              return (
+                <ScrollReveal key={card.slug} delay={(i % 3) * 0.08}>
+                  <Link
+                    href={brandHref(card.slug) ?? "/brands"}
+                    className="group flex h-full flex-col border border-gray-100 bg-white hover:border-[#007969]/40 transition-all active:scale-[0.99]"
+                  >
+                    <div className="h-32 md:h-40 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-8">
+                      {brand?.logo ? (
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={brand.logo}
+                            alt={`${card.name} logo`}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-label text-[#007969]/40">{card.name}</span>
+                      )}
+                    </div>
+                    <div className="p-5 md:p-6 flex flex-col flex-1">
                       <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 mb-2">
-                        {brand.country}
+                        Brand Partner
                       </p>
-                    )}
-                    <h2 className="text-[#1c1c1e] font-semibold text-lg group-hover:text-[#007969] transition-colors mb-2">
-                      {brand.name}
-                    </h2>
-                    {brand.tagline && (
-                      <p className="text-[#6b7280] text-sm leading-relaxed flex-1">{brand.tagline}</p>
-                    )}
-                    <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mt-5">
-                      View {brand.name} →
-                    </span>
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
+                      <h2 className="text-[#1c1c1e] font-semibold text-lg group-hover:text-[#007969] transition-colors mb-2">
+                        {card.name}
+                      </h2>
+                      <p className="text-[#6b7280] text-sm leading-relaxed flex-1">
+                        {card.strapline}
+                      </p>
+                      <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mt-5">
+                        View System →
+                      </span>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              );
+            })}
           </div>
 
           <ScrollReveal delay={0.2}>

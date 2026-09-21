@@ -26,6 +26,23 @@ export const BRAND_ROUTES: Record<string, string> = {
 
 export const BRAND_ROUTE_ENTRIES = Object.entries(BRAND_ROUTES);
 
+/**
+ * Presentation for the Shop By Brand index, as published on the live site.
+ * The display names and straplines differ from the `brand` documents' own
+ * title/tagline — "Cortizo Systems" against Sanity's "Cortizo" — and the
+ * ordering is curated rather than alphabetical, so both are held here.
+ */
+export type BrandCard = { slug: string; name: string; strapline: string };
+
+export const BRAND_CARDS: BrandCard[] = [
+  { slug: "schuco", name: "Sch\u00fcco Aluminium Windows", strapline: "Engineered for extremes" },
+  { slug: "reynaers", name: "Reynaers Aluminium Systems", strapline: "Belgian engineering, named by system." },
+  { slug: "cortizo", name: "Cortizo Systems", strapline: "Spanish engineering, proven in heat." },
+  { slug: "gulf-extrusions", name: "Gulf Extrusions", strapline: "Engineered for extremes. Designed without compromise." },
+  { slug: "deceuninck", name: "Deceuninck", strapline: "Belgian uPVC. Engineered to last." },
+  { slug: "ultraframe", name: "UltraFrame", strapline: "British roof engineering. Reworked for the sun." },
+];
+
 /** Public URL segment for a Sanity brand slug, or null when it has no page. */
 export function brandRouteSlug(sanitySlug: string): string | null {
   return BRAND_ROUTES[sanitySlug] ?? null;
