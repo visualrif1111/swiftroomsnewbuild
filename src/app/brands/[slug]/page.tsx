@@ -15,7 +15,10 @@ import { urlFor } from "@/sanity/lib/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import { getBrandByRoute, getPublishedBrands } from "@/lib/brands";
-import { BRAND_ROUTE_SLUGS, brandHref } from "@/lib/brandRoutes";
+import { BRAND_CARDS, BRAND_ROUTE_SLUGS, brandHref } from "@/lib/brandRoutes";
+import { brandEditorialFor, brandSeo } from "@/lib/brandEditorial";
+import EditorialSection from "@/components/EditorialSection";
+import FAQAccordion from "@/components/brands/BrandFAQ";
 import { getCategories } from "@/lib/catalogue";
 
 interface Props {
@@ -57,13 +60,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // The root layout applies a "%s | Swiftrooms" template. Stored SEO titles
   // already end in "| Swiftrooms UAE", so they are set as absolute to avoid
   // "… | Swiftrooms UAE | Swiftrooms"; generated titles keep the template.
-  const storedTitle = stegaClean(seo.seoTitle) || "";
-  const title: Metadata["title"] = storedTitle
-    ? { absolute: storedTitle }
-    : `${brand.name} Aluminium Systems in Dubai`;
-  const titleText = storedTitle || `${brand.name} Aluminium Systems in Dubai | Swiftrooms`;
+  // The live pages' own title/description win over the Sanity `seo` object,
+  // which still holds the older index-scoped set.
+  const published = brandSeo[slug];
+  const storedTitle = published?.title || stegaClean(seo.seoTitle) || "";
+  const title: Metadata["title"] = published
+    ? published.title
+    : storedTitle
+      ? { absolute: storedTitle }
+      : `${brand.name} Aluminium Systems in Dubai`;
+  const titleText = published
+    ? `${published.title} | Swiftrooms`
+    : storedTitle || `${brand.name} Aluminium Systems in Dubai | Swiftrooms`;
 
   const description =
+    published?.description ||
     stegaClean(seo.seoDescription) ||
     brand.tagline ||
     `Swiftrooms supplies and installs ${brand.name} systems across the UAE.`;
@@ -99,6 +110,13 @@ export default async function BrandPage({ params }: Props) {
     getCategories(),
     getPublishedBrands(),
   ]);
+
+  const editorial = brandEditorialFor(slug);
+  // The live pages title themselves with the card name ("Cortizo Systems"),
+  // not the bare Sanity title.
+  const displayName = BRAND_CARDS.find((c) => c.slug === brand.slug)?.name ?? brand.name;
+  const worksWith = editorial?.worksWith ?? [];
+  const strapline = BRAND_CARDS.find((c) => c.slug === brand.slug)?.strapline;
 
   const target = normaliseBrand(brand.name);
   const products = categories.flatMap((c) =>
@@ -150,12 +168,21 @@ export default async function BrandPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 lg:gap-16 items-center">
             <div className="min-w-0">
               <ScrollReveal>
-                {brand.country && (
-                  <span className="text-label text-[#007969] mb-3 md:mb-4 block">{brand.country}</span>
-                )}
-                <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4">{brand.name}</h1>
-                {brand.tagline && (
-                  <p className="text-base sm:text-xl text-[#6b7280] italic">{brand.tagline}</p>
+                <span className="text-label text-[#007969] mb-3 md:mb-4 block">Brand Partner</span>
+                <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4">{displayName}</h1>
+                {editorial ? (
+                  <>
+                    {strapline && (
+                      <p className="text-base sm:text-xl text-[#6b7280] mb-4">{strapline}</p>
+                    )}
+                    <p className="text-[#6b7280] text-base md:text-lg leading-relaxed">
+                      {editorial.intro}
+                    </p>
+                  </>
+                ) : (
+                  brand.tagline && (
+                    <p className="text-base sm:text-xl text-[#6b7280] italic">{brand.tagline}</p>
+                  )
                 )}
               </ScrollReveal>
             </div>
@@ -166,7 +193,7 @@ export default async function BrandPage({ params }: Props) {
                   <div className="relative w-full h-full">
                     <Image
                       src={brand.logo}
-                      alt={`${brand.name} logo`}
+                      alt={`${displayName} logo`}
                       fill
                       className="object-contain"
                       priority
@@ -320,6 +347,66 @@ export default async function BrandPage({ params }: Props) {
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Ported editorial */}
+      {editorial?.sections.map((section) => (
+        <EditorialSection key={section.id} section={section} />
+      ))}
+
+      {/* Complete the system */}
+      {worksWith.length > 0 && (
+        <section className="py-12 md:py-20 border-t border-gray-100">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+            <ScrollReveal>
+              <p className="text-label text-[#007969] mb-3">Complete the system</p>
+              <h2 className="text-title text-[#1c1c1e] mb-8 md:mb-12">Works well with</h2>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              {worksWith.map((item, i) => (
+                <ScrollReveal key={item.href} delay={i * 0.08}>
+                  <Link
+                    href={item.href}
+                    className="group flex h-full flex-col border border-gray-100 bg-white p-5 md:p-6 hover:border-[#007969]/40 transition-all active:scale-[0.99]"
+                  >
+                    <h3 className="text-[#1c1c1e] font-semibold text-base group-hover:text-[#007969] transition-colors mb-2">
+                      {item.label}
+                    </h3>
+                    <p className="text-[#6b7280] text-sm leading-relaxed flex-1">
+                      {item.description}
+                    </p>
+                    <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mt-5">
+                      View range →
+                    </span>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {editorial && editorial.faqs.length > 0 && (
+        <section className="py-12 md:py-20 bg-[#f8f9fa] border-t border-gray-100">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+            <ScrollReveal>
+              <p className="text-label text-[#007969] mb-3">Common questions</p>
+              <h2 className="text-title text-[#1c1c1e] mb-8 md:mb-12">
+                Frequently Asked Questions
+              </h2>
+            </ScrollReveal>
+            <FAQAccordion faqs={editorial.faqs} />
+            <ScrollReveal delay={0.1}>
+              <p className="text-[#6b7280] text-sm mt-8">
+                Have a question not listed here?{" "}
+                <Link href="/contact" className="text-[#007969] hover:underline">
+                  Contact our technical team →
+                </Link>
+              </p>
+            </ScrollReveal>
           </div>
         </section>
       )}
