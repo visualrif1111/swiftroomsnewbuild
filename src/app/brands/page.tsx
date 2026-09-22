@@ -10,7 +10,7 @@ import Image from "next/image";
 import { SITE_URL } from "@/lib/site";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
-import { getPublishedBrands } from "@/lib/brands";
+import { getBrands } from "@/lib/brands";
 import { BRAND_CARDS, brandHref } from "@/lib/brandRoutes";
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopByBrandPage() {
-  const brands = await getPublishedBrands();
+  const brands = await getBrands();
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -43,16 +43,15 @@ export default async function ShopByBrandPage() {
     "@type": "ItemList",
     name: "Swiftrooms Brand Partners",
     url: `${SITE_URL}/brands`,
-    numberOfItems: brands.length,
-    itemListElement: brands.map((brand, i) => ({
+    numberOfItems: BRAND_CARDS.length,
+    itemListElement: BRAND_CARDS.map((card, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}${brandHref(brand.slug) ?? "/brands"}`,
+      url: `${SITE_URL}${card.href ?? brandHref(card.slug) ?? "/brands"}`,
       item: {
         "@type": "Brand",
-        name: brand.name,
-        description: brand.tagline || undefined,
-        ...(brand.country ? { foundingLocation: { "@type": "Place", name: brand.country } } : {}),
+        name: card.name,
+        description: card.strapline,
       },
     })),
   };
