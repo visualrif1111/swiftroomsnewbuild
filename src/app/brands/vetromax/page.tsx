@@ -6,6 +6,7 @@
 // `vetromax` is deliberately absent from BRAND_ROUTES so the two cannot clash.
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { SITE_URL } from "@/lib/site";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
@@ -109,16 +110,18 @@ export default function VetromaxPage() {
               </ScrollReveal>
             </div>
 
-            {/* Imagery placeholder — see the implementation report: Swiftrooms
-                holds no approved Vetromax photography, and the source images
-                must not be hotlinked in production. */}
+            {/* Manufacturer imagery, downloaded and served from /public rather
+                than hotlinked from vetromax.com. */}
             <ScrollReveal delay={0.15}>
-              <div className="aspect-[4/3] bg-[#f8f9fa] border border-gray-100 flex items-center justify-center p-8">
-                <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 text-center leading-relaxed">
-                  Vetromax imagery
-                  <br />
-                  awaiting approved assets
-                </p>
+              <div className="relative aspect-[4/3] bg-[#f8f9fa] border border-gray-100 overflow-hidden">
+                <Image
+                  src={vetromaxBrand.image.src}
+                  alt={vetromaxBrand.image.alt}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover"
+                />
               </div>
             </ScrollReveal>
           </div>
@@ -141,12 +144,21 @@ export default function VetromaxPage() {
                   href={`/brands/vetromax/${s.slug}`}
                   className="group flex h-full flex-col border border-gray-100 bg-white hover:border-[#007969]/40 transition-all active:scale-[0.99]"
                 >
-                  <div className="h-40 md:h-48 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-8">
-                    <p className="text-[0.55rem] tracking-widest uppercase text-gray-400 text-center">
-                      {s.name} imagery
-                      <br />
-                      awaiting approved assets
-                    </p>
+                  <div className="relative h-40 md:h-48 bg-[#f8f9fa] border-b border-gray-100 overflow-hidden">
+                    {s.image ? (
+                      <Image
+                        src={s.image.src}
+                        alt={s.image.alt}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-contain p-4 group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    ) : (
+                      <p className="absolute inset-0 flex items-center justify-center text-[0.55rem] tracking-widest uppercase text-gray-400">
+                        {s.name}
+                      </p>
+                    )}
                   </div>
                   <div className="p-6 md:p-8 flex flex-col flex-1">
                     <div className="flex items-start justify-between gap-4 mb-2">

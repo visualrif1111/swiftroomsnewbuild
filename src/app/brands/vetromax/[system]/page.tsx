@@ -4,6 +4,7 @@
 // it was crawled from vetromax.com or supplied by the client brief.
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "@/lib/site";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -132,15 +133,24 @@ export default async function VetromaxSystemPage({ params }: Props) {
               </ScrollReveal>
             </div>
 
-            {/* Imagery placeholder — no approved Vetromax assets held, and the
-                source images must not be hotlinked in production. */}
+            {/* Manufacturer render, downloaded and served from /public rather
+                than hotlinked from vetromax.com. */}
             <ScrollReveal delay={0.15}>
-              <div className="aspect-[4/3] bg-[#f8f9fa] border border-gray-100 flex items-center justify-center p-8">
-                <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 text-center leading-relaxed">
-                  {system.name} imagery
-                  <br />
-                  awaiting approved assets
-                </p>
+              <div className="relative aspect-[4/3] bg-[#f8f9fa] border border-gray-100 overflow-hidden">
+                {system.image ? (
+                  <Image
+                    src={system.image.src}
+                    alt={system.image.alt}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    className="object-contain p-6"
+                  />
+                ) : (
+                  <p className="absolute inset-0 flex items-center justify-center text-[0.6rem] tracking-widest uppercase text-gray-400">
+                    {system.name}
+                  </p>
+                )}
               </div>
             </ScrollReveal>
           </div>

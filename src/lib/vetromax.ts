@@ -47,6 +47,8 @@ export type VetromaxSystem = {
   };
   /** Configurations or applications, where published. */
   configurations?: { heading: string; items: string[] };
+  /** Manufacturer render, downloaded and served locally (never hotlinked). */
+  image?: { src: string; alt: string };
   /** Official Vetromax brochure. Linked, never mirrored. */
   brochureUrl?: string;
   related: string[];
@@ -144,6 +146,10 @@ export const vetromaxSystems: VetromaxSystem[] = [
       items: ["Conventional curtain wall", "Structural curtain wall", "Hybrid configurations"],
     },
     brochureUrl: `${BROCHURE}/VetroFacade_Brochure.pdf`,
+    image: {
+      src: "/brands/vetromax/vetro-facade.webp",
+      alt: "Vetro Façade curtain wall render showing the mullion and transom junction with glazing on both axes",
+    },
     related: ["vetro-casement", "vetro-slide"],
     seo: {
       title: "Vetromax Vetro Façade — Minimal Curtain Wall Systems",
@@ -225,6 +231,10 @@ export const vetromaxSystems: VetromaxSystem[] = [
       ],
     },
     brochureUrl: `${BROCHURE}/VetroCasement%20Brochure.pdf`,
+    image: {
+      src: "/brands/vetromax/vetro-casement.webp",
+      alt: "Vetro Casement hinged door render viewed from outside, showing the concealed sash and flush outer face",
+    },
     related: ["vetro-facade", "vetro-pivot"],
     seo: {
       title: "Vetromax Vetro Casement — Hidden Sash Windows & Doors",
@@ -320,6 +330,10 @@ export const vetromaxSystems: VetromaxSystem[] = [
       ],
     },
     brochureUrl: `${BROCHURE}/VetroSlide_Brochure.pdf`,
+    image: {
+      src: "/brands/vetromax/vetro-slide.webp",
+      alt: "Vetro Slide render in section, showing the sliding panels, concealed frame and floor track set into stone",
+    },
     related: ["vetro-guillotine", "vetro-pivot"],
     seo: {
       title: "Vetromax Vetro Slide — Minimal Sliding Windows & Doors",
@@ -413,6 +427,10 @@ export const vetromaxSystems: VetromaxSystem[] = [
       ],
     },
     brochureUrl: `${BROCHURE}/VetroPivot_Brochure.pdf`,
+    image: {
+      src: "/brands/vetromax/vetro-pivot.webp",
+      alt: "Vetro Pivot render in section, showing the door profile meeting a stone threshold over the slab",
+    },
     related: ["vetro-casement", "vetro-slide"],
     seo: {
       title: "Vetromax Vetro Pivot — Minimal Pivot Door System",
@@ -496,6 +514,10 @@ export const vetromaxSystems: VetromaxSystem[] = [
         { label: "Wind Resistance", value: "Class B4", standard: "EN 12 210:2000" },
       ],
     },
+    image: {
+      src: "/brands/vetromax/vetro-guillotine.webp",
+      alt: "Vetro Guillotine render showing three stacked vertical sliding panels within a single frame",
+    },
     related: ["vetro-slide", "vetro-facade"],
     seo: {
       title: "Vetromax Vetro Guillotine — Minimal Vertical Sliding System",
@@ -537,6 +559,10 @@ export const COMPARE_ROWS: { key: keyof VetromaxSystem["compare"]; label: string
 export const vetromaxBrand = {
   name: "Vetromax",
   strapline: "Minimalist Aluminium Systems",
+  image: {
+    src: "/brands/vetromax/home.webp",
+    alt: "Contemporary villa facade with minimal-framed aluminium glazing across two storeys",
+  },
   intro:
     "Vetromax builds minimalist aluminium systems for contemporary architecture — curtain wall, casement windows and doors, sliding and vertical sliding walls, and oversized pivot entrances. The common thread across the range is that structural depth is carried behind the sightline rather than across it, so the visible frame stays narrow while the glass gets larger.",
   why: [

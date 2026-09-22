@@ -131,7 +131,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
 
           {/* ── Desktop nav ── */}
           <ul
-            className={`hidden lg:flex items-center gap-7 font-accent text-[1rem] tracking-[0.12em] uppercase font-semibold transition-colors duration-300 ${
+            className={`hidden xl:flex items-center gap-5 font-accent text-[0.85rem] tracking-[0.1em] uppercase font-semibold transition-colors duration-300 ${
               heroMode ? "text-white" : "text-[#3a3a3c]"
             }`}
           >
@@ -197,10 +197,10 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
           </ul>
 
           {/* ── Desktop CTAs ── */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden xl:flex items-center gap-3 ml-5">
             <Link
               href="/showroom"
-              className={`font-accent text-[1rem] tracking-[0.12em] uppercase font-semibold transition-colors px-3 py-2 ${
+              className={`font-accent text-[0.85rem] tracking-[0.1em] uppercase font-semibold transition-colors px-2 py-2 ${
                 heroMode ? "text-white hover:text-white/70" : "text-[#3a3a3c] hover:text-[#007969]"
               }`}
             >
@@ -219,7 +219,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
 
           {/* ── Mobile burger — minimal thin lines ── */}
           <button
-            className={`lg:hidden p-2 -mr-1 transition-colors ${heroMode ? "text-white" : "text-[#1c1c1e]"}`}
+            className={`xl:hidden p-2 -mr-1 transition-colors ${heroMode ? "text-white" : "text-[#1c1c1e]"}`}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
@@ -336,7 +336,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.22 } }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-[60] bg-[#0f0f0f] flex flex-col lg:hidden overflow-hidden"
+            className="fixed inset-0 z-[60] bg-[#0f0f0f] flex flex-col xl:hidden overflow-hidden"
           >
             {/* Header row — logo + close */}
             <div className="flex-shrink-0 flex items-center justify-between px-6 h-16">
