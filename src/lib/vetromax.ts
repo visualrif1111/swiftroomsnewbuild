@@ -562,3 +562,49 @@ export const vetromaxBrand = {
     { name: "Hospitality and retail", description: "Vertical sliding serveries, frameless corners and oversized entrance doors." },
   ],
 };
+
+/**
+ * Cross-links from the existing Swiftrooms catalogue products to the dedicated
+ * Vetromax area. Keyed by catalogue product slug.
+ *
+ * The two uPVC products map to the brand landing page rather than a system:
+ * Vetromax's five published systems are all aluminium, so pointing a uPVC suite
+ * at one of them would be wrong.
+ */
+const PRODUCT_TO_SYSTEM: Record<string, string> = {
+  "vetro-casement": "vetro-casement",
+  "vetromax-pivot-door": "vetro-pivot",
+  "vetromax-vf35": "vetro-facade",
+};
+
+export type VetromaxCrossLink = { href: string; label: string; description: string };
+
+/**
+ * The Vetromax link for a catalogue product, or null when the product is not a
+ * Vetromax one. Never replaces the product's own content — it is an addition.
+ */
+export function vetromaxCrossLink(
+  productSlug: string,
+  brand: string | undefined,
+): VetromaxCrossLink | null {
+  if (!brand || !/vetro/i.test(brand)) return null;
+
+  const systemSlug = PRODUCT_TO_SYSTEM[productSlug];
+  const system = systemSlug ? vetromaxSystem(systemSlug) : null;
+
+  if (system) {
+    return {
+      href: `/brands/vetromax/${system.slug}`,
+      label: `${system.name} — ${system.category}`,
+      description:
+        "Full manufacturer specification, tested performance figures and configuration options for this system.",
+    };
+  }
+
+  return {
+    href: "/brands/vetromax",
+    label: "Vetromax — Minimalist Aluminium Systems",
+    description:
+      "The full Vetromax range, with manufacturer specifications and tested performance for each system.",
+  };
+}

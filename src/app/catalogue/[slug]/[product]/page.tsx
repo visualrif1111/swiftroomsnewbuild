@@ -8,6 +8,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getProduct, getProductParams } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticles } from "@/lib/blog";
+import { vetromaxCrossLink } from "@/lib/vetromax";
 import { getProductPageSettings } from "@/lib/product-page-settings";
 
 interface Props {
@@ -42,6 +43,10 @@ export default async function ProductDetailPage({ params }: Props) {
   if (!found) notFound();
   const { category: cat, product } = found;
   const chrome = await getProductPageSettings();
+
+  // Vetromax products additionally link through to their dedicated system page.
+  // Null for every other brand, so no other product page changes.
+  const crossLink = vetromaxCrossLink(product.slug, product.brand);
 
   const related = cat.products.filter((p) => p.id !== product.id).slice(0, 3);
   const heroImage = product.image ?? cat.image;
@@ -192,7 +197,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 manufacturer warranty.
               </p>
               <p className="text-[#6b7280] leading-relaxed">
-                As authorised {product.brand} partners, Swiftrooms supply and install this system to the
+                As authorised {product.brand}{" "}partners, Swiftrooms supply and install this system to the
                 manufacturer&apos;s exact specification — ensuring the performance credentials translate
                 from the data sheet to the installed product.
               </p>
@@ -200,6 +205,35 @@ export default async function ProductDetailPage({ params }: Props) {
           </ScrollReveal>
         </div>
       </section>
+
+      {/* 2b — Manufacturer system link.
+           Additive only: the product's own content above is untouched, this
+           just points at the dedicated Vetromax area for the full spec. */}
+      {crossLink && (
+        <section className="pb-4 md:pb-8">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+            <ScrollReveal>
+              <Link
+                href={crossLink.href}
+                className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 border border-gray-200 bg-[#f8f9fa] p-5 md:p-6 hover:border-[#007969] transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.6rem] tracking-widest uppercase text-[#007969] mb-2">
+                    Manufacturer system
+                  </p>
+                  <p className="font-heading font-semibold text-[#1c1c1e] group-hover:text-[#007969] transition-colors">
+                    {crossLink.label}
+                  </p>
+                  <p className="text-[#6b7280] text-sm mt-1">{crossLink.description}</p>
+                </div>
+                <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] whitespace-nowrap">
+                  View System →
+                </span>
+              </Link>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* 3 — Technical Specifications */}
       {product.specs && Object.keys(product.specs).length > 0 && (
