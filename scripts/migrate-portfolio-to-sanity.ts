@@ -181,11 +181,11 @@ async function run() {
       const im = await img(g, `${p.name} — ${p.type}`);
       if (im) gallery.push({ ...im, _key: slugify(g) });
     }
-    let video, videoPoster;
+    let video;
     if (!SKIP_MEDIA && p.media.video && existsSync(publicPath(p.media.video))) {
       video = { _type: "file", asset: { _type: "reference", _ref: await uploadAsset("file", p.media.video, "video/mp4") } };
     }
-    videoPoster = await img(p.media.videoPoster, `${p.name} video`);
+    const videoPoster = await img(p.media.videoPoster, `${p.name} video`);
     const s = seoFor(p);
 
     await client.createOrReplace({

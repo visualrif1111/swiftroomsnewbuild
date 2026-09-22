@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { usePointerCoarse } from "@/lib/use-pointer-coarse";
+import { useRef, useEffect } from "react";
 import { motion, useInView, useAnimation } from "framer-motion";
 
 interface Props {
@@ -11,16 +12,12 @@ interface Props {
 }
 
 export default function ScrollReveal({ children, delay = 0, direction = "up", className }: Props) {
-  const [isTouch, setIsTouch] = useState(false);
+  // Touch devices get zero animation — eliminates will-change compositor layers
+  // and IntersectionObserver overhead that cause scroll lag on mobile.
+  const isTouch = usePointerCoarse();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-5%" });
   const controls = useAnimation();
-
-  useEffect(() => {
-    // Touch devices get zero animation — eliminates will-change compositor layers
-    // and IntersectionObserver overhead that cause scroll lag on mobile
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
 
   useEffect(() => {
     if (!isTouch && inView) {

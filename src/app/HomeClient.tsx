@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { usePointerCoarse } from "@/lib/use-pointer-coarse";
+import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
@@ -101,10 +102,7 @@ export default function HomeClient({
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const [isTouch, setIsTouch] = useState(false);
-  useEffect(() => {
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const isTouch = usePointerCoarse();
 
   /* carousel refs & active-slide state */
   const productCarouselRef = useRef<HTMLDivElement>(null);
@@ -565,7 +563,7 @@ export default function HomeClient({
           {/* ── Mobile: 2-per-view snap carousel ── */}
           <div className="md:hidden">
             <div className="flex overflow-x-auto snap-x snap-proximity scrollbar-hide overscroll-x-contain -mx-5 px-5 gap-3 pb-2">
-              {brands.map((brand, i) => (
+              {brands.map((brand) => (
                 <Link
                   key={brand.name}
                   href="/catalogue/brands"

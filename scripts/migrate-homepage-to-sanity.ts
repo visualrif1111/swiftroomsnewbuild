@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
-import { stats, productCategories, portfolioProjects } from "../src/lib/data";
+import { stats, portfolioProjects } from "../src/lib/data";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 try {
