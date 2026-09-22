@@ -6,7 +6,7 @@ import { getPageSettings, pageMetadata } from "@/lib/pageSettings";
 import PageBuilder from "@/components/blocks/PageBuilder";
 
 const baseMetadata: Metadata = {
-  title: "About Swiftrooms — UAE Glazing Specialists Since 2009",
+  title: "About Swiftrooms — UAE Glazing Specialists Since 2011",
   description:
     "Fifteen years supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE. Authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions.",
   alternates: { canonical: `${SITE_URL}/about` },
@@ -35,7 +35,7 @@ export default async function AboutPage() {
     "@id": `${SITE_URL}/#business`,
     name: "Swiftrooms",
     url: SITE_URL,
-    foundingDate: "2009",
+    foundingDate: "2011",
     description:
       "Premium aluminium windows, doors, curtain wall and glazing systems for UAE residential and commercial projects. Authorised Cortizo, Vetromax, Vetro and Gulf Extrusions partners.",
     areaServed: [

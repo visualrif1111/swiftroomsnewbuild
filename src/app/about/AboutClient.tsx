@@ -79,7 +79,7 @@ export default function AboutClient({
           <ScrollReveal delay={0.2}>
             <p className="text-body-lg text-[#6b7280] max-w-2xl">
               {hero?.subheading ??
-                "Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE since 2009. We are authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions — four of the world's leading aluminium and glazing systems manufacturers."}
+                "Swiftrooms has been supplying and installing premium aluminium windows, doors and curtain wall systems across the UAE since 2011. We are authorised partners for Cortizo, Vetromax, Vetro and Gulf Extrusions — four of the world's leading aluminium and glazing systems manufacturers."}
             </p>
           </ScrollReveal>
         </div>

@@ -1635,13 +1635,13 @@ export const testimonials: Testimonial[] = [
 
 export const timeline: TimelineEntry[] = [
   {
-    year: "2009",
+    year: "2011",
     title: "Founded",
     description:
       "Swiftrooms established in Dubai with a single purpose: to bring European-grade aluminium window and door systems to the UAE market, installed to European standards.",
   },
   {
-    year: "2011",
+    year: "2012",
     title: "Cortizo Partnership",
     description:
       "Became authorised Cortizo partners for the UAE — the first formal relationship between the Spanish manufacturer and a UAE specialist installer.",
