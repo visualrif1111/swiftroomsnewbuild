@@ -14,15 +14,33 @@ import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 type FormType = "quote" | "showroom";
 
+/**
+ * Optional attribution carried from whichever CTA opened the drawer, so a lead
+ * raised from a product page arrives with that product attached instead of an
+ * unknown source. Every field is optional and omitting the context entirely
+ * leaves the existing behaviour unchanged.
+ */
+export interface LeadContext {
+  brand?: string;
+  product?: string;
+  productSlug?: string;
+  /** Where on the page the CTA sat, e.g. "hero" or "final-cta". */
+  ctaLocation?: string;
+  /** Overrides the default lead source label. */
+  source?: string;
+}
+
 interface CTAFormContextValue {
   activeForm: FormType | null;
-  openFreeQuoteForm: () => void;
-  openShowroomVisitForm: () => void;
+  leadContext: LeadContext | null;
+  openFreeQuoteForm: (context?: LeadContext) => void;
+  openShowroomVisitForm: (context?: LeadContext) => void;
   closeForm: () => void;
 }
 
 const CTAFormContext = createContext<CTAFormContextValue>({
   activeForm: null,
+  leadContext: null,
   openFreeQuoteForm: () => {},
   openShowroomVisitForm: () => {},
   closeForm: () => {},
@@ -34,9 +52,16 @@ export function useCTAForms() {
 
 export function CTAFormProvider({ children }: { children: React.ReactNode }) {
   const [activeForm, setActiveForm] = useState<FormType | null>(null);
+  const [leadContext, setLeadContext] = useState<LeadContext | null>(null);
 
-  const openFreeQuoteForm = useCallback(() => setActiveForm("quote"), []);
-  const openShowroomVisitForm = useCallback(() => setActiveForm("showroom"), []);
+  const openFreeQuoteForm = useCallback((context?: LeadContext) => {
+    setLeadContext(context ?? null);
+    setActiveForm("quote");
+  }, []);
+  const openShowroomVisitForm = useCallback((context?: LeadContext) => {
+    setLeadContext(context ?? null);
+    setActiveForm("showroom");
+  }, []);
   const closeForm = useCallback(() => setActiveForm(null), []);
 
   // Lock body scroll while a drawer is open, via the shared ref-counted helper.
@@ -58,7 +83,7 @@ export function CTAFormProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CTAFormContext.Provider
-      value={{ activeForm, openFreeQuoteForm, openShowroomVisitForm, closeForm }}
+      value={{ activeForm, leadContext, openFreeQuoteForm, openShowroomVisitForm, closeForm }}
     >
       {children}
       <AnimatePresence>
@@ -87,7 +112,7 @@ export function CTAFormProvider({ children }: { children: React.ReactNode }) {
               onClick={(e) => e.stopPropagation()}
             >
               {activeForm === "quote" ? (
-                <FreeQuoteForm onClose={closeForm} />
+                <FreeQuoteForm onClose={closeForm} context={leadContext} />
               ) : (
                 <ShowroomVisitForm onClose={closeForm} />
               )}

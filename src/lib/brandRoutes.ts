@@ -32,7 +32,13 @@ export const BRAND_ROUTE_ENTRIES = Object.entries(BRAND_ROUTES);
  * title/tagline — "Cortizo Systems" against Sanity's "Cortizo" — and the
  * ordering is curated rather than alphabetical, so both are held here.
  */
-export type BrandCard = { slug: string; name: string; strapline: string };
+export type BrandCard = {
+  slug: string;
+  name: string;
+  strapline: string;
+  /** Overrides the BRAND_ROUTES lookup. Used by brands with their own sub-tree. */
+  href?: string;
+};
 
 export const BRAND_CARDS: BrandCard[] = [
   { slug: "schuco", name: "Sch\u00fcco Aluminium Windows", strapline: "Engineered for extremes" },
@@ -41,6 +47,12 @@ export const BRAND_CARDS: BrandCard[] = [
   { slug: "gulf-extrusions", name: "Gulf Extrusions", strapline: "Engineered for extremes. Designed without compromise." },
   { slug: "deceuninck", name: "Deceuninck", strapline: "Belgian uPVC. Engineered to last." },
   { slug: "ultraframe", name: "UltraFrame", strapline: "British roof engineering. Reworked for the sun." },
+  {
+    slug: "vetromax",
+    name: "Vetromax",
+    strapline: "Minimalist aluminium systems.",
+    href: "/brands/vetromax",
+  },
 ];
 
 /** Public URL segment for a Sanity brand slug, or null when it has no page. */

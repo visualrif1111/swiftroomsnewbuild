@@ -89,7 +89,7 @@ export default async function ShopByBrandPage() {
               return (
                 <ScrollReveal key={card.slug} delay={(i % 3) * 0.08}>
                   <Link
-                    href={brandHref(card.slug) ?? "/brands"}
+                    href={card.href ?? brandHref(card.slug) ?? "/brands"}
                     className="group flex h-full flex-col border border-gray-100 bg-white hover:border-[#007969]/40 transition-all active:scale-[0.99]"
                   >
                     <div className="h-32 md:h-40 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-8">

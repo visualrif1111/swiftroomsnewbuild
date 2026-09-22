@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useCTAForms } from "./CTAFormProvider";
+import { useCTAForms, type LeadContext } from "./CTAFormProvider";
 
 interface ButtonProps {
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
+  /** Attribution passed through to the lead payload. */
+  context?: LeadContext;
 }
 
-export function QuoteButton({ className, children, onClick }: ButtonProps) {
+export function QuoteButton({ className, children, onClick, context }: ButtonProps) {
   const { openFreeQuoteForm } = useCTAForms();
   return (
     <button
       type="button"
       className={className}
       onClick={() => {
-        openFreeQuoteForm();
+        openFreeQuoteForm(context);
         onClick?.();
       }}
     >
@@ -25,14 +27,14 @@ export function QuoteButton({ className, children, onClick }: ButtonProps) {
   );
 }
 
-export function ShowroomButton({ className, children, onClick }: ButtonProps) {
+export function ShowroomButton({ className, children, onClick, context }: ButtonProps) {
   const { openShowroomVisitForm } = useCTAForms();
   return (
     <button
       type="button"
       className={className}
       onClick={() => {
-        openShowroomVisitForm();
+        openShowroomVisitForm(context);
         onClick?.();
       }}
     >

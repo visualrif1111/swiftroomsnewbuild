@@ -4,6 +4,7 @@ import { getCategories } from "@/lib/catalogue";
 import { getPortfolioProjects } from "@/lib/portfolio";
 import { getArticleSlugs } from "@/lib/blog";
 import { BRAND_ROUTE_SLUGS } from "@/lib/brandRoutes";
+import { vetromaxSystems } from "@/lib/vetromax";
 
 const BASE_URL = SITE_URL;
 
@@ -75,8 +76,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const vetromaxRoutes: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/brands/vetromax`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    ...vetromaxSystems.map((s) => ({
+      url: `${BASE_URL}/brands/vetromax/${s.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ];
+
   return [
     ...staticRoutes,
+    ...vetromaxRoutes,
     ...categoryRoutes,
     ...productRoutes,
     ...portfolioRoutes,

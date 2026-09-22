@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import type { LeadContext } from "./CTAFormProvider";
 import { AnimatePresence, motion } from "framer-motion";
 
 const TOTAL_STEPS = 8;
@@ -208,7 +209,40 @@ const INITIAL: FormData = {
   message: "",
 };
 
-export default function FreeQuoteForm({ onClose }: { onClose: () => void }) {
+/**
+ * Attribution gathered at submit time rather than on mount, so a lead reflects
+ * the page the visitor actually submitted from.
+ */
+function attribution(context?: LeadContext | null) {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const utm: Record<string, string> = {};
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+    const value = params.get(key);
+    if (value) utm[key] = value;
+  }
+  return {
+    brand: context?.brand,
+    product: context?.product,
+    productSlug: context?.productSlug,
+    ctaLocation: context?.ctaLocation,
+    leadSource: context?.source ?? "free-quote-form",
+    pageUrl: window.location.href,
+    pagePath: window.location.pathname,
+    referrer: document.referrer || undefined,
+    device: window.matchMedia("(pointer: coarse)").matches ? "touch" : "pointer",
+    submittedAt: new Date().toISOString(),
+    ...utm,
+  };
+}
+
+export default function FreeQuoteForm({
+  onClose,
+  context,
+}: {
+  onClose: () => void;
+  context?: LeadContext | null;
+}) {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<FormData>(INITIAL);
@@ -267,6 +301,7 @@ export default function FreeQuoteForm({ onClose }: { onClose: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "free-quote-form",
+          ...attribution(context),
           projectType: data.projectType,
           propertyType: data.propertyType,
           location: locationParts.join(", "),
