@@ -1,7 +1,7 @@
 "use client";
 
 import { usePointerCoarse } from "@/lib/use-pointer-coarse";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useLayoutEffect } from "react";
 import Link from "next/link";
 import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
 import Image from "next/image";
@@ -78,6 +78,45 @@ function Dots({ count, active, onDotClick }: { count: number; active: number; on
   );
 }
 
+/**
+ * On short viewports the bottom-anchored hero copy can grow up under the fixed
+ * header. Shrinks the heading just enough to keep 12px clear of the header,
+ * never below 24px; otherwise the responsive `.text-display` size applies.
+ */
+function useFitBelowHeader(
+  contentRef: React.RefObject<HTMLElement | null>,
+  headingRef: React.RefObject<HTMLElement | null>,
+) {
+  useLayoutEffect(() => {
+    function fit() {
+      const header = document.querySelector("header");
+      const heading = headingRef.current;
+      const content = contentRef.current;
+      if (!header || !heading || !content) return;
+      heading.style.fontSize = "";
+      const overlap = header.getBoundingClientRect().bottom + 12 - content.getBoundingClientRect().top;
+      if (overlap <= 0) return;
+      const height = heading.getBoundingClientRect().height;
+      const size = parseFloat(getComputedStyle(heading).fontSize);
+      if (height > 0 && size > 0) {
+        heading.style.fontSize = `${Math.max(24, size * Math.max(0, 1 - overlap / height) * 0.96)}px`;
+      }
+    }
+    fit();
+    // Re-run once web fonts and the entrance animation have settled.
+    const t1 = setTimeout(fit, 300);
+    const t2 = setTimeout(fit, 1000);
+    window.addEventListener("resize", fit);
+    window.addEventListener("orientationchange", fit);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", fit);
+      window.removeEventListener("orientationchange", fit);
+    };
+  }, [contentRef, headingRef]);
+}
+
 export default function HomeClient({
   settings,
   productCategories,
@@ -103,6 +142,9 @@ export default function HomeClient({
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const isTouch = usePointerCoarse();
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const heroHeadingRef = useRef<HTMLHeadingElement>(null);
+  useFitBelowHeader(heroContentRef, heroHeadingRef);
 
   /* carousel refs & active-slide state */
   const productCarouselRef = useRef<HTMLDivElement>(null);
@@ -182,7 +224,7 @@ export default function HomeClient({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-end bg-[#030a08]">
+      <section ref={heroRef} className="relative hero-min-h overflow-hidden flex items-end bg-[#030a08]">
         {/* Poster image — LCP candidate, always visible */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
@@ -224,6 +266,7 @@ export default function HomeClient({
           }}
         />
         <motion.div
+          ref={heroContentRef}
           className="relative z-10 w-full max-w-screen-xl mx-auto px-5 md:px-8 pb-24 md:pb-28"
           style={isTouch ? undefined : { opacity: heroOpacity }}
         >
@@ -236,14 +279,15 @@ export default function HomeClient({
             {settings.hero.eyebrow}
           </motion.p>
           <motion.h1
+            ref={heroHeadingRef}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-display text-white mb-6 max-w-5xl"
           >
-            Premium <span className="text-[#4dd9c0]">Aluminium</span>
+            Premium Aluminium
             <br />
-            Doors &amp; Windows in Dubai, UAE
+            <span className="text-[#4dd9c0]">Doors &amp; Windows</span> in Dubai, UAE
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 24 }}
