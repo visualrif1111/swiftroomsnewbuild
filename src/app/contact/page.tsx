@@ -6,6 +6,9 @@ import { CTALink } from "@/components/forms/CTAButtons";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import LeadTypeform from "@/components/forms/LeadTypeform";
 
+const MAP_EMBED_URL =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3616.383716776185!2d55.11823018885498!3d24.987074200000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f6bcfbcc1dd2b%3A0x3409283432368103!2sSwift%20Rooms%20LLC%20-%20Windows%2C%20Doors%20%26%20Luxury%20Glass%20Rooms!5e0!3m2!1sen!2sin!4v1787728654500!5m2!1sen!2sin";
+
 const DEFAULT_HOURS = [
   { days: "Sunday – Thursday", value: "8:30 – 17:30" },
   { days: "Saturday", value: "10:00 – 14:00" },
@@ -121,6 +124,25 @@ export default async function ContactPage() {
               heading="Send us a message"
               intro="Answer a few quick questions and our team will get back to you within 12 hours."
             />
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Map — the showroom & factory listing on Google Maps */}
+      <section className="pb-20">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+          <ScrollReveal>
+            <div className="relative rounded-xl overflow-hidden border border-gray-200 h-[320px] md:h-[420px] lg:h-[480px]">
+              <iframe
+                src={MAP_EMBED_URL}
+                className="absolute inset-0 h-full w-full"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="Swiftrooms showroom & factory location on Google Maps"
+              />
+            </div>
           </ScrollReveal>
         </div>
       </section>

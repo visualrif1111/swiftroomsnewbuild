@@ -61,65 +61,44 @@ export default async function ShopByBrandPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }} />
 
-      <section className="pt-32 pb-10 md:pt-44 md:pb-16 lg:pt-52 lg:pb-20">
+      <section className="pt-32 pb-20 md:pt-44 md:pb-28 lg:pt-52">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
-            <p className="text-label text-[#007969] mb-4">Brand Partners</p>
+            <p className="text-label text-[#007969] mb-3 md:mb-4">Brand Partners</p>
             <h1 className="text-headline text-[#1c1c1e] mb-6 max-w-2xl">Shop By Brand</h1>
-          </ScrollReveal>
-          <ScrollReveal delay={0.1}>
-            <p className="text-body-lg text-[#6b7280] max-w-2xl">
+            <p className="text-body-lg text-[#6b7280] max-w-2xl mb-12 md:mb-16">
               Dedicated system pages for our specialist manufacturer partners, engineered in
               Europe, re-specified for Gulf conditions.
             </p>
           </ScrollReveal>
-        </div>
-      </section>
 
-      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-        <div className="divider-brand" />
-      </div>
-
-      <section className="py-12 md:py-20">
-        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {/* Hairline grid, as on swiftrooms.ae; each cell also carries the brand's logo. */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-100">
             {BRAND_CARDS.map((card, i) => {
               const brand = brands.find((b) => b.slug === card.slug);
               return (
                 <ScrollReveal key={card.slug} delay={(i % 3) * 0.08}>
                   <Link
                     href={card.href ?? brandHref(card.slug) ?? "/brands"}
-                    className="group flex h-full flex-col border border-gray-100 bg-white hover:border-[#007969]/40 transition-all active:scale-[0.99]"
+                    className="group block bg-white p-6 md:p-8 h-full hover:bg-[#f0fdf4] transition-colors"
                   >
-                    <div className="h-32 md:h-40 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-8">
-                      {brand?.logo ? (
-                        <div className="relative w-full h-full">
-                          <Image
-                            src={brand.logo}
-                            alt={`${card.name} logo`}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          />
-                        </div>
-                      ) : (
-                        <span className="text-label text-[#007969]/40">{card.name}</span>
-                      )}
-                    </div>
-                    <div className="p-5 md:p-6 flex flex-col flex-1">
-                      <p className="text-[0.6rem] tracking-widest uppercase text-gray-400 mb-2">
-                        Brand Partner
-                      </p>
-                      <h2 className="text-[#1c1c1e] font-semibold text-lg group-hover:text-[#007969] transition-colors mb-2">
-                        {card.name}
-                      </h2>
-                      <p className="text-[#6b7280] text-sm leading-relaxed flex-1">
-                        {card.strapline}
-                      </p>
-                      <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mt-5">
-                        View System →
-                      </span>
-                    </div>
+                    {brand?.logo && (
+                      <div className="relative h-10 w-36 mb-5">
+                        <Image
+                          src={brand.logo}
+                          alt={`${card.name} logo`}
+                          fill
+                          className="object-contain object-left"
+                          sizes="144px"
+                        />
+                      </div>
+                    )}
+                    <p className="text-label text-[#007969] mb-3">Brand Partner</p>
+                    <h2 className="text-xl font-semibold text-[#1c1c1e] mb-2 group-hover:text-[#007969] transition-colors">
+                      {card.name}
+                    </h2>
+                    <p className="text-[#6b7280] text-sm italic mb-4">{card.strapline}</p>
+                    <span className="text-[0.65rem] tracking-widest uppercase text-[#007969]">View system →</span>
                   </Link>
                 </ScrollReveal>
               );
