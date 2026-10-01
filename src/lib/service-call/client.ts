@@ -4,14 +4,15 @@
 //        ↓
 //   getServiceRequestClient()        ← this file
 //        ↓
-//   mockServiceRequestClient         ← Phase 1 (now)
-//   httpServiceRequestClient         ← later: POSTs to the agreed API contract
+//   httpServiceRequestClient         → POST /api/service-requests → database
+//   mockServiceRequestClient         ← UI-only testing, nothing leaves the browser
 //
-// To integrate a real backend, implement ServiceRequestClient (types.ts) and
-// return it here. No component imports a backend directly.
+// No component imports a backend directly. Set
+// NEXT_PUBLIC_SERVICE_CALL_CLIENT=mock to run the wizard without a backend.
+import { httpServiceRequestClient } from "./http-client";
 import { mockServiceRequestClient } from "./mock-client";
 import type { ServiceRequestClient } from "./types";
 
 export function getServiceRequestClient(): ServiceRequestClient {
-  return mockServiceRequestClient;
+  return process.env.NEXT_PUBLIC_SERVICE_CALL_CLIENT === "mock" ? mockServiceRequestClient : httpServiceRequestClient;
 }

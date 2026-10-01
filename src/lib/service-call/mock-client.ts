@@ -1,9 +1,10 @@
-// Phase 1 mock implementation of ServiceRequestClient.
+// Mock ServiceRequestClient for UI work without a backend
+// (NEXT_PUBLIC_SERVICE_CALL_CLIENT=mock — see client.ts).
 //
 // Nothing leaves the browser: no network calls, no uploads, no storage beyond a
-// localStorage counter so references increase between test runs. Replace with a
-// production implementation (see client.ts and the contract in types.ts).
-import type { ServiceRequestClient, ServiceRequestDraft, ServiceRequestReceipt, SubmitOptions } from "./types";
+// localStorage counter so references increase between test runs. References it
+// returns are NOT real — the database allocates the authoritative ones.
+import { ServiceRequestSubmitError, type ServiceRequestClient, type ServiceRequestDraft, type ServiceRequestReceipt, type SubmitOptions } from "./types";
 
 const COUNTER_KEY = "swiftrooms.service-call.mock-sequence";
 
@@ -32,11 +33,11 @@ const wait = (ms: number, signal?: AbortSignal) =>
   });
 
 export const mockServiceRequestClient: ServiceRequestClient = {
-  async submit(draft: ServiceRequestDraft, options: SubmitOptions = {}): Promise<ServiceRequestReceipt> {
+  async submit(draft: ServiceRequestDraft, options: SubmitOptions): Promise<ServiceRequestReceipt> {
     // QA hook: add ?mock=fail to the page URL to see the error state.
     if (new URLSearchParams(window.location.search).get("mock") === "fail") {
       await wait(800, options.signal);
-      throw new Error("Mock submission failure");
+      throw new ServiceRequestSubmitError("server", "Mock submission failure");
     }
 
     // Simulate upload progress, a little slower when there is more media.
@@ -51,7 +52,7 @@ export const mockServiceRequestClient: ServiceRequestClient = {
     return {
       id: `mock_${submittedAt.getTime()}`,
       reference: formatReference(submittedAt.getFullYear(), nextSequence()),
-      status: "submitted",
+      status: "SUBMITTED",
       submittedAt: submittedAt.toISOString(),
     };
   },

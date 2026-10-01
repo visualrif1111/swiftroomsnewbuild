@@ -6,14 +6,23 @@
 // same definitions can be lifted into another codebase unchanged.
 // `ServiceRequestClient` below is the full contract a backend must implement.
 
-/** Lifecycle of a service request once it leaves the customer's device. */
-export type ServiceStatus =
-  | "submitted" // received from the customer, not yet looked at
-  | "triaged" // reviewed by the service team, next step decided
-  | "scheduled" // visit booked
-  | "in_progress" // engineer attending / parts on order
-  | "resolved" // fixed, awaiting confirmation
-  | "closed"; // complete
+/**
+ * Lifecycle of a service request once it leaves the customer's device.
+ * Mirrors the `service_request_status` enum in the database.
+ */
+export const SERVICE_STATUSES = [
+  "SUBMITTED", // received from the customer, not yet looked at
+  "AI_PROCESSED", // automated triage has run (later phase)
+  "AWAITING_REVIEW", // waiting for the service team
+  "MORE_INFORMATION_REQUIRED", // customer asked for more detail or media
+  "INSPECTION_REQUIRED", // a site visit is needed
+  "SCHEDULED", // visit booked
+  "IN_PROGRESS", // engineer attending / parts on order
+  "RESOLVED", // fixed, awaiting confirmation
+  "CLOSED", // complete
+] as const;
+
+export type ServiceStatus = (typeof SERVICE_STATUSES)[number];
 
 /** The categories a customer can pick on "What needs attention?". */
 export type ServiceProductId =
@@ -116,9 +125,34 @@ export interface ServiceRequestReceipt {
 }
 
 export interface SubmitOptions {
+  /**
+   * Identifies one submit attempt. Sending the same key again (double click,
+   * retry after a timeout, refresh mid-submit) returns the original request
+   * rather than creating a duplicate.
+   */
+  idempotencyKey: string;
   /** 0–1 overall progress, for media uploads. */
   onProgress?: (fraction: number) => void;
   signal?: AbortSignal;
+}
+
+/** Why a submit failed, so the UI can say something useful. */
+export type SubmitErrorKind =
+  | "validation" // the server rejected the data (fieldErrors says which)
+  | "network" // offline or the connection dropped
+  | "timeout" // no answer in time — the request may or may not exist
+  | "unavailable" // the service is not configured or is down
+  | "server"; // anything else
+
+export class ServiceRequestSubmitError extends Error {
+  constructor(
+    public readonly kind: SubmitErrorKind,
+    message: string,
+    public readonly fieldErrors: Record<string, string> = {},
+  ) {
+    super(message);
+    this.name = "ServiceRequestSubmitError";
+  }
 }
 
 /**
@@ -126,5 +160,5 @@ export interface SubmitOptions {
  * a production implementation replaces it without touching any component.
  */
 export interface ServiceRequestClient {
-  submit(draft: ServiceRequestDraft, options?: SubmitOptions): Promise<ServiceRequestReceipt>;
+  submit(draft: ServiceRequestDraft, options: SubmitOptions): Promise<ServiceRequestReceipt>;
 }

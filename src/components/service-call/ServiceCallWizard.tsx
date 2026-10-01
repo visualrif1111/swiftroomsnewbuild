@@ -5,11 +5,18 @@
 // backend is reached only through getServiceRequestClient().
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toCreatePayload } from "@/lib/service-call/api-contract";
 import { getServiceRequestClient } from "@/lib/service-call/client";
 import { EMPTY_DRAFT, SERVICE_CALL_STEPS } from "@/lib/service-call/config";
-import { clearDraft, loadDraft, saveDraft } from "@/lib/service-call/draft-storage";
+import { clearDraft, loadDraft, saveDraft, type PendingSubmission } from "@/lib/service-call/draft-storage";
 import { releaseMedia } from "@/lib/service-call/media";
-import type { ServiceMedia, ServiceRequestDraft, ServiceRequestReceipt } from "@/lib/service-call/types";
+import { SERVICE_PHONE } from "@/lib/contact";
+import {
+  ServiceRequestSubmitError,
+  type ServiceMedia,
+  type ServiceRequestDraft,
+  type ServiceRequestReceipt,
+} from "@/lib/service-call/types";
 import { hasProblemInformation, validateDetails, validateProducts } from "@/lib/service-call/validation";
 import { Icon } from "./icons";
 import ProgressIndicator from "./ProgressIndicator";
@@ -32,15 +39,34 @@ interface Initial {
   step: number;
   draft: ServiceRequestDraft;
   restored: { hadMedia: boolean } | null;
+  submission: PendingSubmission | null;
+}
+
+/** What the customer would see if this submit failed. */
+function submitErrorMessage(err: unknown): string {
+  const kind = err instanceof ServiceRequestSubmitError ? err.kind : "server";
+  const kept = "Nothing you've entered has been lost.";
+  switch (kind) {
+    case "validation": {
+      const first = err instanceof ServiceRequestSubmitError ? Object.values(err.fieldErrors)[0] : undefined;
+      return `Some details need checking${first ? `: ${first}` : "."} Use Edit to correct them.`;
+    }
+    case "network":
+      return `We couldn't reach our service team. Check your connection and try again. ${kept}`;
+    case "timeout":
+      return `This is taking longer than expected. Try again — if your first attempt got through, you won't create a duplicate. ${kept}`;
+    default:
+      return `We couldn't send your request just now. Please try again, or call our service team on ${SERVICE_PHONE}. ${kept}`;
+  }
 }
 
 function initialState(): Initial {
   const stored = loadDraft();
-  if (!stored) return { view: "intro", step: 0, draft: EMPTY_DRAFT, restored: null };
+  if (!stored) return { view: "intro", step: 0, draft: EMPTY_DRAFT, restored: null, submission: null };
   let step = Math.min(Math.max(stored.step, 0), REVIEW);
   // Media doesn't survive a refresh; if it was the only evidence, send them back to add it.
   if (step > EVIDENCE && !hasProblemInformation(stored.draft)) step = EVIDENCE;
-  return { view: "steps", step, draft: stored.draft, restored: { hadMedia: stored.hadMedia } };
+  return { view: "steps", step, draft: stored.draft, restored: { hadMedia: stored.hadMedia }, submission: stored.submission };
 }
 
 export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; phoneRaw: string }) {
@@ -60,11 +86,15 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
   const containerRef = useRef<HTMLElement>(null);
   const focusPending = useRef(false);
   const latestDraft = useRef(draft);
+  // The current submit attempt's key — reused for retries, so the server never
+  // creates the request twice. A ref (not state) so a double click can't race.
+  const submission = useRef<PendingSubmission | null>(init.submission);
+  const inFlight = useRef(false);
 
   // Persist typed answers so a refresh doesn't lose them.
   useEffect(() => {
     latestDraft.current = draft;
-    if (view === "steps") saveDraft(draft, step);
+    if (view === "steps") saveDraft(draft, step, submission.current);
   }, [draft, step, view]);
 
   // Free object URLs when the page is left.
@@ -128,19 +158,34 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     if (Object.keys(validateDetails(draft.customer)).length) return show("steps", 0);
     if (Object.keys(validateProducts(draft)).length) return show("steps", 1);
     if (!hasProblemInformation(draft)) return show("steps", EVIDENCE);
+    if (inFlight.current) return;
+    inFlight.current = true;
+
+    // Same answers as the last attempt → same key (a retry). Edited → new
+    // request. Media counts are left out: attachments don't survive a refresh,
+    // and losing them must not turn a retry into a second request.
+    const fingerprint = JSON.stringify({ ...toCreatePayload(draft), declaredMedia: null });
+    if (submission.current?.fingerprint !== fingerprint) submission.current = { key: crypto.randomUUID(), fingerprint };
+    saveDraft(draft, step, submission.current); // survives a refresh mid-submit
 
     setSubmitting(true);
     setSubmitError(null);
     setProgress(0);
     try {
-      const result = await getServiceRequestClient().submit(draft, { onProgress: setProgress });
+      const result = await getServiceRequestClient().submit(draft, {
+        idempotencyKey: submission.current.key,
+        onProgress: setProgress,
+      });
+      // Only now — the server has confirmed the request exists.
+      submission.current = null;
       clearDraft();
       setReceipt(result);
       setRestored(null);
       show("done");
-    } catch {
-      setSubmitError("We couldn't send your request. Check your connection and try again — nothing you've entered has been lost.");
+    } catch (err) {
+      setSubmitError(submitErrorMessage(err));
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   }
@@ -150,6 +195,7 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     releaseMedia(draft.voiceNote);
     draft.media.forEach(releaseMedia);
     setDraft({ ...EMPTY_DRAFT, customer: draft.customer });
+    submission.current = null;
     setReceipt(null);
     setMaxReached(0);
     show("steps", 0);
@@ -159,6 +205,7 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     releaseMedia(draft.voiceNote);
     draft.media.forEach(releaseMedia);
     clearDraft();
+    submission.current = null;
     setDraft(EMPTY_DRAFT);
     setRestored(null);
     setMaxReached(0);

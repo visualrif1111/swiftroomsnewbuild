@@ -6,8 +6,20 @@ import type { ServiceRequestDraft } from "./types";
 
 const KEY = "swiftrooms.service-call.draft.v1";
 
+/**
+ * The submit attempt in progress: its idempotency key and a fingerprint of the
+ * data it was issued for. Kept so a refresh mid-submit retries with the same
+ * key (no duplicate); a different fingerprint means the customer edited the
+ * request and it gets a new key.
+ */
+export interface PendingSubmission {
+  key: string;
+  fingerprint: string;
+}
+
 export interface StoredDraft {
   draft: ServiceRequestDraft;
+  submission: PendingSubmission | null;
   /** Index of the step the customer was on. */
   step: number;
   /** True when media was attached before the refresh, so we can say it was lost. */
@@ -19,7 +31,9 @@ export function loadDraft(): StoredDraft | null {
     const raw = window.sessionStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredDraft;
+    const sub = parsed.submission;
     return {
+      submission: sub && typeof sub.key === "string" && typeof sub.fingerprint === "string" ? sub : null,
       step: typeof parsed.step === "number" ? parsed.step : 0,
       hadMedia: !!parsed.hadMedia,
       draft: {
@@ -35,9 +49,10 @@ export function loadDraft(): StoredDraft | null {
   }
 }
 
-export function saveDraft(draft: ServiceRequestDraft, step: number) {
+export function saveDraft(draft: ServiceRequestDraft, step: number, submission: PendingSubmission | null = null) {
   try {
     const stored: StoredDraft = {
+      submission,
       step,
       hadMedia: draft.media.length > 0 || draft.voiceNote !== null,
       draft: { ...draft, voiceNote: null, media: [] },
