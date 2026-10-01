@@ -63,16 +63,21 @@ const sortByDateDesc = (posts: BlogPost[]) =>
 /* ── Dot indicator component ──────────────────────────────────────────────── */
 function Dots({ count, active, onDotClick }: { count: number; active: number; onDotClick: (i: number) => void }) {
   return (
-    <div className="flex items-center justify-center gap-2 mt-4">
+    <div className="flex items-center justify-center gap-1 mt-6">
       {Array.from({ length: count }).map((_, i) => (
+        // 44px tap target around a small visual dot.
         <button
           key={i}
           onClick={() => onDotClick(i)}
           aria-label={`Go to slide ${i + 1}`}
-          className={`rounded-full transition-all duration-300 ${
-            active === i ? "w-5 h-1.5 bg-[#007969]" : "w-1.5 h-1.5 bg-gray-300"
-          }`}
-        />
+          className="min-w-11 min-h-11 flex items-center justify-center"
+        >
+          <span
+            className={`block rounded-full transition-all duration-300 ${
+              active === i ? "w-5 h-1.5 bg-[#007969]" : "w-1.5 h-1.5 bg-gray-300"
+            }`}
+          />
+        </button>
       ))}
     </div>
   );
@@ -222,9 +227,11 @@ export default function HomeClient({
   ];
 
   return (
-    <>
+    // Flex column so the product range can sit straight after the hero on
+    // mobile (as on swiftrooms.ae) while keeping its later desktop position.
+    <div className="flex flex-col">
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative hero-min-h overflow-hidden flex items-end bg-[#030a08]">
+      <section ref={heroRef} className="relative hero-min-h overflow-hidden flex items-end bg-[#030a08] order-first">
         {/* Poster image — LCP candidate, always visible */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
@@ -486,7 +493,7 @@ export default function HomeClient({
       <EditorialSection section={homeEditorial.worthTransforming} />
 
       {/* ── PRODUCTS ──────────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-[#f8f9fa]">
+      <section className="py-16 md:py-24 bg-[#f8f9fa] order-first md:order-none">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8">
           <ScrollReveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-14">
@@ -810,15 +817,20 @@ export default function HomeClient({
               <span className="text-[0.65rem] tracking-widest uppercase text-[#6b7280]">
                 Step {activeProcess + 1} of {processSteps.length}
               </span>
-              <div className="flex gap-1.5">
+              <div className="flex gap-0.5">
                 {processSteps.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => scrollTo(processCarouselRef, i)}
-                    className={`rounded-full transition-all duration-300 ${
-                      activeProcess === i ? "w-4 h-1.5 bg-[#007969]" : "w-1.5 h-1.5 bg-gray-200"
-                    }`}
-                  />
+                    aria-label={`Go to step ${i + 1}`}
+                    className="min-w-11 min-h-11 flex items-center justify-center"
+                  >
+                    <span
+                      className={`block rounded-full transition-all duration-300 ${
+                        activeProcess === i ? "w-4 h-1.5 bg-[#007969]" : "w-1.5 h-1.5 bg-gray-200"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
             </div>
@@ -923,22 +935,6 @@ export default function HomeClient({
               <div>
                 <p className="text-label text-[#007969] mb-3">{settings.sections.testimonialsEyebrow}</p>
                 <h2 className="text-title text-[#1c1c1e]">{settings.sections.testimonialsHeading}</h2>
-                {/* Mirrors the aggregateRating already published in this page's
-                    LocalBusiness structured data, so the two cannot disagree. */}
-                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-[#f5a623] text-base leading-none" aria-hidden="true">
-                    ★★★★★
-                  </span>
-                  <span className="font-heading font-bold text-[#1c1c1e]">4.9</span>
-                  <a
-                    href="https://www.google.com/search?q=Swiftrooms+Dubai+reviews"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[0.7rem] tracking-widest uppercase text-[#6b7280] hover:text-[#007969] transition-colors"
-                  >
-                    Read our Google reviews →
-                  </a>
-                </div>
               </div>
               <Link
                 href="/portfolio"
@@ -950,6 +946,20 @@ export default function HomeClient({
                 </svg>
               </Link>
             </div>
+          </ScrollReveal>
+          {/* Mirrors the aggregateRating already published in this page's
+              LocalBusiness structured data, so the two cannot disagree. */}
+          <ScrollReveal>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Swift+Rooms+LLC"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mb-10 md:mb-14 text-sm text-[#3a3a3c] hover:text-[#007969] transition-colors"
+            >
+              <span className="flex text-[#f5b400]" aria-hidden="true">★★★★★</span>
+              <span className="font-semibold">4.9</span>
+              <span className="text-[#6b7280]">Read our Google reviews →</span>
+            </a>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-200">
             {testimonials.map((t, i) => (
@@ -999,6 +1009,6 @@ export default function HomeClient({
           </div>
         </ScrollReveal>
       </section>
-    </>
+    </div>
   );
 }
