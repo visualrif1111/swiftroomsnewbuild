@@ -18,6 +18,7 @@ import { getBrandByRoute, getPublishedBrands } from "@/lib/brands";
 import { BRAND_CARDS, BRAND_ROUTE_SLUGS, brandHref } from "@/lib/brandRoutes";
 import { brandEditorialFor, brandSeo } from "@/lib/brandEditorial";
 import EditorialSection from "@/components/EditorialSection";
+import type { EditorialSection as EditorialSectionData } from "@/lib/homeEditorial";
 import FAQAccordion from "@/components/brands/BrandFAQ";
 import { getCategories } from "@/lib/catalogue";
 
@@ -117,6 +118,10 @@ export default async function BrandPage({ params }: Props) {
   const displayName = BRAND_CARDS.find((c) => c.slug === brand.slug)?.name ?? brand.name;
   const worksWith = editorial?.worksWith ?? [];
   const strapline = BRAND_CARDS.find((c) => c.slug === brand.slug)?.strapline;
+  const allSections = editorial?.sections ?? [];
+  const isClosing = (eyebrow: string) => eyebrow.toLowerCase() === "why swiftrooms";
+  const mainSections = allSections.filter((sec) => !isClosing(sec.eyebrow));
+  const closingSections = allSections.filter((sec) => isClosing(sec.eyebrow));
 
   const target = normaliseBrand(brand.name);
   const products = categories.flatMap((c) =>
@@ -155,7 +160,7 @@ export default async function BrandPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero */}
-      <section className="pt-32 pb-10 md:pt-44 md:pb-16 lg:pt-52 lg:pb-20">
+      <section className="pt-32 pb-12 md:pt-44 md:pb-20 lg:pt-52 lg:pb-28">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
             <nav className="flex items-center gap-2 text-[0.65rem] tracking-widest uppercase text-gray-400 mb-6 md:mb-8">
@@ -168,22 +173,24 @@ export default async function BrandPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 lg:gap-16 items-center">
             <div className="min-w-0">
               <ScrollReveal>
-                <span className="text-label text-[#007969] mb-3 md:mb-4 block">Brand Partner</span>
-                <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4">{displayName}</h1>
-                {editorial ? (
-                  <>
-                    {strapline && (
-                      <p className="text-base sm:text-xl text-[#6b7280] mb-4">{strapline}</p>
-                    )}
-                    <p className="text-[#6b7280] text-base md:text-lg leading-relaxed">
-                      {editorial.intro}
-                    </p>
-                  </>
-                ) : (
-                  brand.tagline && (
-                    <p className="text-base sm:text-xl text-[#6b7280] italic">{brand.tagline}</p>
-                  )
+                <p className="text-label text-[#007969] mb-3 md:mb-4">Brand Partner</p>
+                <h1 className="text-headline text-[#1c1c1e] mb-3 md:mb-4 max-w-3xl">{displayName}</h1>
+                {(strapline || brand.tagline) && (
+                  <p className="text-base md:text-xl text-[#6b7280] italic mb-6 md:mb-8">
+                    {strapline ?? brand.tagline}
+                  </p>
                 )}
+              </ScrollReveal>
+              {editorial?.intro && (
+                <ScrollReveal delay={0.1}>
+                  <p className="text-body-lg text-[#6b7280] max-w-2xl">{editorial.intro}</p>
+                </ScrollReveal>
+              )}
+              <ScrollReveal delay={0.2}>
+                <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                  <QuoteButton className="btn-brand">Get a Quote</QuoteButton>
+                  <ShowroomButton className="btn-outline">Book Showroom Visit</ShowroomButton>
+                </div>
               </ScrollReveal>
             </div>
 
@@ -207,12 +214,8 @@ export default async function BrandPage({ params }: Props) {
         </div>
       </section>
 
-      <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-        <div className="divider-brand" />
-      </div>
-
-      {/* Overview + sidebar */}
-      <section className="py-12 md:py-20">
+      {/* Overview + sidebar — new-build addition: the systems we supply and brand details */}
+      <section className="py-12 md:py-20 border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
             <div className="lg:col-span-2 min-w-0">
@@ -351,37 +354,29 @@ export default async function BrandPage({ params }: Props) {
         </section>
       )}
 
-      {/* Ported editorial */}
-      {editorial?.sections.map((section) => (
-        <EditorialSection key={section.id} section={section} />
-      ))}
+      {/* Ported editorial — "Why Swiftrooms" closes the page after the FAQ, as on the live site */}
+      <EditorialBlocks sections={mainSections} />
 
       {/* Complete the system */}
       {worksWith.length > 0 && (
         <section className="py-12 md:py-20 border-t border-gray-100">
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
             <ScrollReveal>
-              <p className="text-label text-[#007969] mb-3">Complete the system</p>
-              <h2 className="text-title text-[#1c1c1e] mb-8 md:mb-12">Works well with</h2>
+              <p className="text-label text-[#007969] mb-3">Complete the System</p>
+              <h2 className="text-title text-[#1c1c1e] mb-8 md:mb-12 max-w-xl">Works well with</h2>
             </ScrollReveal>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-              {worksWith.map((item, i) => (
-                <ScrollReveal key={item.href} delay={i * 0.08}>
-                  <Link
-                    href={item.href}
-                    className="group flex h-full flex-col border border-gray-100 bg-white p-5 md:p-6 hover:border-[#007969]/40 transition-all active:scale-[0.99]"
-                  >
-                    <h3 className="text-[#1c1c1e] font-semibold text-base group-hover:text-[#007969] transition-colors mb-2">
-                      {item.label}
-                    </h3>
-                    <p className="text-[#6b7280] text-sm leading-relaxed flex-1">
-                      {item.description}
-                    </p>
-                    <span className="text-[0.6rem] tracking-widest uppercase text-[#007969] mt-5">
-                      View range →
-                    </span>
-                  </Link>
-                </ScrollReveal>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-gray-100 border border-gray-100">
+              {worksWith.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group block bg-white hover:bg-[#f0fdf4] transition-colors duration-300 p-5 md:p-6"
+                >
+                  <h3 className="text-sm md:text-base font-semibold text-[#1c1c1e] group-hover:text-[#007969] transition-colors mb-1">
+                    {item.label}
+                  </h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{item.description}</p>
+                </Link>
               ))}
             </div>
           </div>
@@ -390,28 +385,30 @@ export default async function BrandPage({ params }: Props) {
 
       {/* FAQ */}
       {editorial && editorial.faqs.length > 0 && (
-        <section className="py-12 md:py-20 bg-[#f8f9fa] border-t border-gray-100">
+        <section className="py-12 md:py-20 border-t border-gray-100">
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
             <ScrollReveal>
-              <p className="text-label text-[#007969] mb-3">Common questions</p>
-              <h2 className="text-title text-[#1c1c1e] mb-8 md:mb-12">
-                Frequently Asked Questions
-              </h2>
+              <div className="max-w-3xl">
+                <p className="text-label text-[#007969] mb-3">Common Questions</p>
+                <h2 className="text-title text-[#1c1c1e] mb-10">Frequently Asked Questions</h2>
+              </div>
             </ScrollReveal>
             <FAQAccordion faqs={editorial.faqs} />
-            <ScrollReveal delay={0.1}>
-              <p className="text-[#6b7280] text-sm mt-8">
-                Have a question not listed here?{" "}
-                <Link href="/contact" className="text-[#007969] hover:underline">
-                  Contact our technical team →
-                </Link>
-              </p>
+            <ScrollReveal delay={0.2}>
+              <div className="mt-8 max-w-3xl">
+                <p className="text-[#6b7280] text-sm">
+                  Have a question not listed here?{" "}
+                  <QuoteButton className="text-[#007969] hover:underline">Contact our technical team →</QuoteButton>
+                </p>
+              </div>
             </ScrollReveal>
           </div>
         </section>
       )}
 
-      {/* Other brands */}
+      <EditorialBlocks sections={closingSections} />
+
+      {/* Other brands — new-build addition */}
       {otherBrands.length > 0 && (
         <section className="py-12 md:py-20 border-t border-gray-100 bg-[#f8f9fa]">
           <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -442,25 +439,30 @@ export default async function BrandPage({ params }: Props) {
         </section>
       )}
 
-      {/* Bottom CTA */}
-      <section className="py-16 md:py-24 border-t border-gray-100">
+      {/* Closing CTA */}
+      <section className="py-20 bg-[#030213] relative overflow-hidden">
         <ScrollReveal>
-          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10 text-center">
-            <p className="text-label text-[#007969] mb-4">Specify with confidence</p>
-            <h2 className="text-title text-[#1c1c1e] mb-6 max-w-xl mx-auto">
-              Talk to us about {brand.name}
-            </h2>
-            <p className="text-[#6b7280] max-w-md mx-auto mb-10">
-              We will confirm the right system for your project, the glazing specification and
-              realistic lead times for the UAE.
+          <div className="relative z-10 max-w-screen-xl mx-auto px-5 md:px-8 text-center">
+            <h2 className="text-headline text-white mb-5 max-w-2xl mx-auto">Free Quote &amp; Site Visit Within 24 Hours</h2>
+            <p className="text-white/50 text-body-lg max-w-lg mx-auto mb-10">
+              No obligation. Professional survey. Written specification.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <QuoteButton className="btn-brand">Get A Quote</QuoteButton>
-              <ShowroomButton className="btn-outline">Visit Showroom</ShowroomButton>
+              <QuoteButton className="btn-brand">Get a Quote</QuoteButton>
+              <ShowroomButton className="btn-outline border-white/30 text-white hover:bg-white hover:text-[#007969]">
+                Book Showroom Visit
+              </ShowroomButton>
             </div>
           </div>
         </ScrollReveal>
       </section>
     </>
   );
+}
+
+/** A run of editorial sections, alternating white and grey from the first. */
+function EditorialBlocks({ sections }: { sections: EditorialSectionData[] }) {
+  return sections.map((section, i) => (
+    <EditorialSection key={section.id} section={{ ...section, tone: i % 2 === 0 ? "default" : "muted" }} />
+  ));
 }
