@@ -161,6 +161,23 @@ export const siteSettingsType = defineType({
             }),
           ],
         }),
+        defineField({ name: "brandsBlurb", title: "Brands menu — blurb", type: "text", rows: 2 }),
+        defineField({
+          name: "brands",
+          title: "Brands menu — links",
+          type: "array",
+          of: [
+            defineField({
+              name: "navLink",
+              type: "object",
+              fields: [
+                defineField({ name: "label", title: "Label", type: "string" }),
+                defineField({ name: "href", title: "Link", type: "string" }),
+              ],
+              preview: { select: { title: "label", subtitle: "href" } },
+            }),
+          ],
+        }),
         defineField({
           name: "mobile",
           title: "Mobile menu — links",

@@ -9,18 +9,17 @@ import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 const catalogueItems = [
   { label: "All Products", href: "/catalogue" },
-  { label: "Brands", href: "/catalogue/brands" },
   { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
   { label: "Aluminium Bi-folding Doors", href: "/catalogue/aluminium-bi-folding-doors" },
   { label: "Aluminium Windows", href: "/catalogue/aluminium-windows" },
   { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
+  { label: "Aluminium Glass Doors", href: "/catalogue/aluminium-glass-doors" },
   { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
   { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
   { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
   { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
   { label: "Insect Screens", href: "/catalogue/insect-screens" },
   { label: "Gallery", href: "/catalogue/gallery" },
-  { label: "Promotions", href: "/catalogue/promotions" },
 ];
 
 const technicalItems = [
@@ -28,6 +27,16 @@ const technicalItems = [
   { label: "Blog & Insights", href: "/technical/blog" },
   { label: "Technical Resources", href: "/technical/resources" },
   { label: "FAQ", href: "/technical/faq" },
+];
+
+const brandItems = [
+  { label: "Schüco", href: "/brands/schuco-aluminium-windows" },
+  { label: "Reynaers", href: "/brands/reynaers-aluminium-systems" },
+  { label: "Cortizo", href: "/brands/cortizo-aluminium-systems" },
+  { label: "Gulf Extrusions", href: "/brands/gulf-extrusions-aluminium-systems" },
+  { label: "Deceuninck", href: "/brands/deceuninck-upvc-windows-doors" },
+  { label: "UltraFrame", href: "/brands/ultraframe-roof-systems" },
+  { label: "Vetromax", href: "/brands/vetromax" },
 ];
 
 // Fallback only — src/lib/site-settings.ts DEFAULTS.navigation.mobile is what
@@ -45,24 +54,30 @@ type NavLink = { label: string; href: string };
 type NavData = {
   catalogue?: NavLink[];
   technical?: NavLink[];
+  brands?: NavLink[];
   mobile?: NavLink[];
   catalogueBlurb?: string;
   technicalBlurb?: string;
+  brandsBlurb?: string;
 };
+
+type MegaId = "catalogue" | "technical" | "brands";
 
 export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?: string } = {}) {
   // Sanity-driven menus with the hardcoded arrays as defaults, so the header is
   // byte-identical when Site Settings is blank.
   const catalogue = nav?.catalogue?.length ? nav.catalogue : catalogueItems;
   const technical = nav?.technical?.length ? nav.technical : technicalItems;
+  const brands = nav?.brands?.length ? nav.brands : brandItems;
   const mobile = nav?.mobile?.length ? nav.mobile : mobileNavItems;
   const catalogueBlurb =
     nav?.catalogueBlurb || "Premium aluminium, uPVC and glazing systems from Europe's leading manufacturers.";
   const technicalBlurb = nav?.technicalBlurb || "Resources, guides and expertise from first enquiry to aftercare.";
+  const brandsBlurb = nav?.brandsBlurb || "Dedicated system pages for our specialist manufacturer partners.";
   const quoteCta = quoteLabel || "Get a Quote";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [megaMenu, setMegaMenu] = useState<"catalogue" | "technical" | null>(null);
+  const [megaMenu, setMegaMenu] = useState<MegaId | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
 
@@ -99,7 +114,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
     return () => unlockScroll();
   }, [menuOpen]);
 
-  const openMega = (menu: "catalogue" | "technical") => {
+  const openMega = (menu: MegaId) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setMegaMenu(menu);
   };
@@ -117,21 +132,31 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
             : "bg-transparent"
         }`}
       >
-        <nav className="max-w-screen-xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
+        {/* Legibility scrim behind the transparent header over the homepage hero. */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-400 bg-gradient-to-b from-black/65 via-black/30 to-transparent ${
+            heroMode ? "opacity-100" : "opacity-0"
+          }`}
+        />
+        <nav className="relative z-10 max-w-screen-xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo.svg"
               alt="Swiftrooms"
+              width={176}
+              height={36}
               className="h-9 w-auto transition-all duration-300"
               style={heroMode ? { filter: "brightness(0) invert(1)" } : {}}
             />
           </Link>
 
           {/* ── Desktop nav ── */}
+          <div className="hidden xl:flex flex-1 items-center justify-center gap-6 min-w-0">
           <ul
-            className={`hidden xl:flex items-center gap-5 font-accent text-[0.85rem] tracking-[0.1em] uppercase font-semibold transition-colors duration-300 ${
+            className={`flex items-center gap-5 whitespace-nowrap font-accent text-[0.95rem] tracking-[0.08em] uppercase font-semibold transition-colors duration-300 ${
               heroMode ? "text-white" : "text-[#3a3a3c]"
             }`}
           >
@@ -189,25 +214,37 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
                 Promotions
               </Link>
             </li>
-            <li>
-              <Link href="/brands" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+            <li
+              className="relative"
+              onMouseEnter={() => openMega("brands")}
+              onMouseLeave={closeMega}
+            >
+              <Link
+                href="/brands"
+                aria-haspopup="true"
+                aria-expanded={megaMenu === "brands"}
+                aria-controls="mega-brands"
+                onFocus={() => openMega("brands")}
+                className={`uppercase transition-colors flex items-center gap-1 ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}
+              >
                 Shop By Brand
+                <svg className={`w-3 h-3 ${heroMode ? "opacity-60" : "opacity-40"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+            </li>
+            <li>
+              <Link href="/showroom" className={`transition-colors ${heroMode ? "hover:text-white/70" : "hover:text-[#007969]"}`}>
+                Showroom
               </Link>
             </li>
           </ul>
+          </div>
 
-          {/* ── Desktop CTAs ── */}
-          <div className="hidden xl:flex items-center gap-3 ml-5">
-            <Link
-              href="/showroom"
-              className={`font-accent text-[0.85rem] tracking-[0.1em] uppercase font-semibold transition-colors px-2 py-2 ${
-                heroMode ? "text-white hover:text-white/70" : "text-[#3a3a3c] hover:text-[#007969]"
-              }`}
-            >
-              Showroom
-            </Link>
+          {/* ── Desktop CTA ── */}
+          <div className="hidden xl:flex items-center">
             <QuoteButton
-              className={`font-accent font-semibold text-[1rem] tracking-[0.12em] uppercase px-5 py-2.5 transition-all ${
+              className={`font-accent font-semibold text-[0.95rem] tracking-[0.08em] uppercase px-4 py-2.5 transition-all ${
                 heroMode
                   ? "border border-white/50 text-white hover:bg-white hover:text-[#007969]"
                   : "btn-brand"
@@ -219,7 +256,7 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
 
           {/* ── Mobile burger — minimal thin lines ── */}
           <button
-            className={`xl:hidden p-2 -mr-1 transition-colors ${heroMode ? "text-white" : "text-[#1c1c1e]"}`}
+            className={`xl:hidden min-w-11 min-h-11 -mr-2 flex items-center justify-center transition-colors ${heroMode ? "text-white" : "text-[#1c1c1e]"}`}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
@@ -244,88 +281,38 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
           </button>
         </nav>
 
-        {/* ── Mega — Catalogue ── */}
-        <AnimatePresence>
-          {megaMenu === "catalogue" && (
-            <motion.div
-              id="mega-catalogue"
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="absolute left-0 right-0 bg-white border-t border-b border-gray-100 shadow-xl"
-              onMouseEnter={() => openMega("catalogue")}
-              onMouseLeave={closeMega}
-            >
-              <div className="max-w-screen-xl mx-auto px-8 py-8 grid grid-cols-4 gap-8">
-                <div>
-                  <div className="divider-brand mb-4" />
-                  <p className="text-label text-[#007969] mb-3">Product Range</p>
-                  <p className="text-[#6b7280] text-sm leading-relaxed">
-                    {catalogueBlurb}
-                  </p>
-                  <Link
-                    href="/catalogue"
-                    className="mt-5 inline-flex items-center gap-1.5 text-label text-[#007969] hover:gap-3 transition-all"
-                    onClick={() => setMegaMenu(null)}
-                  >
-                    View all →
-                  </Link>
-                </div>
-                <div className="col-span-3 grid grid-cols-3 gap-1">
-                  {catalogue.map((item) => (
-                    <Link
-                      key={item.href + item.label}
-                      href={item.href}
-                      className="text-sm text-[#3a3a3c] hover:text-[#007969] hover:bg-[#f0fdf4] px-3 py-2 rounded transition-all"
-                      onClick={() => setMegaMenu(null)}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Mega — Technical ── */}
-        <AnimatePresence>
-          {megaMenu === "technical" && (
-            <motion.div
-              id="mega-technical"
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="absolute left-0 right-0 bg-white border-t border-b border-gray-100 shadow-xl"
-              onMouseEnter={() => openMega("technical")}
-              onMouseLeave={closeMega}
-            >
-              <div className="max-w-screen-xl mx-auto px-8 py-8 grid grid-cols-4 gap-8">
-                <div>
-                  <div className="divider-brand mb-4" />
-                  <p className="text-label text-[#007969] mb-3">Technical Hub</p>
-                  <p className="text-[#6b7280] text-sm leading-relaxed">
-                    {technicalBlurb}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  {technical.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="text-sm text-[#3a3a3c] hover:text-[#007969] hover:bg-[#f0fdf4] px-3 py-2 rounded transition-all"
-                      onClick={() => setMegaMenu(null)}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <MegaMenu
+          id="catalogue"
+          open={megaMenu === "catalogue"}
+          title="Product Range"
+          blurb={catalogueBlurb}
+          viewAllHref="/catalogue"
+          links={catalogue}
+          onEnter={() => openMega("catalogue")}
+          onLeave={closeMega}
+          onNavigate={() => setMegaMenu(null)}
+        />
+        <MegaMenu
+          id="technical"
+          open={megaMenu === "technical"}
+          title="Technical Hub"
+          blurb={technicalBlurb}
+          links={technical}
+          onEnter={() => openMega("technical")}
+          onLeave={closeMega}
+          onNavigate={() => setMegaMenu(null)}
+        />
+        <MegaMenu
+          id="brands"
+          open={megaMenu === "brands"}
+          title="Shop By Brand"
+          blurb={brandsBlurb}
+          viewAllHref="/brands"
+          links={brands}
+          onEnter={() => openMega("brands")}
+          onLeave={closeMega}
+          onNavigate={() => setMegaMenu(null)}
+        />
       </header>
 
       {/* ── MOBILE FULL-SCREEN OVERLAY ─────────────────────────────────────── */}
@@ -345,6 +332,8 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
                 <img
                   src="/brand/logo.svg"
                   alt="Swiftrooms"
+                  width={157}
+                  height={32}
                   className="h-8 w-auto"
                   style={{ filter: "brightness(0) invert(1)" }}
                 />
@@ -431,5 +420,76 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+/** Full-width dropdown panel under the header: intro column + link grid. */
+function MegaMenu({
+  id,
+  open,
+  title,
+  blurb,
+  viewAllHref,
+  links,
+  onEnter,
+  onLeave,
+  onNavigate,
+}: {
+  id: MegaId;
+  open: boolean;
+  title: string;
+  blurb: string;
+  /** When set, shows a "View all" link and lays links out in a 3-column grid. */
+  viewAllHref?: string;
+  links: NavLink[];
+  onEnter: () => void;
+  onLeave: () => void;
+  onNavigate: () => void;
+}) {
+  const linkClass = "text-sm text-[#3a3a3c] hover:text-[#007969] hover:bg-[#f0fdf4] px-3 py-2 rounded transition-all";
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          id={`mega-${id}`}
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+          className="absolute left-0 right-0 bg-white border-t border-b border-gray-100 shadow-xl"
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
+        >
+          <div className="max-w-screen-xl mx-auto px-8 py-8 grid grid-cols-4 gap-8">
+            <div>
+              <div className="divider-brand mb-4" />
+              <p className="text-label text-[#007969] mb-3">{title}</p>
+              <p className="text-[#6b7280] text-sm leading-relaxed">{blurb}</p>
+              {viewAllHref && (
+                <Link
+                  href={viewAllHref}
+                  className="mt-5 inline-flex items-center gap-1.5 text-label text-[#007969] hover:gap-3 transition-all"
+                  onClick={onNavigate}
+                >
+                  View all →
+                </Link>
+              )}
+            </div>
+            <div className={viewAllHref ? "col-span-3 grid grid-cols-3 gap-1" : "flex flex-col gap-1"}>
+              {links.map((item) => (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className={`${linkClass} ${item.label === "All Products" ? "font-bold text-[#007969]" : ""}`}
+                  onClick={onNavigate}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

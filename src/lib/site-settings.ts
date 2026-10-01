@@ -33,6 +33,8 @@ export type SiteSettings = {
     catalogue: NavLink[];
     technicalBlurb: string;
     technical: NavLink[];
+    brandsBlurb: string;
+    brands: NavLink[];
     mobile: NavLink[];
   };
   cta: { quoteLabel: string; showroomLabel: string; quoteHref: string; showroomHref: string };
@@ -90,18 +92,17 @@ const DEFAULTS: SiteSettings = {
     catalogueBlurb: "Premium aluminium, uPVC and glazing systems from Europe's leading manufacturers.",
     catalogue: [
       { label: "All Products", href: "/catalogue" },
-      { label: "Brands", href: "/catalogue/brands" },
       { label: "Aluminium Sliding Doors", href: "/catalogue/aluminium-sliding-doors" },
       { label: "Aluminium Bi-folding Doors", href: "/catalogue/aluminium-bi-folding-doors" },
       { label: "Aluminium Windows", href: "/catalogue/aluminium-windows" },
       { label: "Aluminium Doors", href: "/catalogue/aluminium-doors" },
+      { label: "Aluminium Glass Doors", href: "/catalogue/aluminium-glass-doors" },
       { label: "Curtain Wall & Facade", href: "/catalogue/curtain-wall" },
       { label: "uPVC Windows & Doors", href: "/catalogue/upvc" },
       { label: "Garden Rooms", href: "/catalogue/garden-rooms" },
       { label: "Skylights & Rooflights", href: "/catalogue/skylights" },
       { label: "Insect Screens", href: "/catalogue/insect-screens" },
       { label: "Gallery", href: "/catalogue/gallery" },
-      { label: "Promotions", href: "/catalogue/promotions" },
     ],
     technicalBlurb: "Resources, guides and expertise from first enquiry to aftercare.",
     technical: [
@@ -109,6 +110,16 @@ const DEFAULTS: SiteSettings = {
       { label: "Blog & Insights", href: "/technical/blog" },
       { label: "Technical Resources", href: "/technical/resources" },
       { label: "FAQ", href: "/technical/faq" },
+    ],
+    brandsBlurb: "Dedicated system pages for our specialist manufacturer partners.",
+    brands: [
+      { label: "Schüco", href: "/brands/schuco-aluminium-windows" },
+      { label: "Reynaers", href: "/brands/reynaers-aluminium-systems" },
+      { label: "Cortizo", href: "/brands/cortizo-aluminium-systems" },
+      { label: "Gulf Extrusions", href: "/brands/gulf-extrusions-aluminium-systems" },
+      { label: "Deceuninck", href: "/brands/deceuninck-upvc-windows-doors" },
+      { label: "UltraFrame", href: "/brands/ultraframe-roof-systems" },
+      { label: "Vetromax", href: "/brands/vetromax" },
     ],
     // Mirrors the live site's primary navigation. No "Home" entry — the
     // wordmark already links there, and the live nav omits it.
@@ -192,6 +203,8 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
         catalogue: cleanLinks(d.navigation?.catalogue) ?? DEFAULTS.navigation.catalogue,
         technicalBlurb: d.navigation?.technicalBlurb || DEFAULTS.navigation.technicalBlurb,
         technical: cleanLinks(d.navigation?.technical) ?? DEFAULTS.navigation.technical,
+        brandsBlurb: d.navigation?.brandsBlurb || DEFAULTS.navigation.brandsBlurb,
+        brands: cleanLinks(d.navigation?.brands) ?? DEFAULTS.navigation.brands,
         mobile: cleanLinks(d.navigation?.mobile) ?? DEFAULTS.navigation.mobile,
       },
       cta: {

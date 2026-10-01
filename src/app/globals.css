@@ -82,15 +82,15 @@
 
 .text-display {
   font-family: "Exo", sans-serif;
-  font-size: clamp(3.75rem, 10vw, 10rem);
-  line-height: 0.93;
+  font-size: clamp(3rem, min(7vw, 9svh), 7rem);
+  line-height: 0.95;
   letter-spacing: -0.03em;
   font-weight: 800;
 }
 
 .text-headline {
   font-family: "Exo", sans-serif;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, min(5vw, 7svh), 4.5rem);
   line-height: 1.05;
   letter-spacing: -0.015em;
   font-weight: 700;
@@ -98,10 +98,16 @@
 
 .text-title {
   font-family: "Exo", sans-serif;
-  font-size: clamp(1.5rem, 3vw, 2.75rem);
+  font-size: clamp(1.5rem, min(3vw, 5svh), 2.75rem);
   line-height: 1.1;
   letter-spacing: -0.01em;
   font-weight: 600;
+}
+
+/* Full-viewport hero that never collapses below 600px (svh avoids the iOS
+   Safari toolbar jump that 100vh causes). */
+.hero-min-h {
+  min-height: max(600px, 100svh);
 }
 
 .text-label {
@@ -323,18 +329,19 @@
   flex-shrink: 0;
 }
 
-/* Prevent horizontal overflow */
+/* Responsive type scale. Sizes are capped by viewport height (svh) as well as
+   width, so headings stay proportionate on short landscape phones and laptops. */
 @media (max-width: 767px) {
   .text-display {
-    font-size: clamp(2.75rem, 12vw, 5rem);
+    font-size: clamp(2.75rem, min(12vw, 9svh), 5rem);
     line-height: 0.96;
   }
   .text-headline {
-    font-size: clamp(1.75rem, 7vw, 3rem);
+    font-size: clamp(1.75rem, min(7vw, 7svh), 3rem);
     line-height: 1.08;
   }
   .text-title {
-    font-size: clamp(1.375rem, 5.5vw, 2rem);
+    font-size: clamp(1.375rem, min(5.5vw, 5svh), 2rem);
     line-height: 1.15;
   }
 }
@@ -342,6 +349,6 @@
 /* Tablet-specific overrides (768–1023) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .text-display {
-    font-size: clamp(3.5rem, 9vw, 6.5rem);
+    font-size: clamp(3.5rem, min(9vw, 9svh), 6.5rem);
   }
 }
