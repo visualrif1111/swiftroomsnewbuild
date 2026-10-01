@@ -79,7 +79,15 @@ const DEFAULTS: SiteSettings = {
       ],
     },
   ],
-  social: [],
+  // The accounts swiftrooms.ae links to; used until Sanity's social list is filled in.
+  social: [
+    { platform: "Instagram", url: "https://www.instagram.com/swiftrooms.ae" },
+    { platform: "Facebook", url: "https://www.facebook.com/swiftroomsUAE" },
+    { platform: "YouTube", url: "https://youtube.com/@swiftroomsDUBAI" },
+    { platform: "LinkedIn", url: "https://linkedin.com/company/swift-rooms/" },
+    { platform: "WhatsApp", url: "https://wa.me/971505269149" },
+    { platform: "Pinterest", url: "https://pinterest.com/SwiftRoomsUAE" },
+  ],
   footer: {
     brandBlurb:
       "Performance windows, doors and glazing systems for UAE residential and commercial projects. Engineered to perform. Built to outlast.",
@@ -190,7 +198,9 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
       footerLinks: d.footerLinks?.length
         ? d.footerLinks.map((g) => ({ heading: g.heading, links: cleanLinks(g.links) ?? [] }))
         : DEFAULTS.footerLinks,
-      social: (d.social ?? []).map((s) => ({ platform: s.platform, url: stegaClean(s.url) })),
+      social: d.social?.length
+        ? d.social.map((s) => ({ platform: s.platform, url: stegaClean(s.url) }))
+        : DEFAULTS.social,
       footer: {
         brandBlurb: d.footer?.brandBlurb || DEFAULTS.footer.brandBlurb,
         ctaHeading: d.footer?.ctaHeading || DEFAULTS.footer.ctaHeading,

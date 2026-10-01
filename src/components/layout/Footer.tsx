@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { QuoteButton, ShowroomButton } from "@/components/forms/CTAButtons";
-import { BRAND_ROUTE_ENTRIES } from "@/lib/brandRoutes";
+import { getSiteSettings } from "@/lib/site-settings";
+import FooterCTA from "./FooterCTA";
+import { SOCIAL_ICON_PATHS } from "./socialIcons";
 
 /*
  * Contact details the live site publishes that the shared Sanity `contact`
@@ -11,45 +12,32 @@ import { BRAND_ROUTE_ENTRIES } from "@/lib/brandRoutes";
  */
 const SERVICE_PHONE = "04 323 1625";
 const SERVICE_PHONE_RAW = "+97143231625";
+const AREA_LINE = "Jebel Ali, Ind Area 1";
 const FACTORY_ADDRESS_LINE1 = "Dubai Real Estate Centre Ind Park, Unit 1-B";
-const FACTORY_ADDRESS_LINE2 = "Jebel Ali, Ind Area 1";
 
-/** Display names for the brand footer column, keyed by Sanity brand slug. */
-const BRAND_LABELS: Record<string, string> = {
-  cortizo: "Cortizo",
-  deceuninck: "Deceuninck",
-  "gulf-extrusions": "Gulf Extrusions",
-  reynaers: "Reynaers",
-  schuco: "Sch\u00fcco",
-  ultraframe: "UltraFrame",
-};
-import { getSiteSettings } from "@/lib/site-settings";
+const linkClass = "block py-3 text-white/70 text-sm hover:text-white transition-colors";
+
+/** Company links gain "Shop By Brand" after Portfolio, as on the live footer. */
+function withBrandsLink(heading: string, links: { label: string; href: string }[]) {
+  if (heading !== "Company" || links.some((l) => l.href === "/brands")) return links;
+  const at = links.findIndex((l) => l.href === "/portfolio");
+  const out = [...links];
+  out.splice(at + 1, 0, { label: "Shop By Brand", href: "/brands" });
+  return out;
+}
 
 export default async function Footer() {
   const settings = await getSiteSettings();
-  const { contact, showroom, footerLinks, footer, cta } = settings;
+  const { contact, showroom, footerLinks, footer, cta, social, navigation } = settings;
 
   return (
     <footer className="bg-[#030213] text-white">
-      {/* CTA strip */}
-      <div className="bg-[#007969]">
-        <div className="max-w-screen-xl mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="font-heading text-xl font-bold text-white mb-1">
-              {footer.ctaHeading}
-            </p>
-            <p className="text-white/70 text-sm">{footer.ctaSubtext}</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-shrink-0">
-            <QuoteButton className="bg-white text-[#007969] font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-gray-50 transition-colors text-center">
-              {cta.quoteLabel}
-            </QuoteButton>
-            <ShowroomButton className="border border-white/40 text-white font-accent font-semibold text-[0.75rem] tracking-[0.12em] uppercase px-6 py-3 hover:bg-white/10 transition-colors text-center">
-              {cta.showroomLabel}
-            </ShowroomButton>
-          </div>
-        </div>
-      </div>
+      <FooterCTA
+        heading={footer.ctaHeading}
+        subtext={footer.ctaSubtext}
+        quoteLabel={cta.quoteLabel}
+        showroomLabel={cta.showroomLabel}
+      />
 
       {/* Main footer */}
       <div className="max-w-screen-xl mx-auto px-5 md:px-8 py-16">
@@ -60,71 +48,73 @@ export default async function Footer() {
             <img
               src="/brand/logo.svg"
               alt="Swiftrooms"
+              width={196}
+              height={40}
               className="h-10 w-auto mb-6 opacity-90"
               style={{ filter: "brightness(0) invert(1)" }}
             />
-            <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-7">
-              {footer.brandBlurb}
-            </p>
+            <p className="text-white/70 text-sm leading-relaxed max-w-xs mb-7">{footer.brandBlurb}</p>
             <div className="space-y-1.5 text-sm">
               <p className="text-label text-[#007969] mb-3">Contact</p>
-              <a href={`tel:${contact.phoneRaw}`} className="block text-white/50 hover:text-white transition-colors">
+              <a href={`tel:${contact.phoneRaw}`} className="block text-white/70 hover:text-white transition-colors">
                 Sales: {contact.phone}
               </a>
-              <a href={`tel:${SERVICE_PHONE_RAW}`} className="block text-white/50 hover:text-white transition-colors">
+              <a href={`tel:${SERVICE_PHONE_RAW}`} className="block text-white/70 hover:text-white transition-colors">
                 Service: {SERVICE_PHONE}
               </a>
-              <a href={`mailto:${contact.email}`} className="block text-white/50 hover:text-white transition-colors">
+              <a href={`mailto:${contact.email}`} className="block text-white/70 hover:text-white transition-colors">
                 {contact.email}
               </a>
-              <p className="text-white/30 mt-3">
-                Showroom: {showroom.addressLine1}
+              <p className="text-white/60 mt-3">
+                Showroom:
                 <br />
-                {showroom.city}, {showroom.country}
+                {showroom.addressLine1}
+                <br />
+                {AREA_LINE}
               </p>
-              <p className="text-white/30 mt-2">
-                Factory: {FACTORY_ADDRESS_LINE1}
+              <p className="text-white/60 mt-3">
+                Factory:
                 <br />
-                {FACTORY_ADDRESS_LINE2}
+                {FACTORY_ADDRESS_LINE1}
+                <br />
+                {AREA_LINE}
               </p>
             </div>
-          </div>
-
-          {/* Shop By Brand — built from the brand route map rather than the
-              shared Sanity footerLinks, which swiftrooms.ae also reads. */}
-          <div>
-            {/* Title case, matching the live footer — the other group headings
-                use the uppercase label treatment, this one does not. */}
-            <p className="mb-5">
-              <Link
-                href="/brands"
-                className="font-accent font-semibold text-[0.7rem] tracking-[0.12em] text-[#007969] hover:text-white transition-colors"
-              >
-                Shop By Brand
-              </Link>
-            </p>
-            <ul className="space-y-2.5">
-              {BRAND_ROUTE_ENTRIES.map(([slug, route]) => (
-                <li key={slug}>
-                  <Link
-                    href={`/brands/${route}`}
-                    className="text-white/40 text-sm hover:text-white transition-colors"
-                  >
-                    {BRAND_LABELS[slug] ?? slug}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {social.length > 0 && (
+              <div className="flex items-center gap-3 mt-6">
+                {social.map((s) => {
+                  const icon = SOCIAL_ICON_PATHS[s.platform.toLowerCase()];
+                  return (
+                    <a
+                      key={s.url}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.platform}
+                      className="w-8 h-8 flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:border-white/60 transition-colors"
+                    >
+                      {icon ? (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                          <path d={icon} />
+                        </svg>
+                      ) : (
+                        <span className="font-accent text-[0.6rem] font-semibold uppercase">{s.platform.slice(0, 2)}</span>
+                      )}
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Link groups */}
           {footerLinks.map((group) => (
             <div key={group.heading}>
               <p className="text-label text-[#007969] mb-5">{group.heading}</p>
-              <ul className="space-y-2.5">
-                {group.links.map((l) => (
+              <ul className="space-y-1">
+                {withBrandsLink(group.heading, group.links).map((l) => (
                   <li key={l.href}>
-                    <Link href={l.href} className="text-white/40 text-sm hover:text-white transition-colors">
+                    <Link href={l.href} className={linkClass}>
                       {l.label}
                     </Link>
                   </li>
@@ -133,26 +123,24 @@ export default async function Footer() {
             </div>
           ))}
 
-          {/* Hours */}
-          <div>
+          {/* Hours + brands */}
+          <div className="col-span-2 md:col-span-1">
             <p className="text-label text-[#007969] mb-5">Showroom Hours</p>
-            <div className="space-y-2 text-sm text-white/40">
-              {showroom.hours.map((h) => (
-                <div key={h.days} className="flex justify-between gap-4">
-                  <span>{h.days}</span>
-                  <span>{h.opens} – {h.closes}</span>
+            <div className="space-y-2 text-sm text-white/70">
+              {[...showroom.hours, { days: "Friday", opens: "", closes: "" }].map((h) => (
+                <div key={h.days} className="grid grid-cols-[1fr_auto] gap-x-4 items-baseline">
+                  <span className="whitespace-nowrap">{h.days}</span>
+                  <span className="whitespace-nowrap text-right">{h.opens ? `${h.opens} – ${h.closes}` : "Closed"}</span>
                 </div>
               ))}
-              <div className="flex justify-between gap-4">
-                <span>Friday</span>
-                <span>Closed</span>
-              </div>
             </div>
             <div className="mt-8">
-              <p className="text-label text-[#007969] mb-3">Brand Partners</p>
-              <div className="space-y-1.5 text-sm text-white/30">
-                {footer.brandPartners.map((b) => (
-                  <p key={b}>{b}</p>
+              <p className="text-label text-[#007969] mb-3">Shop By Brand</p>
+              <div className="grid grid-cols-2 gap-x-4 text-sm text-white/70">
+                {navigation.brands.map((b) => (
+                  <Link key={b.href} href={b.href} className="block py-1 hover:text-white transition-colors">
+                    {b.label}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -161,12 +149,8 @@ export default async function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-8 pb-[72px] lg:pb-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <p className="text-white/20 text-xs">
-            © {new Date().getFullYear()} Swiftrooms. All rights reserved.
-          </p>
-          <p className="text-white/15 text-xs">
-            {footer.bottomTagline}
-          </p>
+          <p className="text-white/50 text-xs">© {new Date().getFullYear()} Swiftrooms. All rights reserved.</p>
+          <p className="text-white/50 text-xs">{footer.bottomTagline}</p>
         </div>
       </div>
     </footer>
