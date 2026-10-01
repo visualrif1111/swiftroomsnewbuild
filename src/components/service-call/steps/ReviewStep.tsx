@@ -42,7 +42,7 @@ export default function ReviewStep({ draft, headingRef, onEdit, onBack, onSubmit
       {submitting && (
         <div className="mt-6" role="status">
           <p className="mb-2 text-sm text-[#3a3a3c]">
-            Sending your request{draft.media.length ? " and media" : ""}…
+            Sending your request…
           </p>
           <div className="h-1 overflow-hidden rounded-full bg-gray-100">
             <div className="h-full rounded-full bg-[#007969] transition-[width] duration-200" style={{ width: `${Math.round(progress * 100)}%` }} />

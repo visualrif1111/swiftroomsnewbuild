@@ -43,7 +43,7 @@ Rules that keep this portable (Syspree will re-implement it on swiftrooms.ae):
 
 Sanity remains the website CMS. It does not store service requests.
 
-## Submission flow
+## Submission flow (answers)
 
 1. The customer completes five steps (details → product → problem → evidence →
    review). The browser validates each step with `validation.ts`.
@@ -66,22 +66,27 @@ Sanity remains the website CMS. It does not store service requests.
 
 ## Media (Phase 3)
 
-Phase 2 keeps the media UI (camera, upload, voice note, previews) but **does
-not upload anything**. The request records only what was attached
-(`declared_media`: photo count, video count, voice note yes/no) so staff know to
-ask for it. Media never passes through `POST /api/service-requests` — that
-endpoint caps bodies at 16 KB.
+Full detail: [MEDIA.md](./MEDIA.md).
 
-Phase 3 plan:
+```
+create request ──▶ reference + upload token
+  └─ per file: POST …/media (token) ──▶ signed upload URL
+               PUT file ───────────────▶ private bucket `service-evidence` (Supabase Storage)
+               POST …/media/:id/complete ▶ size + content verified ──▶ service_media UPLOADED
+```
 
-- Upload directly from the browser to object storage (Supabase Storage or
-  Vercel Blob) using short-lived signed upload URLs issued by a new endpoint,
-  e.g. `POST /api/service-requests/:reference/media`.
-- Record each file in a `service_media` table (`service_request_id`, kind,
-  storage key, MIME type, size, duration, uploaded_at), replacing
-  `declared_media` as the source of truth.
-- Voice-note transcripts attach to the `service_media` row.
-- Server-side limits must match `MEDIA_LIMITS` in `config.ts`.
+- Files go **straight from the browser to private storage** with a one-object,
+  2-hour signed upload URL. They never pass through our API: the create
+  endpoint still caps bodies at 16 KB, and Vercel functions cap bodies at
+  4.5 MB.
+- A sequential reference is **not** a credential. Media endpoints need the
+  random upload token returned only to the browser that created the request
+  (stored hashed, valid 6 hours).
+- The request exists before any upload, so media failures never lose,
+  duplicate or renumber it. Each file retries or is removed on its own.
+- UI: `useMediaUploads` (queue, retry, remove, refresh recovery) and
+  `steps/UploadStep.tsx`, which shows the confirmed reference first. Both reach
+  the backend only through `getServiceRequestClient()`.
 
 ## AI (later phase)
 
@@ -106,6 +111,18 @@ lose a request.
 - `/service-call` is `noindex` during development; API responses send
   `X-Robots-Tag: noindex`.
 
-Not yet in place (to add before public launch): rate limiting or bot
-protection on the endpoint (for example Vercel Firewall rate-limit rules or
-Turnstile).
+- Media: private bucket with no storage policies; upload token per request;
+  per-object signed upload URLs; four validation layers including a content
+  sniff; staff access only through 5-minute signed read URLs (see MEDIA.md).
+
+### ⛔ Launch blockers
+
+- **No rate limiting or bot protection** on `POST /api/service-requests` or the
+  media endpoints. Anyone can create requests or exhaust storage. Add Vercel
+  Firewall rate-limit rules (per IP, on `/api/service-requests*`) and/or a
+  Turnstile challenge on submit **before the page is linked publicly**.
+- **Abandoned-upload cleanup is not scheduled** (endpoint exists; see MEDIA.md).
+- **Video size**: 50 MB on the Supabase Free plan. Long iPhone videos exceed it;
+  a paid plan plus resumable (TUS) uploads are recommended for launch.
+- **Production database/bucket** don't exist yet: Production has no Supabase
+  variables, by design.

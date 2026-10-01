@@ -1,6 +1,7 @@
 // Service & Aftercare — validation. Pure functions, no React, so the same rules
 // can run in the browser now and on the server later.
-import { COUNTRY_CODES, DESCRIPTION_MAX_LENGTH, MEDIA_LIMITS } from "./config";
+import { ACCEPTED_FORMATS_LABEL, COUNTRY_CODES, DESCRIPTION_MAX_LENGTH, MEDIA_LIMITS } from "./config";
+import { isAcceptedType, normaliseMimeType } from "./media";
 import type { Customer, ServiceMediaKind, ServiceRequestDraft } from "./types";
 
 export type FieldErrors<K extends string = string> = Partial<Record<K, string>>;
@@ -53,15 +54,19 @@ export function validateEvidence(draft: ServiceRequestDraft): FieldErrors<"evide
     : { evidence: "Add a photo or video, or go back and describe the problem in writing or with a voice note." };
 }
 
+/** Max size in bytes for a kind of media. */
+export function maxBytesFor(kind: ServiceMediaKind): number {
+  return kind === "photo" ? MEDIA_LIMITS.maxPhotoBytes : kind === "video" ? MEDIA_LIMITS.maxVideoBytes : MEDIA_LIMITS.maxVoiceNoteBytes;
+}
+
 /** Checks a file before it is added. Returns an error message, or undefined if it's fine. */
-export function validateMediaFile(file: Blob, kind: ServiceMediaKind): string | undefined {
-  const expected = kind === "photo" ? "image/" : kind === "video" ? "video/" : "audio/";
-  // Some browsers leave `type` empty for camera captures — allow those through.
-  if (file.type && !file.type.startsWith(expected)) {
-    return kind === "voice-note" ? "That file isn't an audio recording." : `That file isn't a ${kind}.`;
+export function validateMediaFile(file: Blob, kind: ServiceMediaKind, fileName?: string): string | undefined {
+  const noun = kind === "voice-note" ? "recording" : kind;
+  if (file.size === 0) return `That ${noun} is empty.`;
+  if (!isAcceptedType(normaliseMimeType(file, kind, fileName), kind)) {
+    return `That file type isn't supported. Use ${ACCEPTED_FORMATS_LABEL[kind]}.`;
   }
-  const max =
-    kind === "photo" ? MEDIA_LIMITS.maxPhotoBytes : kind === "video" ? MEDIA_LIMITS.maxVideoBytes : MEDIA_LIMITS.maxVoiceNoteBytes;
-  if (file.size > max) return `That ${kind === "voice-note" ? "recording" : kind} is over ${Math.round(max / 1024 / 1024)} MB.`;
+  const max = maxBytesFor(kind);
+  if (file.size > max) return `That ${noun} is over ${Math.round(max / 1024 / 1024)} MB.`;
   return undefined;
 }

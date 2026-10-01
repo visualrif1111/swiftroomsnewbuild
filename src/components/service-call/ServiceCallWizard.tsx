@@ -9,6 +9,7 @@ import { toCreatePayload } from "@/lib/service-call/api-contract";
 import { getServiceRequestClient } from "@/lib/service-call/client";
 import { EMPTY_DRAFT, SERVICE_CALL_STEPS } from "@/lib/service-call/config";
 import { clearDraft, loadDraft, saveDraft, type PendingSubmission } from "@/lib/service-call/draft-storage";
+import { loadUploadSession, type UploadSession } from "@/lib/service-call/upload-session";
 import { releaseMedia } from "@/lib/service-call/media";
 import { SERVICE_PHONE } from "@/lib/contact";
 import {
@@ -26,13 +27,16 @@ import EvidenceStep from "./steps/EvidenceStep";
 import ProblemStep from "./steps/ProblemStep";
 import ProductSelectionStep from "./steps/ProductSelectionStep";
 import ReviewStep from "./steps/ReviewStep";
+import UploadStep from "./steps/UploadStep";
+import { useMediaUploads } from "./useMediaUploads";
 
 const REVIEW = SERVICE_CALL_STEPS.length - 1;
 const EVIDENCE = 3;
 /** Clears the fixed navbar (h-16 / md:h-20) when scrolling a step into view. */
 const NAV_OFFSET = 96;
 
-type View = "intro" | "steps" | "done";
+// "uploading": the request exists; its files are being uploaded (or retried).
+type View = "intro" | "steps" | "uploading" | "done";
 
 interface Initial {
   view: View;
@@ -40,6 +44,8 @@ interface Initial {
   draft: ServiceRequestDraft;
   restored: { hadMedia: boolean } | null;
   submission: PendingSubmission | null;
+  /** A refresh happened while files were uploading for a created request. */
+  uploadSession: UploadSession | null;
 }
 
 /** What the customer would see if this submit failed. */
@@ -61,12 +67,16 @@ function submitErrorMessage(err: unknown): string {
 }
 
 function initialState(): Initial {
+  const uploadSession = loadUploadSession();
+  if (uploadSession) {
+    return { view: "uploading", step: REVIEW, draft: EMPTY_DRAFT, restored: null, submission: null, uploadSession };
+  }
   const stored = loadDraft();
-  if (!stored) return { view: "intro", step: 0, draft: EMPTY_DRAFT, restored: null, submission: null };
+  if (!stored) return { view: "intro", step: 0, draft: EMPTY_DRAFT, restored: null, submission: null, uploadSession: null };
   let step = Math.min(Math.max(stored.step, 0), REVIEW);
   // Media doesn't survive a refresh; if it was the only evidence, send them back to add it.
   if (step > EVIDENCE && !hasProblemInformation(stored.draft)) step = EVIDENCE;
-  return { view: "steps", step, draft: stored.draft, restored: { hadMedia: stored.hadMedia }, submission: stored.submission };
+  return { view: "steps", step, draft: stored.draft, restored: { hadMedia: stored.hadMedia }, submission: stored.submission, uploadSession: null };
 }
 
 export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; phoneRaw: string }) {
@@ -81,6 +91,8 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
   const [progress, setProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<ServiceRequestReceipt | null>(null);
+  const [mediaResult, setMediaResult] = useState<{ uploaded: number; notUploaded: number } | null>(null);
+  const uploads = useMediaUploads();
 
   const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLElement>(null);
@@ -96,6 +108,12 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     latestDraft.current = draft;
     if (view === "steps") saveDraft(draft, step, submission.current);
   }, [draft, step, view]);
+
+  // Refreshed mid-upload: pick the upload stage back up for the same request.
+  const restoreUploads = uploads.restore;
+  useEffect(() => {
+    if (init.uploadSession) restoreUploads(init.uploadSession);
+  }, [init.uploadSession, restoreUploads]);
 
   // Free object URLs when the page is left.
   useEffect(
@@ -181,7 +199,14 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
       clearDraft();
       setReceipt(result);
       setRestored(null);
-      show("done");
+      const files = [...draft.media, ...(draft.voiceNote ? [draft.voiceNote] : [])];
+      if (files.length) {
+        uploads.begin(result, firstNameOf(draft), files);
+        show("uploading");
+      } else {
+        setMediaResult(null);
+        show("done");
+      }
     } catch (err) {
       setSubmitError(submitErrorMessage(err));
     } finally {
@@ -190,13 +215,21 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     }
   }
 
+  function finishUploads() {
+    setMediaResult(uploads.finish());
+    if (!receipt && uploads.receipt) setReceipt(uploads.receipt);
+    show("done");
+  }
+
   function startAnother() {
     // Keep the customer's details — it's usually the same person reporting a second issue.
     releaseMedia(draft.voiceNote);
     draft.media.forEach(releaseMedia);
+    uploads.reset();
     setDraft({ ...EMPTY_DRAFT, customer: draft.customer });
     submission.current = null;
     setReceipt(null);
+    setMediaResult(null);
     setMaxReached(0);
     show("steps", 0);
   }
@@ -204,6 +237,7 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
   function startOver() {
     releaseMedia(draft.voiceNote);
     draft.media.forEach(releaseMedia);
+    uploads.reset();
     clearDraft();
     submission.current = null;
     setDraft(EMPTY_DRAFT);
@@ -270,10 +304,26 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
             />
           )}
 
+          {view === "uploading" && uploads.receipt && (
+            <UploadStep
+              receipt={uploads.receipt}
+              rows={uploads.rows}
+              headingRef={headingRef}
+              recovered={uploads.recovered}
+              existingCount={uploads.visualCount}
+              onRetry={uploads.retry}
+              onRetryAll={uploads.retryAll}
+              onRemove={uploads.remove}
+              onAddMedia={uploads.add}
+              onFinish={finishUploads}
+            />
+          )}
+
           {view === "done" && receipt && (
             <ConfirmationStep
               receipt={receipt}
-              firstName={draft.customer.fullName.trim().split(/\s+/)[0] ?? ""}
+              firstName={firstNameOf(draft) || uploads.firstName}
+              mediaResult={mediaResult}
               headingRef={headingRef}
               onStartAnother={startAnother}
             />
@@ -283,6 +333,8 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     </section>
   );
 }
+
+const firstNameOf = (d: ServiceRequestDraft) => d.customer.fullName.trim().split(/\s+/)[0] ?? "";
 
 function Intro({
   headingRef,

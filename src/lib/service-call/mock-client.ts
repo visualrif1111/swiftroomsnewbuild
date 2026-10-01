@@ -4,7 +4,14 @@
 // Nothing leaves the browser: no network calls, no uploads, no storage beyond a
 // localStorage counter so references increase between test runs. References it
 // returns are NOT real — the database allocates the authoritative ones.
-import { ServiceRequestSubmitError, type ServiceRequestClient, type ServiceRequestDraft, type ServiceRequestReceipt, type SubmitOptions } from "./types";
+import {
+  MediaUploadError,
+  ServiceRequestSubmitError,
+  type ServiceRequestClient,
+  type ServiceRequestDraft,
+  type ServiceRequestReceipt,
+  type SubmitOptions,
+} from "./types";
 
 const COUNTER_KEY = "swiftrooms.service-call.mock-sequence";
 
@@ -54,6 +61,27 @@ export const mockServiceRequestClient: ServiceRequestClient = {
       reference: formatReference(submittedAt.getFullYear(), nextSequence()),
       status: "SUBMITTED",
       submittedAt: submittedAt.toISOString(),
+      upload: { token: "mock", expiresAt: new Date(Date.now() + 6 * 3600_000).toISOString() },
     };
+  },
+
+  // Simulated uploads: progress over ~1 s per file, nothing stored.
+  // QA hook: ?mock=upload-fail fails every upload.
+  async uploadMedia(_receipt, media, { onRegistered, onProgress, signal } = {}) {
+    onRegistered?.(`mock_${media.id}`);
+    for (let i = 1; i <= 5; i++) {
+      await wait(200, signal);
+      onProgress?.(i / 5);
+    }
+    if (new URLSearchParams(window.location.search).get("mock") === "upload-fail") {
+      throw new MediaUploadError("network", "Mock upload failure");
+    }
+    return { mediaId: `mock_${media.id}`, status: "UPLOADED" };
+  },
+
+  async removeMedia() {},
+
+  async listMedia() {
+    return [];
   },
 };

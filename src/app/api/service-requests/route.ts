@@ -42,13 +42,19 @@ export async function POST(req: NextRequest) {
   if (!result.ok) return fail(422, "validation_failed", "Some details need correcting.", result.fields);
 
   try {
-    const created = await getServiceRequestStore().create(result.value, key.toLowerCase());
+    const store = getServiceRequestStore();
+    const created = await store.create(result.value, key.toLowerCase());
+    // Proof for the media endpoints that this caller created the request. Only
+    // the holder of the (random, unguessable) idempotency key can get one, so a
+    // replay may safely issue a fresh token.
+    const upload = await store.issueUploadToken(created.id);
     const response: CreateServiceRequestResponse = {
       id: created.id,
       reference: created.reference,
       status: created.status,
       submittedAt: created.createdAt,
       replayed: created.replayed,
+      upload,
     };
     return NextResponse.json(response, { status: created.replayed ? 200 : 201, headers: HEADERS });
   } catch (err) {

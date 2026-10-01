@@ -9,11 +9,14 @@ import { Icon } from "../icons";
 export default function ConfirmationStep({
   receipt,
   firstName,
+  mediaResult,
   headingRef,
   onStartAnother,
 }: {
   receipt: ServiceRequestReceipt;
   firstName: string;
+  /** Files sent with the request (null when none were attached). */
+  mediaResult?: { uploaded: number; notUploaded: number } | null;
   headingRef: Ref<HTMLHeadingElement>;
   onStartAnother: () => void;
 }) {
@@ -32,6 +35,23 @@ export default function ConfirmationStep({
         <p className="text-[0.8125rem] text-[#3a3a3c]">Your reference</p>
         <p className="mt-1 font-heading text-2xl font-bold tracking-wide text-[#007969] tabular-nums">{receipt.reference}</p>
       </div>
+
+      {mediaResult && (mediaResult.uploaded > 0 || mediaResult.notUploaded > 0) && (
+        <p className="mx-auto mt-4 max-w-md text-sm text-[#3a3a3c]">
+          {mediaResult.uploaded > 0 && (
+            <>
+              <Icon name="check" className="mr-1 inline w-4 h-4 align-[-3px] text-[#007969]" strokeWidth={2.5} />
+              {mediaResult.uploaded} {mediaResult.uploaded === 1 ? "file" : "files"} received.
+            </>
+          )}
+          {mediaResult.notUploaded > 0 && (
+            <span className="block mt-1 text-[#6b7280]">
+              {mediaResult.notUploaded} {mediaResult.notUploaded === 1 ? "file wasn't" : "files weren't"} uploaded — our team may ask you
+              to send {mediaResult.notUploaded === 1 ? "it" : "them"}.
+            </span>
+          )}
+        </p>
+      )}
 
       <p className="mx-auto mt-6 max-w-md text-[#3a3a3c] leading-relaxed">
         Thank you for contacting Swift Rooms Service &amp; Aftercare.

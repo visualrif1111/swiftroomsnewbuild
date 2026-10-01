@@ -39,16 +39,43 @@ export const COUNTRY_CODES = [
   { code: "+1", country: "USA/Canada", minLength: 10, maxLength: 10 },
 ] as const;
 
-/** Client-side limits. The production API must enforce the same limits server-side. */
+/**
+ * Media limits, shared by the browser and the API (server/media.ts), and
+ * mirrored by the storage bucket (supabase/migrations/0002_service_media.sql).
+ * Videos are capped at 50 MB: the Supabase Free plan's per-file ceiling. A
+ * paid plan allows larger files — raise maxVideoBytes and the bucket limit
+ * together.
+ */
 export const MEDIA_LIMITS = {
-  maxItems: 10,
+  maxItems: 10, // photos + videos per request
+  maxVoiceNotes: 1,
   maxPhotoBytes: 25 * 1024 * 1024,
-  maxVideoBytes: 250 * 1024 * 1024,
+  maxVideoBytes: 50 * 1024 * 1024,
   maxVoiceNoteBytes: 25 * 1024 * 1024,
   maxVoiceNoteSeconds: 180,
   photoAccept: "image/*",
   videoAccept: "video/*",
   audioAccept: "audio/*",
+} as const;
+
+/**
+ * MIME types accepted per kind — what phone cameras, galleries and browser
+ * recorders actually produce (iPhone: HEIC/JPEG photos, MOV/MP4 video, MP4/AAC
+ * voice; Android: JPEG, MP4/3GP video; Chrome/Firefox recorders: WebM/Ogg).
+ * Pickers still use image/* etc. so phones show their normal gallery; the
+ * file is checked after it's chosen, and its bytes are checked on the server.
+ */
+export const ACCEPTED_MEDIA_TYPES = {
+  photo: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
+  video: ["video/mp4", "video/quicktime", "video/webm", "video/3gpp"],
+  "voice-note": ["audio/webm", "audio/mp4", "audio/x-m4a", "audio/aac", "audio/mpeg", "audio/ogg", "audio/wav", "audio/x-wav", "audio/3gpp"],
+} as const;
+
+/** Readable list of formats per kind, for error messages. */
+export const ACCEPTED_FORMATS_LABEL = {
+  photo: "JPEG, PNG, HEIC or WebP",
+  video: "MP4, MOV, WebM or 3GP",
+  "voice-note": "M4A, MP3, AAC, WebM, Ogg or WAV",
 } as const;
 
 export const DESCRIPTION_MAX_LENGTH = 2000;

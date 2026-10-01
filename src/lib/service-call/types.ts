@@ -122,6 +122,40 @@ export interface ServiceRequestReceipt {
   reference: string;
   status: ServiceStatus;
   submittedAt: string;
+  /** Lets this browser attach media to the request it just created. */
+  upload?: { token: string; expiresAt: string };
+}
+
+/** A file's server-side state after an upload attempt. */
+export interface UploadedMediaResult {
+  mediaId: string;
+  status: "UPLOADED";
+}
+
+export interface UploadMediaOptions {
+  /** Called once the server has registered the file (before the upload starts). */
+  onRegistered?: (mediaId: string) => void;
+  /** 0–1 for this file. */
+  onProgress?: (fraction: number) => void;
+  signal?: AbortSignal;
+}
+
+/** Why a media upload failed. */
+export type MediaErrorKind =
+  | "network" // connection dropped — retry
+  | "rejected" // the file isn't acceptable (type/size/content) — remove it
+  | "expired" // the upload window has closed
+  | "limit" // too many files on this request
+  | "server"; // anything else — retry
+
+export class MediaUploadError extends Error {
+  constructor(
+    public readonly kind: MediaErrorKind,
+    message: string,
+  ) {
+    super(message);
+    this.name = "MediaUploadError";
+  }
 }
 
 export interface SubmitOptions {
@@ -161,4 +195,14 @@ export class ServiceRequestSubmitError extends Error {
  */
 export interface ServiceRequestClient {
   submit(draft: ServiceRequestDraft, options: SubmitOptions): Promise<ServiceRequestReceipt>;
+  /**
+   * Uploads one file to the request: register → upload straight to private
+   * storage → verify. Safe to call again for the same media (same media.id):
+   * the server returns the existing record and never duplicates the file.
+   */
+  uploadMedia(receipt: ServiceRequestReceipt, media: ServiceMedia, options?: UploadMediaOptions): Promise<UploadedMediaResult>;
+  /** Removes a registered file (storage object and record). Safe to repeat. */
+  removeMedia(receipt: ServiceRequestReceipt, mediaId: string): Promise<void>;
+  /** The request's files as the server knows them (recovery after a refresh). */
+  listMedia(receipt: ServiceRequestReceipt): Promise<{ mediaId: string; clientMediaId: string; status: "PENDING" | "UPLOADED" | "FAILED"; fileName: string | null; kind: ServiceMediaKind; size: number }[]>;
 }

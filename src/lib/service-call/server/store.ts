@@ -3,11 +3,20 @@
 //   Route handler  →  getServiceRequestStore()  →  Supabase (PostgREST over HTTPS)
 //
 // Plain fetch against Supabase's REST API keeps this dependency-free and easy
-// to port. The service-role key bypasses row level security, so it must only
-// ever be read here, on the server.
+// to port (see supabase.ts). Media lives in media-store.ts.
 import "server-only";
+import { createHash, randomBytes } from "node:crypto";
 import type { ServiceStatus } from "../types";
+import { StoreNotConfiguredError, supabaseConfig, supabaseJson } from "./supabase";
 import type { ValidServiceRequest } from "./validate";
+
+export { StoreNotConfiguredError };
+
+/** How long a browser may keep adding media to the request it created. */
+export const UPLOAD_TOKEN_TTL_MS = 6 * 60 * 60 * 1000;
+
+/** SHA-256 of an upload token; only the hash is stored. */
+export const hashUploadToken = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export interface CreatedServiceRequest {
   id: string;
@@ -49,38 +58,32 @@ export interface StoredServiceRequest {
   statusHistory: StatusHistoryEntry[];
 }
 
+export interface UploadAuthorisation {
+  token: string;
+  expiresAt: string;
+}
+
+/** The request an upload token belongs to, if the token is valid for that reference. */
+export interface AuthorisedRequest {
+  id: string;
+  reference: string;
+  expired: boolean;
+}
+
 export interface ServiceRequestStore {
   create(request: ValidServiceRequest, idempotencyKey: string): Promise<CreatedServiceRequest>;
   getByReference(reference: string): Promise<StoredServiceRequest | null>;
+  /**
+   * Issues a fresh upload token for a request (replacing any previous one) and
+   * returns it once; only its hash is stored.
+   */
+  issueUploadToken(requestId: string): Promise<UploadAuthorisation>;
+  /** Looks up a request by reference AND upload token hash. */
+  authoriseUpload(reference: string, token: string): Promise<AuthorisedRequest | null>;
 }
 
-export class StoreNotConfiguredError extends Error {
-  constructor() {
-    super("Service request storage is not configured (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
-    this.name = "StoreNotConfiguredError";
-  }
-}
-
-const REQUEST_TIMEOUT_MS = 15_000;
-
-function supabaseStore(url: string, key: string): ServiceRequestStore {
-  const base = url.replace(/\/+$/, "");
-  const headers = { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
-
-  async function call(path: string, init: RequestInit) {
-    const res = await fetch(`${base}${path}`, {
-      ...init,
-      headers: { ...headers, ...init.headers },
-      cache: "no-store",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-    if (!res.ok) {
-      // Log the database's own error code only — never the request body (PII).
-      const detail = await res.json().catch(() => ({}));
-      throw new Error(`Supabase ${init.method ?? "GET"} ${path.split("?")[0]} failed: ${res.status} ${detail?.code ?? ""}`.trim());
-    }
-    return res.json();
-  }
+function supabaseStore(): ServiceRequestStore {
+  const call = (path: string, init: RequestInit) => supabaseJson<any>(path, init); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   return {
     async create(request, idempotencyKey) {
@@ -135,13 +138,33 @@ function supabaseStore(url: string, key: string): ServiceRequestStore {
         })),
       };
     },
+
+    async issueUploadToken(requestId) {
+      const token = randomBytes(32).toString("base64url");
+      const expiresAt = new Date(Date.now() + UPLOAD_TOKEN_TTL_MS).toISOString();
+      await call(`/rest/v1/service_requests?id=eq.${encodeURIComponent(requestId)}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ upload_token_hash: hashUploadToken(token), upload_token_expires_at: expiresAt }),
+      });
+      return { token, expiresAt };
+    },
+
+    async authoriseUpload(reference, token) {
+      if (!token) return null;
+      const rows = await call(
+        `/rest/v1/service_requests?reference=eq.${encodeURIComponent(reference)}&upload_token_hash=eq.${hashUploadToken(token)}&select=id,reference,upload_token_expires_at`,
+        { method: "GET" },
+      );
+      const r = rows?.[0];
+      if (!r) return null;
+      return { id: r.id, reference: r.reference, expired: !r.upload_token_expires_at || new Date(r.upload_token_expires_at) <= new Date() };
+    },
   };
 }
 
 /** The configured store. Throws StoreNotConfiguredError when env vars are missing. */
 export function getServiceRequestStore(): ServiceRequestStore {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
-  if (!url || !key) throw new StoreNotConfiguredError();
-  return supabaseStore(url, key);
+  supabaseConfig(); // fail fast when not configured
+  return supabaseStore();
 }

@@ -1,39 +1,44 @@
-// GET /api/service-requests/:reference — read one request with its customer
-// and status history. Staff/testing use only: disabled unless
+// GET /api/service-requests/:reference — read one request with its customer,
+// status history and media. Staff/testing use only: disabled unless
 // SERVICE_REQUESTS_ADMIN_TOKEN is set, and then requires it as a Bearer token.
+// Media come with short-lived (5 minute) signed read URLs — never public URLs.
 // The staff dashboard (later phase) will replace this with real auth.
-import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { getServiceRequestStore, StoreNotConfiguredError } from "@/lib/service-call/server/store";
+import { isAdmin, NO_STORE, REFERENCE_PATTERN, serverFailure } from "@/lib/service-call/server/http";
+import { mediaStore } from "@/lib/service-call/server/media-store";
+import { getServiceRequestStore } from "@/lib/service-call/server/store";
 
-const REFERENCE = /^SR-\d{4}-\d{5,}$/;
-const HEADERS = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" };
-
-function authorised(req: NextRequest) {
-  const expected = process.env.SERVICE_REQUESTS_ADMIN_TOKEN;
-  if (!expected) return false;
-  const given = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const a = Buffer.from(given);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
+const SIGNED_READ_SECONDS = 300;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ reference: string }> }) {
   // Same response whether the endpoint is disabled or the token is wrong.
-  if (!authorised(req)) return NextResponse.json({ error: "not_found" }, { status: 404, headers: HEADERS });
+  const notFound = () => NextResponse.json({ error: "not_found" }, { status: 404, headers: NO_STORE });
+  if (!isAdmin(req)) return notFound();
 
   const { reference } = await params;
-  if (!REFERENCE.test(reference)) return NextResponse.json({ error: "not_found" }, { status: 404, headers: HEADERS });
+  if (!REFERENCE_PATTERN.test(reference)) return notFound();
 
   try {
     const request = await getServiceRequestStore().getByReference(reference);
-    if (!request) return NextResponse.json({ error: "not_found" }, { status: 404, headers: HEADERS });
-    return NextResponse.json(request, { headers: HEADERS });
+    if (!request) return notFound();
+    const records = await mediaStore.list(request.id);
+    const media = await Promise.all(
+      records.map(async (m) => ({
+        id: m.id,
+        type: m.mediaType,
+        mimeType: m.mimeType,
+        originalFilename: m.originalFilename,
+        fileSize: m.fileSize,
+        uploadStatus: m.uploadStatus,
+        failureReason: m.failureReason,
+        storagePath: m.storagePath,
+        uploadedAt: m.uploadedAt,
+        signedUrl: m.uploadStatus === "UPLOADED" ? await mediaStore.signRead(m, SIGNED_READ_SECONDS) : null,
+        signedUrlExpiresInSeconds: m.uploadStatus === "UPLOADED" ? SIGNED_READ_SECONDS : null,
+      })),
+    );
+    return NextResponse.json({ ...request, media }, { headers: NO_STORE });
   } catch (err) {
-    if (err instanceof StoreNotConfiguredError) {
-      return NextResponse.json({ error: "not_configured" }, { status: 503, headers: HEADERS });
-    }
-    console.error("[service-requests] read failed:", err instanceof Error ? err.message : err);
-    return NextResponse.json({ error: "server_error" }, { status: 500, headers: HEADERS });
+    return serverFailure("read request", err);
   }
 }

@@ -4,7 +4,8 @@
 //
 // "Take photo" / "Record video" use <input capture="environment">, which opens
 // the rear camera directly on phones and falls back to a file picker on
-// desktop. Files stay in memory as object URLs in Phase 1.
+// desktop. Files stay in memory (object URLs) until the request is submitted,
+// then upload straight to private storage (see UploadStep).
 import { useRef, useState } from "react";
 import { MEDIA_LIMITS } from "@/lib/service-call/config";
 import { createMedia, mediaKindOf } from "@/lib/service-call/media";
@@ -26,15 +27,21 @@ export default function MediaUploader({
   media,
   onAdd,
   onRemove,
+  showList = true,
+  existingCount,
 }: {
   media: ServiceMedia[];
   onAdd: (items: ServiceMedia[]) => void;
   onRemove: (id: string) => void;
+  /** Set false where another component lists the files (the upload step). */
+  showList?: boolean;
+  /** Files already counted elsewhere (overrides media.length for the limit). */
+  existingCount?: number;
 }) {
   const inputs = useRef<Partial<Record<Picker, HTMLInputElement | null>>>({});
   const [problems, setProblems] = useState<string[]>([]);
   const [announcement, setAnnouncement] = useState("");
-  const remaining = MEDIA_LIMITS.maxItems - media.length;
+  const remaining = MEDIA_LIMITS.maxItems - (existingCount ?? media.length);
   const full = remaining <= 0;
 
   function handle(picker: Picker, list: FileList | null) {
@@ -43,7 +50,7 @@ export default function MediaUploader({
     const added: ServiceMedia[] = [];
     for (const file of Array.from(list)) {
       const kind = mediaKindOf(file) ?? (picker.startsWith("photo") ? "photo" : "video");
-      const error = validateMediaFile(file, kind);
+      const error = validateMediaFile(file, kind, file.name);
       if (error) {
         issues.push(`${file.name}: ${error}`);
         continue;
@@ -110,7 +117,7 @@ export default function MediaUploader({
         </ul>
       )}
 
-      {media.length > 0 && (
+      {showList && media.length > 0 && (
         <div className="mt-6">
           <p className="mb-3 flex items-baseline justify-between text-sm">
             <span className="font-semibold text-[#1c1c1e]">Added</span>

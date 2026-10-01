@@ -141,3 +141,22 @@ until the correct dates are confirmed.**
 The live site contradicts itself on the Cortizo date (timeline 2012 vs
 certification "since 2011"). Once confirmed, update the Sanity documents above
 (they override the code) and the code fallbacks together.
+
+---
+
+## ⛔ Service & Aftercare — launch blockers (do not link /service-call publicly yet)
+
+Details: `docs/service-aftercare/ARCHITECTURE.md` § Launch blockers and `MEDIA.md`.
+
+1. **No rate limiting / bot protection** on `POST /api/service-requests` and the
+   media endpoints (`/api/service-requests/*/media*`). Add Vercel Firewall
+   rate-limit rules and/or Turnstile on submit before launch.
+2. **Abandoned-upload cleanup not scheduled.** Schedule
+   `POST /api/service-requests/maintenance/cleanup-media` (admin token), e.g.
+   hourly, once a production project exists.
+3. **Video limit 50 MB** (Supabase Free plan per-file cap). Long phone videos
+   exceed it: consider a paid plan + resumable uploads.
+4. **No production database/bucket yet.** Production deliberately has no
+   Supabase variables; create a separate project and apply migrations 0001 + 0002.
+5. **Data residency:** dev database is in US-East (`iad1`, same region as the
+   functions). Decide on region before storing real customer media.

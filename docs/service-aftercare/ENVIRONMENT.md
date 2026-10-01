@@ -17,8 +17,14 @@ Names only. **Never commit values.** `.env.local` is git-ignored, and
 returns `503 not_configured` and the customer sees the retry message with the
 service phone number.
 
-Only `server/store.ts` reads the Supabase variables, and it is guarded by
-`import "server-only"`, so a client import fails the build.
+Only `server/supabase.ts` reads the Supabase variables (used by `store.ts` and
+`media-store.ts`), and it is guarded by `import "server-only"`, so a client
+import fails the build.
+
+**Phase 3 added no environment variables.** Media uses the same Supabase URL
+and service-role key, and the bucket name `service-evidence` is a constant in
+code and in migration 0002. The browser never receives Supabase credentials:
+it gets only per-object signed upload URLs and the per-request upload token.
 
 ## Variables the Supabase integration also adds
 
@@ -38,9 +44,10 @@ for applying migrations with `psql`.
 | Preview (branch deployments) | development Supabase project |
 | Production | **not connected** during development. The variables are deliberately absent, so `/api/service-requests` answers 503 there. |
 
-Before launch, create a separate production Supabase project, run the same
-migration there, and set its variables for Production only. Never point
-Preview at production data.
+Before launch, create a separate production Supabase project, run **both**
+migrations there (0002 creates the private bucket), and set its variables for
+Production only. Never point Preview at production data. On a paid plan, raise
+the bucket's `file_size_limit` and `MEDIA_LIMITS.maxVideoBytes` together.
 
 ## Local development
 
