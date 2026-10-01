@@ -3089,7 +3089,7 @@ export const blogPosts: BlogPost[] = [
     relatedProducts: [
       { name: "Cortizo Cor 70 Hidden Sash", href: "/catalogue/aluminium-windows/cortizo-cor-70-hidden-sash" },
       { name: "Cor Vision 4700 Lift & Slide", href: "/catalogue/aluminium-sliding-doors/cor-vision-4700" },
-      { name: "uPVC Casement Window", href: "/catalogue/upvc/upvc-casement-window" },
+      { name: "uPVC Casement Window", href: "/catalogue/upvc/upvc-casement" },
     ],
   },
 ];

@@ -1,19 +1,10 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/site-settings";
+import { FACTORY_ADDRESS_LINE1, SERVICE_PHONE, SERVICE_PHONE_RAW } from "@/lib/contact";
 import FooterCTA from "./FooterCTA";
 import { SOCIAL_ICON_PATHS } from "./socialIcons";
 
-/*
- * Contact details the live site publishes that the shared Sanity `contact`
- * object has no field for — it holds a single unlabelled phone and the
- * showroom address only. Kept here rather than added to that dataset, which
- * swiftrooms.ae also reads. Move them into siteSettings once the schema gains
- * service-phone and factory-address fields.
- */
-const SERVICE_PHONE = "04 323 1625";
-const SERVICE_PHONE_RAW = "+97143231625";
 const AREA_LINE = "Jebel Ali, Ind Area 1";
-const FACTORY_ADDRESS_LINE1 = "Dubai Real Estate Centre Ind Park, Unit 1-B";
 
 const linkClass = "block py-3 text-white/70 text-sm hover:text-white transition-colors";
 

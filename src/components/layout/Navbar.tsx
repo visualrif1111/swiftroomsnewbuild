@@ -89,10 +89,12 @@ export default function Navbar({ nav, quoteLabel }: { nav?: NavData; quoteLabel?
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close on route change
-  useEffect(() => {
+  // Close on route change — reset during render rather than in an effect.
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Escape key — closes the mobile menu and any open desktop mega menu
   useEffect(() => {
