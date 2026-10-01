@@ -9,7 +9,7 @@ import type { ProductCategory, BlogPost } from "@/lib/data";
 import { QuoteButton } from "@/components/forms/CTAButtons";
 import WorksWellWith from "@/components/WorksWellWith";
 import EditorialSection from "@/components/EditorialSection";
-import { categoryHeading, editorialFor } from "@/lib/categoryEditorial";
+import { categoryDescription, categoryHeading, editorialFor } from "@/lib/categoryEditorial";
 import type { EditorialSection as EditorialSectionData } from "@/lib/homeEditorial";
 
 type Category = ProductCategory;
@@ -357,7 +357,7 @@ export default function CategoryClient({
             <p className="text-base md:text-xl text-[#6b7280] italic mb-6 md:mb-8">{category.tagline}</p>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-body-lg text-[#6b7280] max-w-2xl">{category.description}</p>
+            <p className="text-body-lg text-[#6b7280] max-w-2xl">{categoryDescription(category.slug, category.description)}</p>
           </ScrollReveal>
         </div>
       </section>
@@ -368,15 +368,17 @@ export default function CategoryClient({
 
       <EditorialBlocks sections={editorial.beforeProducts} />
 
-      <section className="py-12 md:py-20">
-        <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
-            {category.products.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} categoryImage={category.image} />
-            ))}
+      {category.products.length > 0 && (
+        <section className="py-12 md:py-20">
+          <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100">
+              {category.products.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} categoryImage={category.image} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <CompareTable category={category} />
 
@@ -389,7 +391,7 @@ export default function CategoryClient({
 
 
       <CategoryFAQ
-        faqs={[...(category.faqs ?? []), ...(editorial.extraFaqs ?? [])]}
+        faqs={mergeFaqs(category.faqs ?? [], editorial.extraFaqs ?? [])}
         heading={editorial.faqHeading}
         level={editorial.faqLevel}
       />
@@ -463,6 +465,12 @@ export default function CategoryClient({
       <EditorialBlocks sections={editorial.afterOtherRanges} />
     </>
   );
+}
+
+/** Category FAQs followed by any editorial extras not already in the list. */
+function mergeFaqs(base: { q: string; a: string }[], extra: { q: string; a: string }[]) {
+  const seen = new Set(base.map((f) => f.q.trim().toLowerCase()));
+  return [...base, ...extra.filter((f) => !seen.has(f.q.trim().toLowerCase()))];
 }
 
 /** A run of editorial sections, alternating white and grey from the first. */

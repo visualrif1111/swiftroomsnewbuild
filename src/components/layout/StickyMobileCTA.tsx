@@ -10,7 +10,8 @@ const WA_MESSAGE = encodeURIComponent(
 
 export default function StickyMobileCTA() {
   const pathname = usePathname();
-  if (pathname === "/enquire" || pathname === "/showroom") return null;
+  // Hidden on form pages, where the bar would cover the form's own actions.
+  if (pathname === "/enquire" || pathname === "/showroom" || pathname === "/service-call") return null;
 
   return (
     <>
@@ -20,7 +21,7 @@ export default function StickyMobileCTA() {
       <div
         aria-hidden
         className="lg:hidden"
-        style={{ height: "calc(4.25rem + env(safe-area-inset-bottom))" }}
+        style={{ height: "calc(5rem + env(safe-area-inset-bottom))" }}
       />
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 px-3 py-3 flex gap-2 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] safe-bottom">
         <QuoteButton className="flex-1 btn-brand justify-center py-3 px-2! text-[0.75rem]">

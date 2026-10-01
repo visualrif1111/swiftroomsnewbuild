@@ -46,6 +46,21 @@ export function categoryHeading(slug: string, fallback: string): string {
   return CATEGORY_HEADINGS[slug] ?? fallback;
 }
 
+/** Intro paragraphs the live site sets in place of the category's own description. */
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  "aluminium-windows":
+    "Our aluminium window collection covers every architectural requirement—from aluminium sliding windows and slim-sash casements to large-format tilt-and-turn windows, all precision-engineered for Gulf climates.",
+  "aluminium-sliding-doors":
+    "Our lift-and-slide door collection redefines the boundary between inside and out with slim sliding doors and premium aluminium sliding glass doors. From the Cor Vision 4600 to the flagship 4700, every system is engineered for the most demanding UAE villa specifications.",
+  "upvc":
+    "Our uPVC windows and uPVC doors in Dubai deliver outstanding thermal and acoustic performance with minimal maintenance requirements, making them ideal for residential applications across the UAE.",
+};
+
+/** Hero intro for a category page. Falls back to the category description. */
+export function categoryDescription(slug: string, fallback: string): string {
+  return CATEGORY_DESCRIPTIONS[slug] ?? fallback;
+}
+
 export const categoryEditorial: Record<string, CategoryEditorial> = {
   "aluminium-bi-folding-doors": {
     beforeProducts: [
