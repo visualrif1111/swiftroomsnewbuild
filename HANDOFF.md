@@ -120,3 +120,24 @@ migration script uses it. Keep it out of the app runtime env.
 - Baseline security headers on every route. — `next.config.ts`
 - Global keyboard focus-visible ring; iOS input-zoom fix (form controls ≥16px on
   mobile). — `globals.css`
+
+---
+
+## ⚠️ Content discrepancy — founding year / Cortizo dates (needs confirmation)
+
+Business information, not a design issue. **Do not change any of these values
+until the correct dates are confirmed.**
+
+| Source | Founded | Cortizo partnership |
+|---|---|---|
+| swiftrooms.ae About timeline | 2011 | 2012 |
+| swiftrooms.ae + new build — certification "Cortizo Authorised Partner" (Sanity `cert-0.detail`) | — | "UAE — since 2011" |
+| Sanity `pageSettings.about` → `hero.subheading` | "since 2009" | — |
+| Sanity `timeline-0` / `timeline-1` (year) | 2009 | 2011 |
+| Sanity `siteSettings.company.foundedYear` / `.description` (not read by the frontend) | 2009 | — |
+| Code: About page Organization schema `foundingDate` + fallback copy | 2011 | 2012 (fallback timeline) |
+| Indirect: homepage stat "15+ Years in UAE"; maintenance blog post "fifteen years" | ≈ 2011 | — |
+
+The live site contradicts itself on the Cortizo date (timeline 2012 vs
+certification "since 2011"). Once confirmed, update the Sanity documents above
+(they override the code) and the code fallbacks together.
