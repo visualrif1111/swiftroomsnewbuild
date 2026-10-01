@@ -126,6 +126,7 @@ export const homeEditorial: Record<string, EditorialSection> = {
       "Structural and drainage checks happen before a single frame is ordered",
       "A smooth-looking installation usually means the hard part happened earlier, unseen",
     ],
+    tone: "muted",
   },
 
   leadTime: {
@@ -142,7 +143,6 @@ export const homeEditorial: Record<string, EditorialSection> = {
       "Custom sizing and finish colour both affect how long manufacturing takes",
       "An unrealistically fast quoted timeline is worth questioning, not celebrating",
     ],
-    tone: "muted",
   },
 
   afterYearOne: {
@@ -159,6 +159,7 @@ export const homeEditorial: Record<string, EditorialSection> = {
       "A responsive aftercare relationship matters more once the warranty period is underway",
       "Ask what happens after year one before signing, not after something breaks",
     ],
+    tone: "muted",
   },
 
   askForTheNumbers: {
@@ -175,7 +176,6 @@ export const homeEditorial: Record<string, EditorialSection> = {
       "Specific figures (chamber count, U-value, air permeability class) can be checked independently",
       "A supplier willing to hand over the technical data sheet is worth taking seriously",
     ],
-    tone: "muted",
   },
 
   showroomVisit: {
@@ -192,5 +192,6 @@ export const homeEditorial: Record<string, EditorialSection> = {
       "Testing lock and handle action reveals build quality a spec sheet won't show",
       "Comparing two systems side by side is far easier than switching browser tabs",
     ],
+    tone: "muted",
   },
 };

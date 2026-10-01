@@ -10,6 +10,7 @@ import { QuoteButton } from "@/components/forms/CTAButtons";
 import WorksWellWith from "@/components/WorksWellWith";
 import EditorialSection from "@/components/EditorialSection";
 import { categoryHeading, editorialFor } from "@/lib/categoryEditorial";
+import type { EditorialSection as EditorialSectionData } from "@/lib/homeEditorial";
 
 type Category = ProductCategory;
 type Product = Category["products"][0];
@@ -248,9 +249,18 @@ function CompareTable({ category }: { category: Category }) {
   );
 }
 
-function CategoryFAQ({ category }: { category: Category }) {
+function CategoryFAQ({
+  faqs,
+  heading = "Frequently asked questions.",
+  level = 2,
+}: {
+  faqs: { q: string; a: string }[];
+  heading?: string;
+  level?: 2 | 3 | 4 | 5 | 6;
+}) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-  if (!category.faqs || category.faqs.length === 0) return null;
+  if (faqs.length === 0) return null;
+  const Heading = `h${level}` as "h2" | "h3" | "h4" | "h5" | "h6";
 
   return (
     <section className="py-12 md:py-20 border-t border-gray-100">
@@ -258,13 +268,11 @@ function CategoryFAQ({ category }: { category: Category }) {
         <ScrollReveal>
           <div className="max-w-3xl">
             <p className="text-label text-[#007969] mb-3">Common Questions</p>
-            <h2 className="text-title text-[#1c1c1e] mb-10">
-              Frequently asked questions.
-            </h2>
+            <Heading className="text-title text-[#1c1c1e] mb-10">{heading}</Heading>
           </div>
         </ScrollReveal>
         <div className="max-w-3xl space-y-0">
-          {category.faqs.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <ScrollReveal key={i} delay={i * 0.05}>
               <div className="border-b border-gray-100">
                 <button
@@ -358,9 +366,7 @@ export default function CategoryClient({
         <div className="divider-brand" />
       </div>
 
-      {editorial.beforeProducts?.map((section) => (
-        <EditorialSection key={section.id} section={section} />
-      ))}
+      <EditorialBlocks sections={editorial.beforeProducts} />
 
       <section className="py-12 md:py-20">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
@@ -374,23 +380,19 @@ export default function CategoryClient({
 
       <CompareTable category={category} />
 
-      {editorial.afterCompare?.map((section) => (
-        <EditorialSection key={section.id} section={section} />
-      ))}
+      <EditorialBlocks sections={editorial.afterCompare} />
 
 
       <WorksWellWith categorySlug={category.slug} categories={allCategories} />
 
-      {editorial.afterWorksWellWith?.map((section) => (
-        <EditorialSection key={section.id} section={section} />
-      ))}
+      <EditorialBlocks sections={editorial.afterWorksWellWith} />
 
 
-      <CategoryFAQ category={category} />
-
-      {editorial.afterFaq?.map((section) => (
-        <EditorialSection key={section.id} section={section} />
-      ))}
+      <CategoryFAQ
+        faqs={[...(category.faqs ?? []), ...(editorial.extraFaqs ?? [])]}
+        heading={editorial.faqHeading}
+        level={editorial.faqLevel}
+      />
 
 
       {category.relatedBlogSlugs && category.relatedBlogSlugs.length > 0 && (() => {
@@ -435,6 +437,8 @@ export default function CategoryClient({
         );
       })()}
 
+      <EditorialBlocks sections={editorial.beforeOtherRanges} />
+
       <section className="py-12 md:py-16 bg-[#f8f9fa] border-t border-gray-100">
         <div className="max-w-screen-xl mx-auto px-5 md:px-8 lg:px-10">
           <ScrollReveal>
@@ -456,6 +460,14 @@ export default function CategoryClient({
         </div>
       </section>
 
+      <EditorialBlocks sections={editorial.afterOtherRanges} />
     </>
   );
+}
+
+/** A run of editorial sections, alternating white and grey from the first. */
+function EditorialBlocks({ sections }: { sections?: EditorialSectionData[] }) {
+  return sections?.map((section, i) => (
+    <EditorialSection key={section.id} section={{ ...section, tone: i % 2 === 0 ? "default" : "muted" }} />
+  ));
 }

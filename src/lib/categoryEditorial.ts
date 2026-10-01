@@ -17,8 +17,15 @@ export type CategoryEditorial = {
   afterCompare?: EditorialSection[];
   /** Between "Works well with" and the FAQ. */
   afterWorksWellWith?: EditorialSection[];
-  /** After the FAQ, before "Other product ranges". */
-  afterFaq?: EditorialSection[];
+  /** After the FAQ and related articles, before "Other product ranges". */
+  beforeOtherRanges?: EditorialSection[];
+  /** After "Other product ranges", closing the page. */
+  afterOtherRanges?: EditorialSection[];
+  /** Category-specific questions appended to the Sanity FAQ list. */
+  extraFaqs?: { q: string; a: string }[];
+  /** FAQ heading text and tag level, when a page differs from the default. */
+  faqHeading?: string;
+  faqLevel?: 2 | 3 | 4 | 5 | 6;
 };
 
 /**
@@ -74,7 +81,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Hardened steel hinges keep heavy glass panels aligned through thousands of cycles.",
           "Sealed stainless roller bearings run inside reinforced track channels without jumping.",
         ],
-        tone: "muted",
       },
       {
         id: "aluminium-bi-fold-doors-harnessing-natural-light-for-br",
@@ -90,6 +96,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Maximum light penetration cuts daytime electric lighting needs.",
           "High-transmittance double glazing brightens dark rooms naturally.",
         ],
+        tone: "muted",
       },
       {
         id: "thermal-break-technology-prevents-energy-loss",
@@ -105,7 +112,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Low-E coated double or triple glass blocks direct solar radiation.",
           "Lower heat transfer reduces indoor AC loads and keeps electricity bills manageable.",
         ],
-        tone: "muted",
       },
       {
         id: "level-transitions-with-flush-bottom-tracks",
@@ -121,6 +127,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Integrated sub-sill drainage tracks channel heavy rainwater away from interior floors.",
           "Level floor transitions allow easy stroller, wheelchair, and foot traffic.",
         ],
+        tone: "muted",
       },
       {
         id: "custom-panel-configurations-to-fit-your-floor-plan",
@@ -136,7 +143,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Panels stack neatly to the left, right, or divide across both sides.",
           "Outward-folding options preserve internal floor space and furniture clearance.",
         ],
-        tone: "muted",
       },
       {
         id: "integrated-traffic-doors-for-quick-garden-entry",
@@ -152,6 +158,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Quick entry and exit without unlatching main panel shootbolts.",
           "Main folding panels stay locked, keeping conditioned AC air inside.",
         ],
+        tone: "muted",
       },
       {
         id: "multi-point-shootbolt-locks-ensure-total-peace-of-mind",
@@ -167,7 +174,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Anti-lift track blocks prevent panels from being levered off the frame from outside.",
           "Anti-snap, anti-drill key cylinders stop physical lock manipulation attacks.",
         ],
-        tone: "muted",
       },
       {
         id: "high-performance-gaskets-resist-extreme-wind-and-heavy",
@@ -183,6 +189,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "E900 rated water tightness prevents rain penetration during heavy storms.",
           "Certified structural frames resist severe wind loads up to 2000 Pa.",
         ],
+        tone: "muted",
       },
       {
         id: "tailored-finishes-with-durable-powder-coated-colors",
@@ -198,7 +205,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Dual-color frames let you match dark outdoor profiles with lighter interior trim.",
           "Anodized and wood-grain metallic options offer distinct architectural finishes.",
         ],
-        tone: "muted",
       },
       {
         id: "high-acoustic-insulation-blocks-urban-sound",
@@ -214,6 +220,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Acoustic PVB interlayers absorb high-pitch sound vibrations effectively.",
           "Tight perimeter gasket seals close off tiny air gaps where sound travels.",
         ],
+        tone: "muted",
       },
       {
         id: "why-structural-alloy-outperforms-upvc-and-timber-frames",
@@ -229,7 +236,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Zero frame twisting, expanding, or bowing under 50°C summer heat.",
           "Low maintenance needs compared to timber that requires sanding and varnish.",
         ],
-        tone: "muted",
       },
     ],
 
@@ -298,7 +304,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "bifold-systems-specified-for-gulf-climates-not-generic",
         eyebrow: "Why swiftrooms",
@@ -314,6 +320,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Free site survey, track-leveling checks, and written specs within 24 hours.",
           "Direct technical support for architects, contractors, and project managers.",
         ],
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "How many panels can an aluminium folding door have, and how wide can it span?",
+        a: "Aluminium folding doors are typically configured from 2 to 13 panels, folding inward, outward, or splitting across both sides of the opening, with structural spans running from 1.5 metres up to 12 metres wide. The right configuration depends on the structural opening size and where the parked panels need to sit so they don't block garden seating or interior furniture layouts.",
+      },
+      {
+        q: "Do aluminium bi fold doors need a step or threshold, or can they sit flush with the floor?",
+        a: "They can be mounted flush. Aluminium bi fold doors installed on recessed, sunken tracks sit level with finished floor tiles, removing the step-over that normally separates a kitchen or lounge from an outdoor patio. This also keeps sub-sill drainage channelling rainwater away from the interior floor, so the flush threshold doesn't come at the cost of water ingress.",
+      },
+      {
+        q: "What locking system keeps aluminium folding doors secure across a wide opening?",
+        a: "Aluminium folding doors typically rely on heavy steel shootbolts that extend into the top and bottom tracks when the main handle is lifted, combined with anti-lift track blocks and anti-snap, anti-drill key cylinders on the master leaf. Paired with toughened or laminated glass, this gives a full-width glass opening the same locking integrity as a standard hinged door, which matters most on ground-floor installations.",
       },
     ],
   },
@@ -335,7 +355,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Keeps interior surface temperatures more comfortable to the touch",
           "Works alongside double or triple glazing for compounded benefit",
         ],
-        tone: "muted",
       },
     ],
 
@@ -543,7 +562,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "working-with-an-established-supplier",
         eyebrow: "Why swiftrooms",
@@ -559,6 +578,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Spare parts and hardware availability after installation",
           "Local technical support for servicing and adjustments",
         ],
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "What's the difference between casement and sliding aluminium doors in Dubai?",
+        a: "A casement door hinges open like a traditional door, while a sliding door runs along a track, which suits smaller floor plates where swing space is limited. Aluminium doors Dubai apartment towers specify tend to favour slim-sightline casement or sliding systems for exactly this reason, whereas villa developments more often lean toward pivot or panelled entrances for street presence. The right choice usually comes down to available space and how the opening is used day to day rather than personal preference alone.",
+      },
+      {
+        q: "How does coastal exposure affect aluminium doors in UAE villas?",
+        a: "Coastal humidity and salt air put more strain on hardware and seals than inland heat does on its own, so aluminium doors UAE homeowners install near the coastline need hardware that resists seizing after repeated exposure. We recommend checking gaskets and weather seals before and after summer on any coastal installation, and lubricating locking mechanisms at least twice a year to keep the door operating smoothly through humidity swings.",
+      },
+      {
+        q: "Is a thermally broken frame necessary for every aluminium door in Dubai, or only larger openings?",
+        a: "Thermal break profiles are worth specifying on any aluminium doors Dubai project, not just oversized openings, because heat transfer through the frame adds to cooling load regardless of door size. The benefit compounds when paired with double glazing, and it becomes especially relevant on west-facing or unshaded entrances where surface temperatures climb highest. Smaller standard doors still see a measurable difference in comfort and DEWA consumption once the thermal break is factored in.",
       },
     ],
   },
@@ -579,7 +612,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Occasional soapy water wipe-down handles dust and light surface grime",
           "Hardware (hinges, locks) still needs light annual lubrication regardless of frame material",
         ],
-        tone: "muted",
       },
       {
         id: "how-much-difference-does-upvc-actually-make",
@@ -595,6 +627,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Frame surface stays cooler to the touch even at peak external heat",
           "Reduced heat transfer through the frame lowers AC load on the room",
         ],
+        tone: "muted",
       },
     ],
 
@@ -613,7 +646,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Chamber count affects rigidity as much as insulation value",
           "Cheaper 2–3 chamber frames flex more under wind load over time",
         ],
-        tone: "muted",
       },
       {
         id: "the-steel-you-never-see-is-doing-the-work",
@@ -629,6 +661,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Full-length reinforcement prevents sagging on wider door and window sashes",
           "Corner-only reinforcement is a common shortcut worth asking suppliers about directly",
         ],
+        tone: "muted",
       },
       {
         id: "multi-point-locking-explained-simply",
@@ -644,7 +677,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Ground-floor openings benefit most from the added resistance to forced entry",
           "Locking hardware should be rated separately from the frame's general durability spec",
         ],
-        tone: "muted",
       },
       {
         id: "getting-a-timber-look-without-timber-upkeep",
@@ -660,6 +692,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Dual-colour options allow a different shade inside versus outside",
           "Full RAL colour matching is available beyond standard white and grey",
         ],
+        tone: "muted",
       },
       {
         id: "do-upvc-doors-and-windows-dubai-fade-or-yellow-in-gulf",
@@ -675,7 +708,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "South and west-facing frames take the most cumulative UV exposure",
           "Ask for the manufacturer's UV warranty period, not just a general colour guarantee",
         ],
-        tone: "muted",
       },
       {
         id: "why-fly-screen-channels-are-worth-specifying-upfront",
@@ -691,6 +723,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Far cheaper to specify at order stage than retrofit later",
           "Removable screens still allow full glass cleaning access when needed",
         ],
+        tone: "muted",
       },
       {
         id: "the-seal-matters-as-much-as-the-frame",
@@ -706,7 +739,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Double or triple gasket lines improve both draught and dust resistance",
           "Gasket quality is rarely mentioned in basic quotes, worth asking about directly",
         ],
-        tone: "muted",
       },
       {
         id: "casement-tilt-turn-or-sliding-which-fits-where",
@@ -722,6 +754,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Tilt-turn allows safe ventilation without fully opening the sash",
           "Sliding suits balconies and tight spaces where swing clearance is limited",
         ],
+        tone: "muted",
       },
       {
         id: "where-upvc-actually-saves-money-over-time",
@@ -737,7 +770,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Thermal efficiency can reduce cooling costs in well-insulated rooms",
           "Value comparison should be run over years owned, not just install cost",
         ],
-        tone: "muted",
       },
     ],
 
@@ -806,7 +838,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "upvc-systems-specified-for-gulf-climates",
         eyebrow: "Why swiftrooms",
@@ -823,6 +855,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Free site survey and written specification within 24 hours",
           "Proven track record across residential and commercial projects UAE-wide",
         ],
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "Do uPVC doors in Dubai need steel reinforcement, or is the plastic frame strong enough on its own?",
+        a: "Yes, quality uPVC doors in Dubai are built with a full galvanised steel core running through the main frame and sash sections, not just at the corners, since uPVC on its own isn't rigid enough to hold a large door flat through repeated summer heat cycling. Corner-only reinforcement is a common shortcut worth asking suppliers about directly, as it's usually the difference between a door that stays square and one that starts dragging within two summers.",
+      },
+      {
+        q: "How do uPVC doors Dubai install compared to aluminium on ongoing maintenance?",
+        a: "uPVC doors Dubai buyers choose don't need repainting or resealing across their working life, just an occasional wipe with mild soapy water, whereas aluminium holds its shape better on very large openings but relies on its powder coat to resist fading. The trade-off usually comes down to opening size and sightline priority: uPVC suits bedrooms and secondary elevations well, while aluminium is more often reserved for statement, pool-facing openings.",
+      },
+      {
+        q: "Where should uPVC doors and windows Dubai projects use fly screens, and can they be added later?",
+        a: "Fly screens are far easier to specify upfront than to retrofit, since a channel built into the frame during manufacture sits flush with the sightline, while a screen added afterward tends to look bolted-on. For uPVC doors and windows Dubai suppliers fabricate to order, requesting the integrated channel at order stage keeps the screen removable for glass cleaning without compromising the finished look.",
       },
     ],
   },
@@ -844,7 +890,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Consistent module sizing across long Downtown Dubai or Business Bay elevations",
           "Glass types swapped without reworking the frame",
         ],
-        tone: "muted",
       },
     ],
 
@@ -902,22 +947,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
 
     afterWorksWellWith: [
       {
-        id: "residential-use",
-        eyebrow: "Residential use",
-        heading: "Not Just for Towers",
-        level: 4,
-        body: [
-          "Boutique villas in Emirates Hills, Al Barari and Jumeirah increasingly ask for the same frameless, floor-to-ceiling look as commercial towers, scaled down to a residential setting.",
-          "A well-detailed aluminium glass curtain wall can turn a flat villa elevation into its focal point.",
-        ],
-        points: [
-          "Frameless corner glazing for villa living spaces",
-          "Reduced sightlines compared with standard window systems",
-          "Acoustic upgrades near main roads or flight paths",
-          "Compatible with sliding and pivot door integration",
-        ],
-      },
-      {
         id: "built-for-dubai-s-climate",
         eyebrow: "Local compliance",
         heading: "Built for Dubai's Climate",
@@ -932,7 +961,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Higher corrosion resistance specified for Jumeirah and Palm-area sites",
           "Submission documentation prepared for consultant and authority approval",
         ],
-        tone: "muted",
       },
       {
         id: "getting-the-glazing-right",
@@ -949,6 +977,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Ceramic frit or spandrel panels to mask structure",
           "Tinted or reflective outer glass for glare control on west-facing towers",
         ],
+        tone: "muted",
       },
       {
         id: "one-elevation-several-build-ups",
@@ -965,7 +994,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Acoustic laminated units near busy road frontages",
           "Solar control coatings varied by facade orientation, a core part of any aluminium curtain wall glazing brief",
         ],
-        tone: "muted",
       },
       {
         id: "where-the-cooling-load-comes-from",
@@ -982,6 +1010,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Shadow boxes to mask spandrel zones from view",
           "U-value and SHGC data supplied for Al Sa'fat, Estidama and LEED submissions",
         ],
+        tone: "muted",
       },
       {
         id: "tested-against-real-wind-loads",
@@ -998,7 +1027,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Air and water penetration testing to international standards",
           "Anchor design reviewed against substrate condition on-site",
         ],
-        tone: "muted",
       },
       {
         id: "facade-choices-that-affect-your-rating",
@@ -1015,6 +1043,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Daylighting calculations to support wellbeing credits",
           "End-of-life recyclability of aluminium framing",
         ],
+        tone: "muted",
       },
       {
         id: "built-to-last-not-set-and-forget",
@@ -1031,7 +1060,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Powder coat touch-ups on coastal or Marina-facing elevations",
           "Glass cleaning schedules tailored to building height and dust exposure",
         ],
-        tone: "muted",
       },
       {
         id: "offices-hotels-and-retail-podiums",
@@ -1047,6 +1075,23 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Hotel and hospitality frontages built for visual impact",
           "Retail podiums with larger structural glazing spans",
           "Mixed-use towers blending vision and spandrel zones",
+        ],
+        tone: "muted",
+      },
+      {
+        id: "residential-use",
+        eyebrow: "Residential use",
+        heading: "Not Just for Towers",
+        level: 4,
+        body: [
+          "Boutique villas in Emirates Hills, Al Barari and Jumeirah increasingly ask for the same frameless, floor-to-ceiling look as commercial towers, scaled down to a residential setting.",
+          "A well-detailed aluminium glass curtain wall can turn a flat villa elevation into its focal point.",
+        ],
+        points: [
+          "Frameless corner glazing for villa living spaces",
+          "Reduced sightlines compared with standard window systems",
+          "Acoustic upgrades near main roads or flight paths",
+          "Compatible with sliding and pivot door integration",
         ],
       },
       {
@@ -1084,7 +1129,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    afterOtherRanges: [
       {
         id: "manufacturer-backed-not-just-contractor-built",
         eyebrow: "Why swiftrooms",
@@ -1100,7 +1145,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Free site survey and written specification within 24 hours",
           "Track record across residential and commercial projects across the UAE",
         ],
-        tone: "muted",
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "How long does an aluminium curtain wall installation take on a typical UAE tower?",
+        a: "The programme depends on the build method more than the building height. Stick-built aluminium curtain wall systems take longer on site because every mullion, transom and pane is fitted piece by piece, floor by floor. Unitised aluminium façade systems are pre-glazed off site, so on-site time is largely limited to craning panels into place and sealing joints, which is why unitised builds are usually the faster route on Dubai's tighter handover schedules.",
+      },
+      {
+        q: "Do curtain wall systems need a different specification for coastal versus inland UAE sites?",
+        a: "Yes. An aluminium glass curtain wall facing the coast, such as along Dubai Marina, Palm Jumeirah or Al Reem Island, sits in a harsher corrosion environment than an inland site, so framing typically needs a higher-grade powder coat and closer attention to gasket and drainage detailing. Aluminium façade systems specified for coastal exposure are tested against salt air and higher wind loads, while inland buildings can often work to a standard specification.",
+      },
+      {
+        q: "Can an existing aluminium frame curtain wall be upgraded without replacing the whole facade?",
+        a: "In many cases, yes. Where the structural frame and anchor points are still sound, ageing glass units or gaskets within a curtain wall system can be replaced without stripping the aluminium framing back to the slab edge. This retrofit route is common on older Dubai towers where the original curtain wall meets current wind load standards but the glazing no longer performs to current thermal or Al Sa'fat requirements, a full aluminium façade systems replacement is usually only needed where the frame itself has failed or the building's use has changed.",
       },
     ],
   },
@@ -1141,7 +1199,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Slimmer frames allow more glass per elevation",
           "Lower long-term maintenance than timber or uPVC alternatives",
         ],
-        tone: "muted",
       },
       {
         id: "glass-rooms-dubai-victorian-charm-or-contemporary-lines",
@@ -1158,6 +1215,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Lean-to designs for tighter garden footprints",
           "Custom roof pitch to match the main house",
         ],
+        tone: "muted",
       },
       {
         id: "the-glass-decides-the-comfort-level",
@@ -1174,7 +1232,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Laminated glass options for added security",
           "Tinted roof glazing to soften overhead sun",
         ],
-        tone: "muted",
       },
     ],
 
@@ -1345,7 +1402,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "a-local-team-that-builds-for-this-climate",
         eyebrow: "Why swiftrooms",
@@ -1360,6 +1417,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Free site survey and written specification within 24 hours",
           "Proven track record on garden rooms Dubai villa communities rely on",
         ],
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "What's the difference between a conservatory and a glass room in Dubai?",
+        a: "The terms are often used interchangeably, but the build usually differs. Buyers of a conservatory Dubai tend to follow a Victorian or Edwardian profile with a pitched, sometimes fully glazed roof, while a glass room Dubai villa owners choose today is more likely to be a flat-roof, box-style structure with slimmer aluminium framing and larger single panes. Both sit on the same aluminium platform and can be specified with the same insulated glazing and ventilation package, so the choice comes down to which silhouette suits the main house rather than any difference in performance.",
+      },
+      {
+        q: "Can a garden room in Dubai be used as a home office or gym rather than just a sunroom?",
+        a: "Yes, most garden rooms Dubai clients commission now are built around a specific daily use rather than as a decorative extra. A home office needs strong natural light with glare control, a home gym needs ventilation built into the layout from the outset, and a family lounge or majlis extension needs flush floor levels and sliding or bi-fold doors back into the villa. The layout brief is usually shaped more by how the space will be used than by the exterior style.",
+      },
+      {
+        q: "Is a glass room or conservatory in Dubai suitable for coastal villas?",
+        a: "It can be, but coastal sites need a slightly higher specification than inland ones. A conservatory Dubai villa near the Marina, Palm Jumeirah or a coastal community sees faster wear on seals, hardware and powder-coated aluminium from salt content in the air, so we typically recommend more frequent gasket checks and closer attention to drainage detailing on these builds. Inland glass rooms can generally work to a standard maintenance schedule.",
       },
     ],
   },
@@ -1380,8 +1451,9 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Won't warp, swell, or rot the way timber does in this climate",
           "Outperforms uPVC on large-format panels and heavier daily use",
         ],
-        tone: "muted",
       },
+    ],
+    afterCompare: [
       {
         id: "why-a-slim-frame-still-needs-to-carry-real-weight",
         eyebrow: "Frame engineering",
@@ -1539,7 +1611,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "fabrication-and-installation-matched-to-this-climate",
         eyebrow: "Why swiftrooms",
@@ -1554,6 +1626,30 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Genuine profile stock backed by manufacturer warranty, not grey-market equivalents",
           "After-sales support available once the system is installed and in use",
         ],
+      },
+    ],
+    faqHeading: "Frequently Asked Questions",
+    faqLevel: 5,
+    extraFaqs: [
+      {
+        q: "What makes aluminium a better choice than timber or uPVC for a glass-heavy door?",
+        a: "Aluminium holds a slim, structurally rigid frame around a large glass panel without the swelling, warping, or repainting cycle timber needs, and without the bulk uPVC typically requires to match the same load-bearing capacity.",
+      },
+      {
+        q: "Do aluminium glass doors actually reduce cooling costs?",
+        a: "A thermally broken profile reduces heat transfer through the frame itself, separate from whatever the glazing is doing, the exact saving depends on the rest of the opening's spec, but the frame is contributing rather than working against the glass.",
+      },
+      {
+        q: "Are large glazed doors a security risk compared to a smaller, more traditional door?",
+        a: "Not if the locking hardware is specified correctly. Multi-point locking and laminated or toughened glazing give a large glazed opening resistance comparable to a smaller door, the glass area itself isn't the deciding factor.",
+      },
+      {
+        q: "Which door format suits a rear garden or patio opening best?",
+        a: "Sliding and bi-fold formats generally suit wide rear elevations best, since they open the wall up fully rather than requiring swing clearance, a hinged or pivot format tends to work better as a front entrance statement instead.",
+      },
+      {
+        q: "How much maintenance do aluminium doors need in the UAE?",
+        a: "Less than timber, but not zero. A seasonal routine covering track cleaning, seal inspection before summer, and hardware lubrication keeps most issues from becoming a service call, with coastal properties needing a slightly tighter schedule.",
       },
     ],
   },
@@ -1594,7 +1690,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Aluminium windows: low swing clearance, space-efficient",
           "Fixed lights: combined with any of the above for larger openings",
         ],
-        tone: "muted",
       },
       {
         id: "profile-systems",
@@ -1611,6 +1706,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Factory warranty carried through to the UAE installation",
           "Wide finish range without compromising structural spec",
         ],
+        tone: "muted",
       },
     ],
 
@@ -1630,7 +1726,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "New-build towers: slim sightlines prioritised over ornamentation",
           "Inland villas: dust and sand sealing given more weight",
         ],
-        tone: "muted",
       },
       {
         id: "thermal-performance",
@@ -1647,6 +1742,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Double glazing standard, triple glazing available on request",
           "Solar control coatings reduce glare without darkening the room",
         ],
+        tone: "muted",
       },
       {
         id: "security-standards",
@@ -1663,7 +1759,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Restrictor stays for controlled partial opening",
           "Key-locking handles compatible with most profile systems",
         ],
-        tone: "muted",
       },
       {
         id: "finishes",
@@ -1680,6 +1775,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Anthracite and matte black now the most requested tones",
           "Dual-tone options, different interior and exterior colours",
         ],
+        tone: "muted",
       },
       {
         id: "commercial-projects",
@@ -1696,7 +1792,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Matched profile families across window and curtain wall",
           "Acoustic glazing options for street-facing commercial units",
         ],
-        tone: "muted",
       },
       {
         id: "upkeep",
@@ -1713,6 +1808,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Hardware lubrication twice yearly on sliding and hinged systems",
           "Coastal properties benefit from more frequent gasket checks",
         ],
+        tone: "muted",
       },
       {
         id: "from-survey-to-fit",
@@ -1729,7 +1825,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Pre-assembly completed off-site to reduce installation time",
           "Bespoke sizes and finishes extend standard lead times",
         ],
-        tone: "muted",
       },
       {
         id: "pricing",
@@ -1746,6 +1841,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Opening mechanism – sliding generally lower cost than hinged",
           "Custom colours and oversized openings priced separately",
         ],
+        tone: "muted",
       },
       {
         id: "specification-mistakes",
@@ -1762,7 +1858,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Underestimating lead time on bespoke sizes or finishes",
           "Skipping a proper site survey before ordering",
         ],
-        tone: "muted",
       },
       {
         id: "windows-technical-check",
@@ -1779,10 +1874,11 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Guidance on matching windows with existing or planned doors",
           "Support for single-unit replacements through to full developments",
         ],
+        tone: "muted",
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "windows-why-swiftrooms",
         eyebrow: "Why Swiftrooms",
@@ -1798,7 +1894,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "In-house technical support for architects and consultants",
           "Track record across villas, towers and commercial fit-outs UAE-wide",
         ],
-        tone: "muted",
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "Why do so many UAE architects specify Cortizo windows by name rather than a generic aluminium profile?",
+        a: "Cortizo windows are extruded in Spain to European certification standards, so profile depth and thermal break performance stay consistent run after run, which matters once a frame has faced several years of direct Gulf sun. That consistency is why Cortizo windows come up early in technical conversations on architect-led jobs across the UAE, rather than being swapped in later as a lower-cost substitute.",
+      },
+      {
+        q: "Is there a difference in how aluminium windows are specified in Sharjah compared with Dubai?",
+        a: "Aluminium windows Sharjah enquiries more often involve retrofit work on older low-rise buildings than new-build villas, so the brief tends to focus on frame replacement without disturbing existing openings and on sealing against dust rather than sightline aesthetics. Dubai's mix of new-build towers and villa renovations means aluminium windows uae buyers there are just as likely to be prioritising slim sightlines as retrofit practicality.",
+      },
+      {
+        q: "Do aluminium windows UAE buildings use need a different spec for coastal versus inland sites?",
+        a: "Yes. Coastal sites are typically specified with higher corrosion resistance and more frequent hardware checks, since salt air wears seals and fittings faster than inland dust exposure does. Inland villas usually put more weight on dust and sand sealing in the track channels instead, so the two briefs diverge even when the same aluminium windows uae profile family, including Cortizo windows, is used on both.",
       },
     ],
   },
@@ -1868,7 +1977,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "The 4700 series is built for larger villa openings and heavier panel weights.",
           "Genuine Cortizo profiles carry factory certification, unlike re-badged extrusions.",
         ],
-        tone: "muted",
       },
       {
         id: "material-strength",
@@ -1884,6 +1992,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Reinforced steel inserts sit inside the aluminium where loads concentrate.",
           "Tighter manufacturing tolerances are the real reason slim systems cost more.",
         ],
+        tone: "muted",
       },
       {
         id: "large-format-glazing",
@@ -1899,7 +2008,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Panel weights above 300kg typically call for motorised or lift-assist tracks.",
           "Wider spans need a structural engineer to confirm lintel capacity beforehand.",
         ],
-        tone: "muted",
       },
       {
         id: "supplier-due-diligence",
@@ -1915,6 +2023,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Confirm whether warranty coverage is backed by the manufacturer or just the installer.",
           "Request an on-site survey before any quote, measurements on paper aren't reliable.",
         ],
+        tone: "muted",
       },
     ],
 
@@ -1933,7 +2042,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Dust-rated gaskets stop fine sand ingress that jams standard seals over time.",
           "Solar-control coatings reduce glare and heat without visibly tinting the glass.",
         ],
-        tone: "muted",
       },
       {
         id: "glass-specifications",
@@ -1949,6 +2057,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Acoustic interlayers cut traffic and neighborhood noise more than glass thickness alone.",
           "Triple glazing adds cost and weight, usually only justified on high-noise plots.",
         ],
+        tone: "muted",
       },
       {
         id: "panoramic-visions",
@@ -1964,7 +2073,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Fewer interlocks across a run means a cleaner, wider sightline outward.",
           "Best suited to elevations with a genuine view worth preserving unobstructed.",
         ],
-        tone: "muted",
       },
       {
         id: "system-mechanics",
@@ -1980,6 +2088,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Better compression seal means improved weather resistance in exposed elevations.",
           "Handle action is heavier, worth testing in a showroom before committing.",
         ],
+        tone: "muted",
       },
       {
         id: "hardware-and-tracks",
@@ -1995,7 +2104,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Stainless steel resists the corrosion risk from coastal humidity better than mild steel.",
           "Track cleaning twice a year prevents most of the sticking complaints we see.",
         ],
-        tone: "muted",
       },
       {
         id: "perimeter-protection",
@@ -2011,6 +2119,7 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Multi-point locking distributes force across several anchor points, not just the handle.",
           "Laminated glass options add a physical barrier beyond the lock itself.",
         ],
+        tone: "muted",
       },
       {
         id: "before-you-finalise-drawings",
@@ -2026,7 +2135,6 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Lintel height must clear the head track plus any curtain box allowance.",
           "Drainage falls need checking on ground-floor openings facing exposed gardens.",
         ],
-        tone: "muted",
       },
       {
         id: "warranty-and-aftercare",
@@ -2042,10 +2150,11 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Keep the original specification sheet for any future servicing or matching work.",
           "Annual roller and track servicing extends functional life well beyond the warranty period.",
         ],
+        tone: "muted",
       },
     ],
 
-    afterFaq: [
+    beforeOtherRanges: [
       {
         id: "why-swiftrooms",
         eyebrow: "Why Swiftrooms",
@@ -2062,7 +2171,20 @@ export const categoryEditorial: Record<string, CategoryEditorial> = {
           "Free on-site survey, threshold-leveling assessment, and written technical spec within 24 hours",
           "Dedicated in-house technical support for architects, consultants, and contractors",
         ],
-        tone: "muted",
+      },
+    ],
+    extraFaqs: [
+      {
+        q: "When should a project use large sliding glass doors instead of a standard multi-panel run?",
+        a: "Large sliding glass doors, fewer and bigger panels rather than a run split into narrow sections, tend to suit rear elevations wider than eight metres, since they let in more light and leave fewer visible frame joints across the view. The trade-off is weight: panels above roughly 300kg usually need motorised or lift-assist tracks, and a structural engineer should confirm lintel capacity before the opening is finalised.",
+      },
+      {
+        q: "What should I check before choosing between aluminium sliding door suppliers in the UAE?",
+        a: "Ask for written proof of authorised distributor status rather than relying on a logo on the website, since grey-market profiles look identical to genuine stock until a warranty claim gets rejected a couple of years in. It's also worth confirming whether warranty coverage is backed by the manufacturer or only by the installer, and insisting on an on-site survey before any quote, since paper measurements rarely match what's actually on site.",
+      },
+      {
+        q: "What glass and gasket spec should sliding doors UAE villas use compared to a system designed for Europe?",
+        a: "Sliding doors UAE buyers choose need a thermal break sized for sustained 45–50°C exterior heat rather than European averages, along with dust-rated gaskets that stop fine airborne sand from jamming standard seals over time. Skipping either usually shows up within a year as sticking tracks or a rise in AC running costs, and that mistake gets more expensive the larger the installation.",
       },
     ],
   },
