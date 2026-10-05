@@ -190,12 +190,15 @@ export const mediaStore = {
       await res.body?.cancel();
       return { record, outcome: "not_uploaded" };
     }
+    // A 0-byte object can't satisfy "bytes=0-63", so Storage answers 416:
+    // the object exists but is empty — rejected below as empty_file.
+    const empty = res.status === 416;
     if (!res.ok) {
       await res.body?.cancel();
-      throw new SupabaseError(`Storage read failed: ${res.status}`, res.status);
+      if (!empty) throw new SupabaseError(`Storage read failed: ${res.status}`, res.status);
     }
-    const head = new Uint8Array(await res.arrayBuffer());
-    const total = Number(res.headers.get("content-range")?.split("/")[1] ?? head.byteLength);
+    const head = empty ? new Uint8Array() : new Uint8Array(await res.arrayBuffer());
+    const total = empty ? 0 : Number(res.headers.get("content-range")?.split("/")[1] ?? head.byteLength);
 
     const kind = TYPE_TO_KIND[record.mediaType];
     let reason: string | null = null;
