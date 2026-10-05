@@ -17,6 +17,7 @@ import {
   type ServiceRequestErrorResponse,
 } from "./api-contract";
 import { normaliseMimeType } from "./media";
+import { describeMediaRejection } from "./media-errors";
 import {
   MediaUploadError,
   ServiceRequestSubmitError,
@@ -55,7 +56,10 @@ async function mediaError(res: Response): Promise<MediaUploadError> {
   if (res.status === 409 && body?.error === "media_limit_reached") {
     return new MediaUploadError("limit", "This request already has the maximum number of files.");
   }
-  if (res.status === 422) return new MediaUploadError("rejected", Object.values(body?.fields ?? {})[0] ?? "This file can't be accepted.");
+  if (res.status === 422) {
+    const { message, code } = describeMediaRejection(body);
+    return new MediaUploadError("rejected", message, code);
+  }
   return new MediaUploadError("server", body?.message ?? `HTTP ${res.status}`);
 }
 
@@ -177,6 +181,7 @@ export const httpServiceRequestClient: ServiceRequestClient = {
       mediaId: m.id,
       clientMediaId: m.clientMediaId,
       status: m.uploadStatus,
+      failureReason: m.failureReason,
       fileName: m.fileName,
       kind: m.kind,
       size: m.size,

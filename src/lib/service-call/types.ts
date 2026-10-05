@@ -152,6 +152,8 @@ export class MediaUploadError extends Error {
   constructor(
     public readonly kind: MediaErrorKind,
     message: string,
+    /** Internal reason from the server (e.g. content_does_not_match_type) — for debugging, never shown. */
+    public readonly code?: string,
   ) {
     super(message);
     this.name = "MediaUploadError";
@@ -204,5 +206,5 @@ export interface ServiceRequestClient {
   /** Removes a registered file (storage object and record). Safe to repeat. */
   removeMedia(receipt: ServiceRequestReceipt, mediaId: string): Promise<void>;
   /** The request's files as the server knows them (recovery after a refresh). */
-  listMedia(receipt: ServiceRequestReceipt): Promise<{ mediaId: string; clientMediaId: string; status: "PENDING" | "UPLOADED" | "FAILED"; fileName: string | null; kind: ServiceMediaKind; size: number }[]>;
+  listMedia(receipt: ServiceRequestReceipt): Promise<{ mediaId: string; clientMediaId: string; status: "PENDING" | "UPLOADED" | "FAILED"; failureReason: string | null; fileName: string | null; kind: ServiceMediaKind; size: number }[]>;
 }

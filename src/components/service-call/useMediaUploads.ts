@@ -15,6 +15,8 @@ import {
   type UploadState,
 } from "@/lib/service-call/upload-session";
 import { MediaUploadError, type ServiceMedia, type ServiceRequestReceipt } from "@/lib/service-call/types";
+import { mediaFailureMessage } from "@/lib/service-call/media-errors";
+import { matchLostEntries } from "@/lib/service-call/upload-recovery";
 import type { UploadRow } from "./steps/UploadStep";
 
 const CONCURRENCY = 2;
@@ -26,6 +28,8 @@ interface Entry extends StoredUploadItem {
   /** The file is still in memory (false after a refresh). */
   hasFile: boolean;
   previewUrl?: string;
+  /** Interrupted by a refresh; replaced when the customer adds the same file again. */
+  lost?: boolean;
 }
 
 const errorText = (err: unknown) => {
@@ -130,9 +134,16 @@ export function useMediaUploads() {
     (items: ServiceMedia[]) => {
       if (!items.length) return;
       for (const m of items) files.current.set(m.id, m);
-      setOrder((o) => [...o, ...items.map((m) => m.id)]);
+      // A file added again after a refresh takes the place of its lost entry.
+      const replaces = matchLostEntries(Object.values(entriesRef.current), items);
+      const replacedBy = new Map([...replaces].map(([newId, oldId]) => [oldId, newId]));
+      setOrder((o) => [
+        ...o.map((id) => replacedBy.get(id) ?? id),
+        ...items.filter((m) => !replaces.has(m.id)).map((m) => m.id),
+      ]);
       {
         const next = { ...entriesRef.current };
+        for (const oldId of replacedBy.keys()) next[oldId] = { ...next[oldId], state: "REMOVED", lost: false };
         for (const m of items) {
           next[m.id] = {
             id: m.id,
@@ -181,14 +192,19 @@ export function useMediaUploads() {
     } catch {
       // Upload window closed or offline: show what we remember.
     }
-    const uploaded = new Map(server.filter((m) => m.status === "UPLOADED").map((m) => [m.clientMediaId, m]));
+    const byClientId = new Map(server.map((m) => [m.clientMediaId, m]));
     const next: Record<string, Entry> = {};
     for (const item of session.items) {
       if (item.state === "REMOVED") continue;
-      const done = uploaded.get(item.id);
-      next[item.id] = done
-        ? { ...item, state: "UPLOADED", mediaId: done.mediaId, progress: 1, retryable: false, hasFile: false }
-        : { ...item, state: "FAILED", progress: 0, error: "Not uploaded before the page reloaded — add it again below.", retryable: false, hasFile: false };
+      const known = byClientId.get(item.id);
+      if (known?.status === "UPLOADED") {
+        next[item.id] = { ...item, state: "UPLOADED", mediaId: known.mediaId, progress: 1, retryable: false, hasFile: false };
+      } else if (known?.status === "FAILED") {
+        // Rejected by the server (e.g. wrong content): still missing, but adding it again won't help.
+        next[item.id] = { ...item, state: "FAILED", progress: 0, error: mediaFailureMessage(known.failureReason), retryable: false, hasFile: false };
+      } else {
+        next[item.id] = { ...item, state: "FAILED", progress: 0, error: "Not uploaded before the page reloaded — add it again below.", retryable: false, hasFile: false, lost: true };
+      }
     }
     commit(next);
     setOrder(Object.keys(next));
