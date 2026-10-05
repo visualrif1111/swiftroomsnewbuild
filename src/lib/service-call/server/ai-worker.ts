@@ -11,12 +11,16 @@ import type { AiRun, AiRunStore, AiRunTrigger, EnqueueOutcome } from "../ai/run-
 import type { ServiceAiProvider } from "../ai/provider";
 import { AI_LIMITS, isServiceAiEnabled, resolveServiceAiProvider, type ProviderResolution } from "./ai-config";
 import { supabaseAiStore } from "./ai-store";
+import { normaliseImage } from "./image-normaliser";
+import type { ImageNormaliser } from "../ai/provider";
 
 export interface WorkerDeps {
   store: AiRunStore;
   /** The configured provider, or why there isn't one (fail closed). */
   provider: ServiceAiProvider | ProviderResolution;
   readMedia: (mediaId: string) => Promise<Uint8Array>;
+  /** Photo derivative builder; defaults to the sharp-based normaliser. */
+  normaliseImage?: ImageNormaliser;
   enabled: () => boolean;
 }
 
@@ -78,7 +82,12 @@ export async function runAiWorker(limit: number, deps: WorkerDeps = defaultDeps(
   const runs = await deps.store.claim(worker, AI_LIMITS.leaseSeconds, Math.max(0, Math.min(limit, 10)));
   const results: RunOutcome[] = [];
   for (const run of runs) {
-    results.push(await processRun(run, { store: deps.store, provider: resolved.provider, worker, leaseSeconds: AI_LIMITS.leaseSeconds, readMedia: deps.readMedia }));
+    results.push(
+      await processRun(run, {
+        store: deps.store, provider: resolved.provider, worker, leaseSeconds: AI_LIMITS.leaseSeconds,
+        readMedia: deps.readMedia, normaliseImage: deps.normaliseImage ?? normaliseImage,
+      }),
+    );
   }
   return { enabled: true, results };
 }

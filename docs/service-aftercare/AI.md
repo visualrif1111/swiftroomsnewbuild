@@ -9,10 +9,12 @@ customer.
 > - **Phase 4A:** foundation (queue, leases, versioned reports, validation, privacy boundary).
 > - **Phase 4B:** voice transcription with OpenAI.
 > - **Phase 4C:** report synthesis from the customer's text and voice
->   transcripts (OpenAI Responses API, strict schema `scr-1.1`).
+>   transcripts (OpenAI Responses API, strict schema).
+> - **Phase 4D:** photo evidence analysis. One photo per vision call; validated
+>   observations are injected into the report by the server (`scr-1.2`).
 >
-> Photos and video are **not analysed** yet (4D/4E), so reports describe only
-> what the customer said. Reports are internal: nothing is shown to customers.
+> Video is **not analysed** yet (4E). HEIC/HEIF photos are skipped (no
+> decoder). Reports are internal: nothing is shown to customers.
 > AI is **off in every deployed environment** (`SERVICE_AI_ENABLED` unset).
 > The deterministic stub remains for tests and local work.
 
@@ -262,6 +264,97 @@ transcripts (cached) + description + selections
 
 A request with photos or video is therefore **PARTIAL** in 4C.
 
+## Photo analysis (Phase 4D)
+
+```
+per PHOTO (cached per input hash; ONE photo per vision call):
+  original bytes (service role, server-side) → sha256 → exact duplicate in this request? → SKIPPED (PHOTO_DUPLICATE)
+  → normalise in memory (server/image-normaliser.ts, sharp):
+      HEIC/HEIF (by type or content) → SKIPPED image_format_not_supported   (no decoder, by decision)
+      corrupt → FAILED image_unreadable    header > 100 MP → FAILED image_too_large_to_process
+      EXIF orientation applied → sRGB → fit ≤ 1536 px → flatten on white → fresh JPEG q82, NO metadata
+      near-uniform pixels → SKIPPED image_blank
+  → POST /v1/responses: observe-v1 instructions + {"photo":"Photo n","productCategoriesSelectedByCustomer":[…]} + input_image (data URL, detail "high")
+       strict json_schema "photo_observation_po_1", store:false, low reasoning, ≤ 3,000 output tokens
+  → validate po-1 → fail → ONE corrective attempt (rule codes only) → fail → FAILED invalid_observation
+  → service_media_analyses COMPLETED { schema:"po-1", photo, observations, cannotDetermine, derivative:{width,height,bytes,sha256,normaliser}, sourceSha256 }
+report synthesis: server injects the validated observations as content.mediaObservations (ob-1…, evidence = that photo);
+  the report model receives them as structured data only (never the photograph) and may only reference their ids.
+```
+
+| | |
+|---|---|
+| Sent to the vision model | One in-memory **derivative** (JPEG, ≤ 1536 px on the long edge, no EXIF/GPS/XMP/IPTC/ICC), a neutral label ("Photo 2") and the selected product categories. **Never** the original file, its file name, the customer's description, contact details, references, media ids, storage paths or URLs. |
+| Derivatives | **Memory only.** Never stored. The analysis records width, height, bytes, SHA-256 and normaliser version (`img-1`), plus the original's SHA-256, so the derivative can be rebuilt exactly. The **original private upload remains the authoritative evidence.** |
+| Model | `gpt-6.1-sol` by default (`SERVICE_AI_MODEL_VISION`). Reasoning effort is shared with synthesis (`SERVICE_AI_REPORT_REASONING`, default `low`). |
+| Versions | Observe prompt `openai-observe-1` (`ai/prompts/observe-v1.ts`). The per-photo cache key covers media id, verified size, `IMAGE_OBSERVATIONS`, provider, vision model and **`openai-observe-1/img-1`** (prompt plus normaliser version). Each report records `observePromptVersion` and `observePromptHash`. Report prompt `openai-report-2`, pipeline `4d.1`. |
+| Formats | **Analysed:** JPEG, PNG, WebP. **SKIPPED:** HEIC/HEIF, recognised by MIME type or by content (`ftyp` brand), never converted (future media-normalisation enhancement). |
+| Dependency | `sharp` (direct dependency since 4D; already used by Next.js). It is traced into the AI route bundles. |
+
+### Photo observation `po-1`
+
+The vision model returns:
+- `photo.quality` (`CLEAR` / `LIMITED` / `UNUSABLE`) and `photo.qualityIssues[]`;
+- `photo.relevance` (`RELEVANT` / `UNCLEAR` / `NOT_RELEVANT`);
+- `photo.visibleProductTypes[]`;
+- `photo.visibleTextPresent` and `photo.personalInfoVisible` (flags only);
+- `observations[]` (at most 8): `type`, `observation` (≤ 300 chars), `certainty`, `location`;
+- `cannotDetermine[]` (at most 5).
+
+**There are no media ids or labels in it.** The server attaches the identity
+of the one photo in the call, so an observation can't be attributed to
+another photo.
+
+Validation is deterministic and fails closed:
+- **Structure:** strict shape and closed vocabularies.
+- **Shared forbidden-claim rules**, plus **causation** ("caused by", "due to",
+  "because of", …).
+- **Photo-only conclusion rule:** any mention of warranty; a failed, defective
+  or faulty component named as such; repair or replacement needed; an
+  installation or manufacturing fault; customer-caused damage; wear and tear.
+- **Hedging** required unless certainty is CLEAR.
+- **No transcribed text:** quoted runs of 15 or more characters are rejected,
+  so text inside an image stays data.
+- **No descriptions of people.**
+- An UNUSABLE or NOT_RELEVANT photo can only carry `NOTHING_NOTABLE_VISIBLE`.
+- Size limits.
+
+Refusal, content filter or a 400 from the provider on a photo: **that photo**
+FAILS and the report continues. Timeouts, 429 and 5xx requeue the run;
+completed photos stay cached.
+
+### Report integration (`scr-1.2`)
+
+- `content.mediaObservations` is **written by the server** from validated
+  `po-1` results, as `"<location>: <observation>"`. The model's own
+  `mediaObservations` must be `[]` (schema `maxItems: 0`); anything else is
+  rejected (`must_be_server_provided`).
+- References to observations (`basedOnRefs`, urgency `refs`) must resolve to
+  injected ids.
+- Customer statements still need verbatim quotes from the description or
+  transcripts, so a **photo observation can never become a customer
+  statement**.
+- Customer versus photo conflicts keep both, plus **`EVIDENCE_DISCREPANCY`**
+  (new). `CONFLICTING_CUSTOMER_INFORMATION` stays for customer versus customer.
+- New server-owned `photoAssessments[]`: quality, issues, relevance, visible
+  product types, text and PII flags, `cannotDetermine`.
+- New notices: `PHOTO_LIMITED_QUALITY`, `PHOTO_NOT_RELEVANT`,
+  `PHOTO_DUPLICATE`, `PHOTO_BLANK` (plus `NOT_ANALYSED`).
+- Confidence is still ≤ MEDIUM. A request with video is PARTIAL (4E).
+- A request first reported in 4C (text only) qualifies for an automatic new
+  version under 4D versions (within 72 h and the run cap), or a manual
+  reprocess. The 4C report stays immutable.
+
+### Residual risks
+
+- Visual hallucination can't be eliminated deterministically. It is mitigated
+  by one photo per call, hedging and certainty rules, the no-cause and
+  no-diagnosis rules, the LIKELY limits, the confidence cap and human review.
+- **Personal data inside photos** (faces, documents, house numbers) is only
+  flagged, not redacted.
+- Image inputs can be retained by OpenAI for abuse review in rare cases, even
+  under Modified Abuse Monitoring (HANDOFF.md).
+
 ## Code
 
 | Path | Role |
@@ -364,7 +457,7 @@ When disabled:
 
 It is **unset in every environment** today. Production must stay disabled until the launch decisions in [HANDOFF.md](./HANDOFF.md) are made.
 
-## Service Call Report (`scr-1.1`)
+## Service Call Report (`scr-1.2`)
 
 Stored as `service_ai_reports.ai_report`. It has two layers:
 
@@ -374,7 +467,9 @@ Stored as `service_ai_reports.ai_report`. It has two layers:
 - `mediaSummary`;
 - `transcripts[]` (machine-generated, shown with the original recording);
 - `safetyFlags[]`: a deterministic keyword net over the customer's own words, independent of the AI;
-- `evidenceNotices[]` (scr-1.1): fixed-wording notices about the evidence.
+- `evidenceNotices[]` (scr-1.1): fixed-wording notices about the evidence;
+- `photoAssessments[]` (scr-1.2): per analysed photo;
+- `content.mediaObservations` (scr-1.2): written by the server from validated photo analysis.
 
 Version, provider, models, prompt/pipeline versions, fingerprint and timestamps are columns.
 
@@ -479,6 +574,9 @@ There are no review endpoints yet: "reviewer" needs real staff identities, which
 | `ai-report-json-schema.test.mjs` | Strict-schema compliance and parity with the validator; fixtures conform |
 | `ai-synthesis-validation.test.mjs` | Quote provenance, normalisation, text-only phase rules, confidence cap, advisory transcript uncertainty, contradictions, liability/eligibility claims, size |
 | `ai-openai-synthesis.test.mjs` | Responses request (exact fields, strict schema, `store:false`, no PII), corrective message carries rule codes only, parsing (refusal, content filter, incomplete, non-JSON), error mapping, configurable model |
+| `ai-image-normaliser.test.mjs` | Real `sharp`: EXIF/GPS/ICC removal (byte-level), orientation, 1536 px bound, sRGB and alpha, HEIC skip (type and content), corrupt, decompression bomb, blank |
+| `ai-photo-observation.test.mjs` | `po-1` strict schema (no media-id field), hedging, diagnosis, causation, repair, warranty and fault rules, no transcribed text, no people, unusable/irrelevant consistency, sizes |
+| `ai-photo-pipeline.test.mjs` | End-to-end 4D matrix (30 cases): attribution, one image per call, contradiction (`EVIDENCE_DISCREPANCY`), ambiguous, irrelevant, blank/corrupt/HEIC/bomb (no call), downscale and orientation, no EXIF in what is sent, visible text and PII flags, duplicates, image prompt injection, report can't invent/alter/misattribute observations, no image in report calls, provider failures, cache and reprocess, v2 after a 4C v1, lifecycle, PII, kill switch |
 | `ai-synthesis-pipeline.test.mjs` | End-to-end 4C matrix over real SQL: text, voice, text and voice, possibly incomplete, contradiction, vague, urgent, failed audio, no text, multilingual, prompt injection, hallucination, forbidden claims, refusal/incomplete/non-JSON, timeouts and 429/5xx, 401/400, idempotency, reprocess, 4B upgrade, prompt-version split, lifecycle, PII |
 | `ai-transcription-pipeline.test.mjs` | Transcription through the pipeline and real SQL: caching, repeated finalize, reprocess reuse, retry vs permanent, SKIPPED formats, run-wide errors, no PII sent, request untouched, kill switch, fail-closed |
 
@@ -489,7 +587,7 @@ verified against the Development database. PGlite has one connection.
 
 - **4B** ✅ voice transcription.
 - **4C** ✅ report synthesis (text and voice).
-- **4D**: photos (HEIC, EXIF stripping, observations).
+- **4D** ✅ photo analysis (HEIC deferred).
 - **4E**: video (frames plus audio).
 - **4F**: evaluation set, cost controls and reliability.
 

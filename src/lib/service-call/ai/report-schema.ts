@@ -1,9 +1,13 @@
-// Service Call Report — schema "scr-1.1" (Phase 4, docs/service-aftercare/AI.md).
+// Service Call Report — schema "scr-1.2" (Phase 4, docs/service-aftercare/AI.md).
 //
 // scr-1.1 (Phase 4C) is scr-1 plus: a verbatim `quote` on every customer
 // statement (checked against the source the model was given), the
 // CONFLICTING_CUSTOMER_INFORMATION unknown topic, and server-owned
 // `evidenceNotices`.
+// scr-1.2 (Phase 4D) adds photo evidence: `mediaObservations` are written by
+// the server from validated per-photo analysis (the report model may only
+// reference them), the EVIDENCE_DISCREPANCY topic (customer vs photo), the
+// server-owned `photoAssessments`, and photo evidence-notice codes.
 //
 // A report has two layers:
 //   - server-owned facts (processing coverage, media counts, transcripts,
@@ -18,7 +22,7 @@
 // No vendor types: this file is shared by the pipeline, validators and tests.
 import type { ServiceProductId } from "../types";
 
-export const REPORT_SCHEMA_VERSION = "scr-1.1";
+export const REPORT_SCHEMA_VERSION = "scr-1.2";
 
 export const PRODUCT_IDS: readonly ServiceProductId[] = [
   "window", "sliding-door", "bi-fold-door", "entrance-door", "glass",
@@ -42,6 +46,9 @@ export const OBSERVATION_TYPES = [
 
 export const CERTAINTIES = ["CLEAR", "PROBABLE", "UNCERTAIN"] as const;
 
+/** The only observation type an unusable or irrelevant photo may carry (po-1). */
+export const HEDGE_TYPES_ALLOWED_WHEN_UNUSABLE: readonly ObservationType[] = ["NOTHING_NOTABLE_VISIBLE"];
+
 export const UNKNOWN_TOPICS = [
   "COMPONENT_FAILURE",
   "CAUSE",
@@ -53,6 +60,8 @@ export const UNKNOWN_TOPICS = [
   "SAFETY_CONFIRMATION",
   /** Customer information disagrees (e.g. typed vs spoken). Never resolved by the AI. */
   "CONFLICTING_CUSTOMER_INFORMATION",
+  /** Customer-reported information disagrees with a photo observation (scr-1.2). Never resolved by the AI. */
+  "EVIDENCE_DISCREPANCY",
   "OTHER",
 ] as const;
 
@@ -193,7 +202,27 @@ export interface ServiceCallReportContent {
 
 // ─── Server-owned envelope (stored as service_ai_reports.ai_report) ──────────
 
-export type EvidenceNoticeCode = "TRANSCRIPT_MAY_BE_INCOMPLETE" | "NO_SPEECH_DETECTED" | "NOT_ANALYSED";
+export type EvidenceNoticeCode =
+  | "TRANSCRIPT_MAY_BE_INCOMPLETE"
+  | "NO_SPEECH_DETECTED"
+  | "NOT_ANALYSED"
+  | "PHOTO_LIMITED_QUALITY"
+  | "PHOTO_NOT_RELEVANT"
+  | "PHOTO_DUPLICATE"
+  | "PHOTO_BLANK";
+
+/** Server-owned summary of one analysed photo (scr-1.2), from its validated po-1 result. */
+export interface PhotoAssessment {
+  mediaId: string;
+  label: string;
+  quality: "CLEAR" | "LIMITED" | "UNUSABLE";
+  qualityIssues: string[];
+  relevance: "RELEVANT" | "UNCLEAR" | "NOT_RELEVANT";
+  visibleProductTypes: string[];
+  visibleTextPresent: boolean;
+  personalInfoVisible: boolean;
+  cannotDetermine: string[];
+}
 
 export type MediaCoverageOutcome = "ANALYSED" | "SKIPPED" | "FAILED";
 export type EvidenceType = "PHOTO" | "VIDEO" | "VOICE";
@@ -215,5 +244,7 @@ export interface ServiceCallReport {
    * a file not analysed in this phase. Advisory — never proof of anything.
    */
   evidenceNotices: { mediaId: string; label: string; code: EvidenceNoticeCode; message: string }[];
+  /** One entry per analysed photo (scr-1.2). */
+  photoAssessments: PhotoAssessment[];
   content: ServiceCallReportContent;
 }

@@ -237,9 +237,9 @@ placeholders labelled `[STUB]`.
 
 - `aiStatus` is `NOT_STARTED` when there are no runs, otherwise the latest run's status.
 - `runs[]`: number, trigger, status, attempts, versions, provider/models, error code and detail, usage, timestamps. Lease owners are omitted.
-- `reports[]`: every version, with `aiReport` (schema `scr-1.1` since 4C, with verbatim statement quotes and `evidenceNotices`), provenance (`models` includes `report`, `reportPromptVersion`, `reportPromptHash`) and review fields.
+- `reports[]`: every version, with `aiReport` (schema `scr-1.2` since 4D: verbatim statement quotes, `evidenceNotices`, server-injected photo `mediaObservations`, `photoAssessments`), provenance (`models` includes `report`, `vision`, the prompt versions and hashes) and review fields.
 - `aiProvider`: `{ "id": "openai", "models": { … } }` or `{ "id": null, "problem": "openai_key_missing" }`. Never a key.
-- `mediaAnalyses[]` (Phase 4B): cached per-file results, newest first: `mediaId`, `kind` (`TRANSCRIPT`…), `status`, `provider`, `model`, `promptVersion`, `language`, `transcript`, `result` (`{ languages, noSpeechDetected, completeness }`; `completeness.possiblyIncomplete` means "may be incomplete", AI.md), `errorCode`, `usage`, `inputHash`, `runId`, timestamps. Derived data; the original audio remains the source record.
+- `mediaAnalyses[]` (Phase 4B): cached per-file results, newest first: `mediaId`, `kind` (`TRANSCRIPT`…), `status`, `provider`, `model`, `promptVersion`, `language`, `transcript`, `result` (`{ languages, noSpeechDetected, completeness }`; `completeness.possiblyIncomplete` means "may be incomplete", AI.md), `errorCode`, `usage`, `inputHash`, `runId`, timestamps. Derived data; the original audio remains the source record. Photos (4D): `kind` `IMAGE_OBSERVATIONS`, `result` `{ schema: "po-1", photo, observations, cannotDetermine, derivative, sourceSha256 }`, or an error code (`image_format_not_supported`, `image_blank`, `image_unreadable`, `image_too_large_to_process`, `invalid_observation`, `image_refused`, …).
 
 ### POST /api/service-requests/:reference/ai/reprocess
 

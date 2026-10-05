@@ -1,4 +1,4 @@
-// Strict JSON Schema for the AI-owned report content (scr-1.1), sent to the
+// Strict JSON Schema for the AI-owned report content (scr-1.2), sent to the
 // provider as a structured-output constraint. It mirrors report-schema.ts and
 // report-validation.ts exactly — a parity test keeps them in step. The
 // server re-validates everything regardless (the schema can't express
@@ -23,7 +23,7 @@ const obj = (properties: Record<string, Schema>): Schema => ({
 });
 const ids = arr(str(20), LIMITS.listItems);
 
-export const REPORT_JSON_SCHEMA_NAME = "service_call_report_scr_1_1";
+export const REPORT_JSON_SCHEMA_NAME = "service_call_report_scr_1_2";
 
 export const REPORT_JSON_SCHEMA: Schema = obj({
   issueSummary: str(LIMITS.issueSummary),
@@ -50,7 +50,9 @@ export const REPORT_JSON_SCHEMA: Schema = obj({
       certainty: oneOf(CERTAINTIES),
       relatesToSymptomRefs: ids,
     }),
-    LIMITS.observations,
+    // scr-1.2: observations are injected by the server from validated photo
+    // analysis; the report model must return none of its own.
+    0,
   ),
   unknownsRequiringInspection: arr(obj({ topic: oneOf(UNKNOWN_TOPICS), question: str(LIMITS.shortText), whyUnknown: str(LIMITS.shortText) }), LIMITS.listItems),
   affectedProducts: arr(obj({ category: oneOf(PRODUCT_IDS), basis: oneOf(PRODUCT_BASES) }), PRODUCT_IDS.length),

@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { createOpenAiProvider, parseReportResponse, REPORT_MAX_OUTPUT_TOKENS, REPORT_PROMPT_HASH } from "../../src/lib/service-call/server/openai-provider.ts";
 import { ServiceAiProviderError } from "../../src/lib/service-call/ai/provider.ts";
 import { REPORT_JSON_SCHEMA } from "../../src/lib/service-call/ai/report-json-schema.ts";
-import { REPORT_INSTRUCTIONS } from "../../src/lib/service-call/ai/prompts/report-v1.ts";
+import { REPORT_INSTRUCTIONS } from "../../src/lib/service-call/ai/prompts/report-v2.ts";
 import { resolveServiceAiProvider } from "../../src/lib/service-call/server/ai-config.ts";
 import { goodReport, json, openAiMock, responseOf, USAGE } from "../support/synthesis-mock.mjs";
 
@@ -34,12 +34,12 @@ test("request: Responses API, strict scr-1.1 schema, store:false, low reasoning,
   assert.equal(body.store, false);
   assert.deepEqual(body.reasoning, { effort: "low" });
   assert.equal(body.max_output_tokens, REPORT_MAX_OUTPUT_TOKENS);
-  assert.equal(body.prompt_cache_key, "service-report-openai-report-1");
-  assert.deepEqual(body.text, { format: { type: "json_schema", name: "service_call_report_scr_1_1", schema: REPORT_JSON_SCHEMA, strict: true } });
+  assert.equal(body.prompt_cache_key, "service-report-openai-report-2");
+  assert.deepEqual(body.text, { format: { type: "json_schema", name: "service_call_report_scr_1_2", schema: REPORT_JSON_SCHEMA, strict: true } });
   assert.equal(body.instructions, REPORT_INSTRUCTIONS);
   assert.equal(body.input.length, 1);
   assert.equal(body.input[0].role, "user");
-  assert.deepEqual(input, INPUT, "the user message is exactly the minimised input");
+  assert.deepEqual(input, { ...INPUT, mediaObservations: [] }, "the user message is exactly the minimised input + provided observations");
   assert.equal(correction, null);
   assert.ok(!("user" in body) && !("metadata" in body) && !("safety_identifier" in body));
   assert.deepEqual(res.usage, { openaiReportCalls: 1, openaiReportInputTokens: USAGE.input_tokens, openaiReportCachedInputTokens: 1024, openaiReportOutputTokens: USAGE.output_tokens, openaiReportReasoningTokens: 1300 });
@@ -50,8 +50,8 @@ test("corrective attempt carries only our rule codes after the same data", async
   const mock = openAiMock();
   await provider(mock).synthesiseReport({ input: INPUT, observations: [], correction: ["customerReported.statements[0].quote: quote_not_found_in_source", "confidence.overall: confidence_above_phase_maximum"] });
   const { text, input } = mock.calls.responses[0];
-  assert.deepEqual(input, INPUT);
-  const feedback = text.slice(JSON.stringify(INPUT).length);
+  assert.deepEqual(input, { ...INPUT, mediaObservations: [] });
+  const feedback = text.slice(JSON.stringify({ ...INPUT, mediaObservations: [] }).length);
   for (const line of feedback.split("\n").filter((l) => l.startsWith("- "))) assert.match(line, /^- [\w[\].]+: [a-z_:A-Z]+$/);
   assert.ok(!feedback.includes("sliding door") && !feedback.includes("grinding"), "no customer content echoed in feedback");
 });
@@ -69,8 +69,8 @@ test("models and reasoning are configurable (e.g. Luna for 4F evaluation)", asyn
 
 test("provider exposes capabilities, split prompt versions and the prompt hash", () => {
   const p = provider(openAiMock());
-  assert.deepEqual(p.capabilities, { transcribe: true, observe: false, synthesise: true });
-  assert.deepEqual(p.promptVersions, { transcribe: "openai-transcribe-1", observe: "none", report: "openai-report-1" });
+  assert.deepEqual(p.capabilities, { transcribe: true, observe: true, synthesise: true });
+  assert.deepEqual(p.promptVersions, { transcribe: "openai-transcribe-1", observe: "openai-observe-1/img-1", report: "openai-report-2" });
   assert.equal(p.reportPromptHash, REPORT_PROMPT_HASH);
   assert.match(REPORT_PROMPT_HASH, /^[0-9a-f]{64}$/);
 });

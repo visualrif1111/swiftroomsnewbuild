@@ -39,7 +39,8 @@ export type ProviderResolution =
  *
  *   SERVICE_AI_PROVIDER=openai  requires OPENAI_API_KEY; models from
  *                               SERVICE_AI_MODEL_TRANSCRIBE (default gpt-transcribe) and
- *                               SERVICE_AI_MODEL_REPORT (default gpt-6.1-sol); reasoning
+ *                               SERVICE_AI_MODEL_REPORT and SERVICE_AI_MODEL_VISION
+ *                               (default gpt-6.1-sol); reasoning
  *                               effort SERVICE_AI_REPORT_REASONING (default low)
  *   SERVICE_AI_PROVIDER=stub    deterministic placeholder; refused in Production
  */
@@ -55,9 +56,10 @@ export function resolveServiceAiProvider(env: NodeJS.ProcessEnv = process.env): 
     if (!apiKey) return { ok: false, reason: "openai_key_missing" };
     const model = env.SERVICE_AI_MODEL_TRANSCRIBE?.trim() || DEFAULT_TRANSCRIBE_MODEL;
     const reportModel = env.SERVICE_AI_MODEL_REPORT?.trim() || undefined;
+    const visionModel = env.SERVICE_AI_MODEL_VISION?.trim() || undefined;
     const effort = env.SERVICE_AI_REPORT_REASONING?.trim().toLowerCase();
     const reportReasoning = (REPORT_REASONING_EFFORTS as readonly string[]).includes(effort ?? "") ? (effort as (typeof REPORT_REASONING_EFFORTS)[number]) : undefined;
-    return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model, reportModel, reportReasoning }) };
+    return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model, reportModel, reportReasoning, visionModel }) };
   }
   return { ok: false, reason: "unknown_provider" };
 }

@@ -12,9 +12,9 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), { status
 
 /**
  * OpenAI provider whose HTTP calls are answered by `respond(n)` and recorded.
- * These are the Phase 4B transcription tests: report synthesis (4C) is
- * switched off here so they keep isolating transcription behaviour; the
- * synthesis path is covered by ai-synthesis-pipeline.test.mjs.
+ * These are the Phase 4B transcription tests: report synthesis (4C) and
+ * photo analysis (4D) are switched off here so they keep isolating
+ * transcription; those paths have their own suites.
  */
 function mockedOpenAi(respond = () => json({ text: "The door won't lock since yesterday.", languages: [{ code: "en" }], usage: { type: "tokens", input_tokens: 50, output_tokens: 8, total_tokens: 58 } })) {
   const calls = [];
@@ -25,7 +25,7 @@ function mockedOpenAi(respond = () => json({ text: "The door won't lock since ye
       return respond(calls.length);
     },
   });
-  const provider = { ...full, capabilities: { ...full.capabilities, synthesise: false } };
+  const provider = { ...full, capabilities: { ...full.capabilities, synthesise: false, observe: false } };
   return { provider, calls };
 }
 
@@ -78,8 +78,8 @@ test("voice note → real-provider path → transcript cached against the right 
   const [run] = await runs(s.db, s.request.id);
   assert.equal(run.status, "FAILED");
   assert.equal(run.error_code, "report_stage_not_available");
-  assert.equal(run.pipeline_version, "4c.1");
-  assert.equal(run.prompt_version, "openai-report-1", "run prompt version = report prompt (4C split)");
+  assert.equal(run.pipeline_version, "4d.1");
+  assert.equal(run.prompt_version, "openai-report-2", "run prompt version = report prompt (4C split)");
   assert.equal(run.usage.openaiTranscribeInputTokens, 50);
   assert.deepEqual(run.error_detail.media.map((m) => [m.type, m.outcome]), [["VOICE", "ANALYSED"]]);
   assert.equal((await rows(s.db, "select count(*)::int n from service_ai_reports"))[0].n, 0, "no report in 4B");

@@ -12,8 +12,12 @@ import type { ServiceProductId } from "../types";
 export const STUB_PROVIDER_ID = "stub";
 
 export interface StubOptions {
-  /** Media ids whose transcription/observation fails. */
+  /** Media ids whose transcription fails. */
   failMedia?: Record<string, { code: string; retryable: boolean }>;
+  /** Photo labels ("Photo 1") whose observation fails (the photo stage never sees media ids). */
+  failPhotos?: Record<string, { code: string; retryable: boolean }>;
+  /** Custom po-1 output per photo call (label, call number); default: one hedged NOTHING_NOTABLE_VISIBLE. */
+  photoContent?: (label: string, call: number) => unknown;
   /** Synthesis behaviour per call, in order (then "ok"). */
   synthesis?: ("ok" | "malformed" | "forbidden" | "unavailable" | "bad_quote" | "incomplete")[];
 }
@@ -41,19 +45,16 @@ export function createStubServiceAiProvider(options: StubOptions = {}): ServiceA
       return { text: "[Stub transcript — no speech recognition was performed.]", language: null, usage: { stubCalls: 1 } };
     },
 
-    async observe({ items }) {
+    async observePhoto({ label }) {
       calls.observe++;
-      items.forEach((i) => failFor(i.mediaId));
-      return {
-        observations: items.map((i) => ({
-          mediaId: i.mediaId,
-          frameAtSeconds: i.type === "VIDEO" ? 0 : null,
-          observation: "Placeholder: no image analysis was performed, so nothing may be inferred from this item.",
-          type: "NOTHING_NOTABLE_VISIBLE" as const,
-          certainty: "UNCERTAIN" as const,
-        })),
-        usage: { stubCalls: 1 },
+      const f = options.failPhotos?.[label];
+      if (f) throw new ServiceAiProviderError(f.code, f.retryable);
+      const content = options.photoContent?.(label, calls.observe) ?? {
+        photo: { quality: "CLEAR", qualityIssues: [], relevance: "UNCLEAR", visibleProductTypes: [], visibleTextPresent: false, personalInfoVisible: false },
+        observations: [{ type: "NOTHING_NOTABLE_VISIBLE", observation: "Placeholder: no image analysis was performed, so nothing may be inferred from this photo.", certainty: "UNCERTAIN", location: null }],
+        cannotDetermine: ["Anything about this photo (stub provider)."],
       };
+      return { content, usage: { stubCalls: 1 } };
     },
 
     async synthesiseReport(request) {
@@ -70,7 +71,7 @@ export function createStubServiceAiProvider(options: StubOptions = {}): ServiceA
   };
 }
 
-function stubContent({ input, observations }: SynthesisRequest): ServiceCallReportContent {
+function stubContent({ input }: SynthesisRequest): ServiceCallReportContent {
   const statements = [
     ...(input.request.description.trim()
       ? [{ id: "st-1", text: truncate(input.request.description.trim(), 300), quote: excerpt(input.request.description), source: { type: "DESCRIPTION" as const, mediaId: null } }]
@@ -86,14 +87,8 @@ function stubContent({ input, observations }: SynthesisRequest): ServiceCallRepo
   return {
     issueSummary: "[STUB] Placeholder report — no AI analysis was performed.",
     customerReported: { statements, reportedSymptoms: [], reportedOnset: null, locationInProperty: null },
-    mediaObservations: observations.map((o, i) => ({
-      id: `ob-${i + 1}`,
-      evidence: { mediaId: o.mediaId, label: o.label, frameAtSeconds: o.frameAtSeconds },
-      observation: o.observation,
-      type: o.type,
-      certainty: o.certainty,
-      relatesToSymptomRefs: [],
-    })),
+    // scr-1.2: observations are inserted by the server; the model returns none.
+    mediaObservations: [],
     unknownsRequiringInspection: [
       { topic: "COMPONENT_FAILURE", question: "Which component, if any, is at fault.", whyUnknown: "Not assessed by the stub provider." },
     ],

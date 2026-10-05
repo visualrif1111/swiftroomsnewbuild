@@ -10,6 +10,14 @@ import { enqueueAiProcessing, runAiWorker, sweepAi } from "../../src/lib/service
 import { isServiceAiEnabled } from "../../src/lib/service-call/server/ai-config.ts";
 import { addMedia, createRequest, freshDatabase } from "../support/db.mjs";
 import { pgliteAiStore } from "../support/ai-fixtures.mjs";
+import { photoJpeg } from "../support/images.mjs";
+
+// Real (synthetic) image bytes so photos pass the Phase 4D normaliser; each photo distinct (no duplicates).
+const PHOTO_BYTES = new Map();
+const bytesFor = async (id) => {
+  if (!PHOTO_BYTES.has(id)) PHOTO_BYTES.set(id, await photoJpeg({ width: 320, height: 240, seed: PHOTO_BYTES.size + 1 }));
+  return PHOTO_BYTES.get(id);
+};
 
 async function setup({ provider = createStubServiceAiProvider(), enabled = true, description, media = ["PHOTO", "VOICE"] } = {}) {
   const db = await freshDatabase();
@@ -18,7 +26,7 @@ async function setup({ provider = createStubServiceAiProvider(), enabled = true,
   for (const type of media) items.push(await addMedia(db, request.id, { type }));
   const store = pgliteAiStore(db, { RunNotOwnedError });
   const reads = [];
-  const deps = { store, provider, enabled: () => enabled, readMedia: async (id) => (reads.push(id), new Uint8Array()) };
+  const deps = { store, provider, enabled: () => enabled, readMedia: async (id) => (reads.push(id), bytesFor(id)) };
   return { db, request, items, store, deps, reads };
 }
 const rows = async (db, sql, params) => (await db.query(sql, params)).rows;
@@ -36,7 +44,7 @@ test("finalize → worker → stub report v1 (photo + voice: COMPLETED)", async 
   assert.equal(rep.provider, "stub");
   assert.equal(rep.review_status, "AWAITING_REVIEW");
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1.1");
+  assert.equal(r.schemaVersion, "scr-1.2");
   assert.equal(r.processing.status, "COMPLETED");
   assert.deepEqual(r.processing.mediaCoverage.map((c) => [c.label, c.outcome]), [["Photo 1", "ANALYSED"], ["Voice note 1", "ANALYSED"]]);
   assert.deepEqual(r.mediaSummary, { photos: 1, videos: 0, voiceNotes: 1 });
@@ -45,7 +53,7 @@ test("finalize → worker → stub report v1 (photo + voice: COMPLETED)", async 
   assert.match(r.content.issueSummary, /^\[STUB\]/);
   assert.deepEqual(r.content.unknownsRequiringInspection.map((u) => u.topic).sort(), ["COMPONENT_FAILURE", "COST", "REPAIR_METHOD", "WARRANTY"]);
   assert.equal(r.content.mediaObservations[0].evidence.mediaId, items[0].id);
-  assert.equal(reads.length, 0, "the stub never reads media bytes");
+  assert.equal(reads.length, 1, "only the photo is read (to build its derivative); voice bytes are not read by the stub");
   const [run] = await runs(db, request.id);
   assert.equal(run.status, "COMPLETED");
   assert.equal(run.usage.synthesisCalls, 1);

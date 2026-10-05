@@ -174,6 +174,13 @@ No schema change was needed for 4B.
 - Transcript cache rows keep their own `prompt_version` (`openai-transcribe-1`).
 - `models` records the report model, prompt version and prompt hash.
 
+**Phase 4D: no database change.**
+- Photo analyses are `service_media_analyses` rows with kind
+  `IMAGE_OBSERVATIONS` and `prompt_version` `openai-observe-1/img-1`.
+- `result` holds the validated `po-1` output plus derivative metadata. No image
+  is stored.
+- Reports hold `scr-1.2`.
+
 ### AI functions (service role only)
 
 | function | purpose |

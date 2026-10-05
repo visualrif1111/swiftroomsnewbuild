@@ -4,21 +4,27 @@
 //
 // Guarantees:
 //   - never writes to the service request (the store has no such method);
-//   - the provider sees only buildServiceAiInput() output and media bytes —
-//     never contact details, references, tokens or URLs;
+//   - the provider sees only buildServiceAiInput() output and, per photo, one
+//     privacy-minimised in-memory derivative — never contact details,
+//     references, tokens, URLs, original files or file names;
+//   - photo observations come only from the per-photo stage, carry the exact
+//     photo they came from, and are injected into the report by the server
+//     (the report model can reference them, never write or alter them);
 //   - nothing is stored as a report unless validateReportContent() accepts it;
 //   - one file failing makes the report PARTIAL, not the run FAILED;
 //   - a lost lease abandons the run without writing anything.
+import { createHash } from "node:crypto";
 import { computeInputFingerprint, mediaInputHash } from "./fingerprint";
+import { validatePhotoObservation, PHOTO_OBSERVATION_SCHEMA_VERSION, type PhotoObservationResult } from "./photo-observation-schema";
 import { buildServiceAiInput, labelEvidence, type TranscriptForAi } from "./input-builder";
-import { ServiceAiProviderError, type MediaReader, type ProviderUsage, type RawObservation, type ServiceAiProvider } from "./provider";
-import { MAX_CONFIDENCE_PHASE_4C, REPORT_SCHEMA_VERSION, type ServiceCallReport, type UrgencyIndicator } from "./report-schema";
+import { ServiceAiProviderError, type ImageNormaliser, type MediaReader, type ProviderUsage, type ServiceAiProvider } from "./provider";
+import { MAX_CONFIDENCE_PHASE_4C, REPORT_SCHEMA_VERSION, type MediaObservation, type PhotoAssessment, type ServiceCallReport, type UrgencyIndicator } from "./report-schema";
 import { validateReportContent, withMandatoryUnknowns, type ValidationContext } from "./report-validation";
 import { RunNotOwnedError, type AiRun, type AiRunStore, type RequestContext } from "./run-store";
 import { detectSafetyFlags } from "./safety";
 import { assessTranscriptCompleteness } from "./transcript-quality";
 
-export const PIPELINE_VERSION = "4c.1";
+export const PIPELINE_VERSION = "4d.1";
 /** Run error code when the provider has no report synthesis (see AI.md). */
 export const REPORT_STAGE_UNAVAILABLE = "report_stage_not_available";
 /** Run error code when there is no customer text or usable transcript to report on (no model call). */
@@ -29,9 +35,15 @@ const NOTICE_TEXT = {
   TRANSCRIPT_MAY_BE_INCOMPLETE: "The transcript may be incomplete (advisory signal, not proof). Listen to the original recording, which is the authoritative evidence.",
   NO_SPEECH_DETECTED: "No speech was recognised in this recording. Listen to the original recording.",
   NOT_ANALYSED: "This file was not analysed in this phase; nothing in the report describes its contents.",
+  PHOTO_LIMITED_QUALITY: "This photo's quality limits what can be seen; observations from it are tentative.",
+  PHOTO_NOT_RELEVANT: "This photo does not appear to show the reported product; it was not used as evidence of the issue.",
+  PHOTO_DUPLICATE: "This photo is an exact duplicate of another photo in the request and was analysed once.",
+  PHOTO_BLANK: "This photo appears blank or nearly blank; nothing could be observed.",
 } as const;
 /** Synthesis attempts per run when output fails validation. */
 const SYNTHESIS_ATTEMPTS = 2;
+/** Per-photo observation attempts when output fails validation. */
+const OBSERVATION_ATTEMPTS = 2;
 
 export interface PipelineDeps {
   store: AiRunStore;
@@ -39,6 +51,8 @@ export interface PipelineDeps {
   worker: string;
   leaseSeconds: number;
   readMedia: MediaReader;
+  /** Builds the in-memory derivative a vision model may see (server/image-normaliser.ts). */
+  normaliseImage: ImageNormaliser;
 }
 
 export type RunOutcome =
@@ -75,17 +89,35 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
 
     const coverage: ServiceCallReport["processing"]["mediaCoverage"] = [];
     const transcripts: TranscriptForAi[] = [];
-    const observations: (RawObservation & { label: string })[] = [];
+    const photos: { mediaId: string; label: string; analysis: PhotoObservationResult }[] = [];
+    /** SHA-256 of original photo bytes already seen in this request → label (exact-duplicate detection). */
+    const seenPhotos = new Map<string, string>();
 
     for (const media of ctx.media) {
       await keepLease();
       const label = labels.get(media.id)!;
-      const step = await processMedia(media, label, ctx, deps, run, { addUsage, count, lastAttempt });
+      const step = await processMedia(media, label, ctx, deps, run, { addUsage, count, lastAttempt, seenPhotos });
       coverage.push({ mediaId: media.id, label, type: media.type, outcome: step.outcome, reasonCode: step.reasonCode });
       if (step.transcript) transcripts.push(step.transcript);
-      if (step.observations) observations.push(...step.observations.map((o) => ({ ...o, label })));
+      if (step.photo) photos.push({ mediaId: media.id, label, analysis: step.photo });
     }
     await keepLease();
+
+    // scr-1.2: the report's media observations are exactly the validated
+    // photo observations, each tied by the server to the photo it came from.
+    const observations: MediaObservation[] = [];
+    for (const p of photos) {
+      for (const o of p.analysis.observations) {
+        observations.push({
+          id: `ob-${observations.length + 1}`,
+          evidence: { mediaId: p.mediaId, label: p.label, frameAtSeconds: null },
+          observation: o.location ? `${o.location}: ${o.observation}` : o.observation,
+          type: o.type,
+          certainty: o.certainty,
+          relatesToSymptomRefs: [],
+        });
+      }
+    }
 
     if (!provider.capabilities.synthesise) {
       // Phase 4B: transcripts are prepared and cached for when report
@@ -151,11 +183,16 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
         lastIssue = res.outputIssue === "incomplete_output" ? "incomplete_output" : "invalid_output";
         lastErrors = [`response: ${res.outputIssue}`];
       } else {
-        const checked = validateReportContent(withMandatoryUnknowns(res.content), validationContext);
-        if (checked.ok) content = checked.value;
+        // The model must return no observations of its own; the server inserts
+        // the validated ones so references to them can be checked.
+        const raw = res.content;
+        const own = isRecord(raw) && Array.isArray(raw.mediaObservations) ? raw.mediaObservations.length : 0;
+        const candidate = isRecord(raw) ? { ...raw, mediaObservations: observations } : raw;
+        const checked = validateReportContent(withMandatoryUnknowns(candidate), validationContext);
+        if (checked.ok && own === 0) content = checked.value;
         else {
           lastIssue = "invalid_output";
-          lastErrors = checked.errors;
+          lastErrors = [...(own > 0 ? ["mediaObservations: must_be_server_provided"] : []), ...(checked.ok ? [] : checked.errors)];
         }
       }
       await keepLease();
@@ -165,13 +202,28 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
     const status = coverage.every((c) => c.outcome === "ANALYSED") ? "COMPLETED" : "PARTIAL";
     const transcriptByMedia = new Map(transcripts.map((t) => [t.mediaId, t]));
     const evidenceNotices: ServiceCallReport["evidenceNotices"] = [];
+    const photoByMedia = new Map(photos.map((p) => [p.mediaId, p.analysis]));
     for (const c of coverage) {
       const t = transcriptByMedia.get(c.mediaId);
+      const photo = photoByMedia.get(c.mediaId);
       const notice = (code: keyof typeof NOTICE_TEXT) => evidenceNotices.push({ mediaId: c.mediaId, label: c.label, code, message: NOTICE_TEXT[code] });
-      if (c.outcome !== "ANALYSED") notice("NOT_ANALYSED");
-      else if (t?.noSpeechDetected) notice("NO_SPEECH_DETECTED");
+      if (c.outcome !== "ANALYSED") {
+        if (c.reasonCode?.startsWith("duplicate_of_")) notice("PHOTO_DUPLICATE");
+        else if (c.reasonCode === "image_blank") notice("PHOTO_BLANK");
+        else notice("NOT_ANALYSED");
+      } else if (t?.noSpeechDetected) notice("NO_SPEECH_DETECTED");
       else if (t?.possiblyIncomplete) notice("TRANSCRIPT_MAY_BE_INCOMPLETE");
+      else if (photo) {
+        if (photo.photo.quality !== "CLEAR") notice("PHOTO_LIMITED_QUALITY");
+        if (photo.photo.relevance === "NOT_RELEVANT") notice("PHOTO_NOT_RELEVANT");
+      }
     }
+    const photoAssessments: PhotoAssessment[] = photos.map((p) => ({
+      mediaId: p.mediaId,
+      label: p.label,
+      ...p.analysis.photo,
+      cannotDetermine: p.analysis.cannotDetermine,
+    }));
     const report: ServiceCallReport = {
       schemaVersion: REPORT_SCHEMA_VERSION,
       serviceReference: ctx.reference,
@@ -189,6 +241,7 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       })),
       safetyFlags,
       evidenceNotices,
+      photoAssessments,
       content,
     };
 
@@ -197,7 +250,13 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       const saved = await store.complete({
         runId: run.id, worker, status, inputFingerprint,
         provider: provider.id,
-        models: { ...provider.models, reportPromptVersion: provider.promptVersions.report, ...(provider.reportPromptHash ? { reportPromptHash: provider.reportPromptHash } : {}) },
+        models: {
+          ...provider.models,
+          reportPromptVersion: provider.promptVersions.report,
+          observePromptVersion: provider.promptVersions.observe,
+          ...(provider.reportPromptHash ? { reportPromptHash: provider.reportPromptHash } : {}),
+          ...(provider.observePromptHash ? { observePromptHash: provider.observePromptHash } : {}),
+        },
         usage,
         errorDetail: failures.length ? { media: failures } : null,
         report,
@@ -223,8 +282,13 @@ interface MediaStep {
   outcome: "ANALYSED" | "SKIPPED" | "FAILED";
   reasonCode: string | null;
   transcript?: TranscriptForAi;
-  observations?: RawObservation[];
+  photo?: PhotoObservationResult;
 }
+
+type Tally = { addUsage: (u: ProviderUsage) => void; count: (k: string) => void; lastAttempt: boolean; seenPhotos: Map<string, string> };
+
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const sha256 = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
 
 async function processMedia(
   media: RequestContext["media"][number],
@@ -232,7 +296,7 @@ async function processMedia(
   ctx: RequestContext,
   deps: PipelineDeps,
   run: AiRun,
-  tally: { addUsage: (u: ProviderUsage) => void; count: (k: string) => void; lastAttempt: boolean },
+  tally: Tally,
 ): Promise<MediaStep> {
   const { store, provider } = deps;
   if (media.type === "VIDEO") {
@@ -240,67 +304,134 @@ async function processMedia(
     return { outcome: "SKIPPED", reasonCode: "video_processing_not_available" };
   }
   if (media.type === "VOICE" && !provider.capabilities.transcribe) return { outcome: "SKIPPED", reasonCode: "transcription_not_available" };
-  if (media.type === "PHOTO" && !provider.capabilities.observe) return { outcome: "SKIPPED", reasonCode: "image_analysis_not_available" };
-  const kind = media.type === "VOICE" ? "TRANSCRIPT" : "IMAGE_OBSERVATIONS";
-  const model = media.type === "VOICE" ? provider.models.transcribe : provider.models.vision;
-  const promptVersion = media.type === "VOICE" ? provider.promptVersions.transcribe : provider.promptVersions.observe;
+  if (media.type === "PHOTO") {
+    if (!provider.capabilities.observe) return { outcome: "SKIPPED", reasonCode: "image_analysis_not_available" };
+    return processPhoto(media, label, ctx, deps, run, tally);
+  }
+  const kind = "TRANSCRIPT";
+  const model = provider.models.transcribe;
+  const promptVersion = provider.promptVersions.transcribe;
   const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion });
   const meta = { provider: provider.id, model, promptVersion, runId: run.id };
 
   const cached = await store.getAnalysis(media.id, kind, inputHash);
   if (cached?.status === "COMPLETED") {
     tally.count("cacheHits");
-    return fromAnalysis(media, cached.transcriptText, cached.language, cached.result);
+    return fromTranscript(media, cached.transcriptText, cached.language, cached.result);
   }
 
   const read = () => deps.readMedia(media.id);
   try {
-    if (media.type === "VOICE") {
-      tally.count("transcribeCalls");
-      const res = await provider.transcribe({ mediaId: media.id, label, mimeType: media.mimeType, read });
-      tally.addUsage(res.usage);
-      // Duration: as measured by the provider, else as recorded by the browser.
-      const duration = res.usage.openaiTranscribeSeconds ?? media.durationSeconds;
-      const result = {
-        languages: res.languages ?? (res.language ? [res.language] : []),
-        noSpeechDetected: !res.text.trim(),
-        completeness: assessTranscriptCompleteness(res.text, duration),
-      };
-      await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result, transcriptText: res.text, language: res.language, errorCode: null, usage: res.usage, ...meta });
-      return fromAnalysis(media, res.text, res.language, result);
-    }
-    tally.count("observeCalls");
-    const res = await provider.observe({ items: [{ mediaId: media.id, label, type: "PHOTO", mimeType: media.mimeType, read }], productCategories: ctx.request.productCategories });
+    tally.count("transcribeCalls");
+    const res = await provider.transcribe({ mediaId: media.id, label, mimeType: media.mimeType, read });
     tally.addUsage(res.usage);
-    const own = res.observations.filter((o) => o.mediaId === media.id);
-    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result: { observations: own }, transcriptText: null, language: null, errorCode: null, usage: res.usage, ...meta });
-    return { outcome: "ANALYSED", reasonCode: null, observations: own };
+    // Duration: as measured by the provider, else as recorded by the browser.
+    const duration = res.usage.openaiTranscribeSeconds ?? media.durationSeconds;
+    const result = {
+      languages: res.languages ?? (res.language ? [res.language] : []),
+      noSpeechDetected: !res.text.trim(),
+      completeness: assessTranscriptCompleteness(res.text, duration),
+    };
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result, transcriptText: res.text, language: res.language, errorCode: null, usage: res.usage, ...meta });
+    return fromTranscript(media, res.text, res.language, result);
   } catch (err) {
-    if (!(err instanceof ServiceAiProviderError)) throw err;
-    // Provider-wide problems (e.g. rejected credentials) stop the run; they say nothing about this file.
-    if (err.scope === "run") throw new RunFailure(err.code, err.retryable);
-    if (err.retryable && !tally.lastAttempt) throw new RunFailure(err.code, true);
-    const status = err.skipped ? "SKIPPED" : "FAILED";
-    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status, result: null, transcriptText: null, language: null, errorCode: err.code, usage: {}, ...meta });
-    return { outcome: status, reasonCode: err.code };
+    return mediaFailure(err, { media, kind, inputHash, meta, store, tally });
   }
 }
 
-function fromAnalysis(media: RequestContext["media"][number], text: string | null, language: string | null, result: Record<string, unknown> | null): MediaStep {
-  if (media.type === "VOICE") {
-    return {
-      outcome: "ANALYSED",
-      reasonCode: null,
-      transcript: {
-        mediaId: media.id,
-        kind: "VOICE_NOTE",
-        text: text ?? "",
-        language,
-        noSpeechDetected: result?.noSpeechDetected === true || !(text ?? "").trim(),
-        possiblyIncomplete: (result?.completeness as { possiblyIncomplete?: unknown } | undefined)?.possiblyIncomplete === true,
-      },
-    };
+/**
+ * One photo: original bytes (server-side) → exact-duplicate check → in-memory
+ * derivative → one vision call → po-1 validation (one corrective attempt) →
+ * cached analysis. The derivative is never stored; the original stays the
+ * authoritative evidence.
+ */
+async function processPhoto(media: RequestContext["media"][number], label: string, ctx: RequestContext, deps: PipelineDeps, run: AiRun, tally: Tally): Promise<MediaStep> {
+  const { store, provider } = deps;
+  const kind = "IMAGE_OBSERVATIONS";
+  const model = provider.models.vision;
+  const promptVersion = provider.promptVersions.observe;
+  const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion });
+  const meta = { provider: provider.id, model, promptVersion, runId: run.id };
+
+  const cached = await store.getAnalysis(media.id, kind, inputHash);
+  if (cached?.status === "COMPLETED" && cached.result?.schema === PHOTO_OBSERVATION_SCHEMA_VERSION) {
+    const source = String(cached.result.sourceSha256 ?? "");
+    if (source && tally.seenPhotos.has(source)) return { outcome: "SKIPPED", reasonCode: `duplicate_of_${slug(tally.seenPhotos.get(source)!)}` };
+    if (source) tally.seenPhotos.set(source, label);
+    tally.count("cacheHits");
+    const r = cached.result as unknown as PhotoObservationResult;
+    return { outcome: "ANALYSED", reasonCode: null, photo: { photo: r.photo, observations: r.observations, cannotDetermine: r.cannotDetermine } };
   }
-  const observations = Array.isArray(result?.observations) ? (result.observations as RawObservation[]) : [];
-  return { outcome: "ANALYSED", reasonCode: null, observations };
+
+  const original = await deps.readMedia(media.id);
+  const sourceSha256 = sha256(original);
+  // Exact duplicate of an earlier photo in this request: analysed once (not cached as its own result).
+  const firstLabel = tally.seenPhotos.get(sourceSha256);
+  if (firstLabel) return { outcome: "SKIPPED", reasonCode: `duplicate_of_${slug(firstLabel)}` };
+  tally.seenPhotos.set(sourceSha256, label);
+
+  const normalised = await deps.normaliseImage(original, media.mimeType);
+  if (!normalised.ok) {
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: normalised.outcome, result: { sourceSha256 }, transcriptText: null, language: null, errorCode: normalised.code, usage: {}, ...meta });
+    return { outcome: normalised.outcome, reasonCode: normalised.code };
+  }
+
+  let value: PhotoObservationResult | null = null;
+  let lastErrors: string[] = [];
+  for (let i = 0; i < OBSERVATION_ATTEMPTS && !value; i++) {
+    tally.count("observeCalls");
+    if (i > 0) tally.count("observeCorrectiveAttempts");
+    let res;
+    try {
+      res = await provider.observePhoto({ label, productCategories: ctx.request.productCategories, image: normalised.image, correction: i > 0 ? lastErrors.slice(0, 20) : undefined });
+    } catch (err) {
+      return mediaFailure(err, { media, kind, inputHash, meta, store, tally });
+    }
+    tally.addUsage(res.usage);
+    if (res.outputIssue) {
+      lastErrors = [`response: ${res.outputIssue}`];
+      continue;
+    }
+    const checked = validatePhotoObservation(res.content);
+    if (checked.ok) value = checked.value;
+    else lastErrors = checked.errors;
+  }
+  if (!value) {
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "FAILED", result: { sourceSha256, validationErrors: lastErrors.slice(0, 20) }, transcriptText: null, language: null, errorCode: "invalid_observation", usage: {}, ...meta });
+    return { outcome: "FAILED", reasonCode: "invalid_observation" };
+  }
+  const result = { schema: PHOTO_OBSERVATION_SCHEMA_VERSION, ...value, derivative: normalised.derivative, sourceSha256 };
+  await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result, transcriptText: null, language: null, errorCode: null, usage: {}, ...meta });
+  return { outcome: "ANALYSED", reasonCode: null, photo: value };
+}
+
+/** Provider error on one file: stop/requeue the run, or record the file as FAILED/SKIPPED. */
+async function mediaFailure(
+  err: unknown,
+  a: { media: RequestContext["media"][number]; kind: "TRANSCRIPT" | "IMAGE_OBSERVATIONS"; inputHash: string; meta: { provider: string; model: string; promptVersion: string; runId: string }; store: AiRunStore; tally: Tally },
+): Promise<MediaStep> {
+  if (!(err instanceof ServiceAiProviderError)) throw err;
+  // Provider-wide problems (e.g. rejected credentials) stop the run; they say nothing about this file.
+  if (err.scope === "run") throw new RunFailure(err.code, err.retryable);
+  if (err.retryable && !a.tally.lastAttempt) throw new RunFailure(err.code, true);
+  const status = err.skipped ? "SKIPPED" : "FAILED";
+  await a.store.recordAnalysis({ mediaId: a.media.id, kind: a.kind, inputHash: a.inputHash, status, result: null, transcriptText: null, language: null, errorCode: err.code, usage: {}, ...a.meta });
+  return { outcome: status, reasonCode: err.code };
+}
+
+const slug = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+
+function fromTranscript(media: RequestContext["media"][number], text: string | null, language: string | null, result: Record<string, unknown> | null): MediaStep {
+  return {
+    outcome: "ANALYSED",
+    reasonCode: null,
+    transcript: {
+      mediaId: media.id,
+      kind: "VOICE_NOTE",
+      text: text ?? "",
+      language,
+      noSpeechDetected: result?.noSpeechDetected === true || !(text ?? "").trim(),
+      possiblyIncomplete: (result?.completeness as { possiblyIncomplete?: unknown } | undefined)?.possiblyIncomplete === true,
+    },
+  };
 }

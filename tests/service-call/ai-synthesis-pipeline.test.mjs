@@ -25,7 +25,9 @@ async function setup({ description = "The living room sliding door catches halfw
   }
   const store = pgliteAiStore(db, { RunNotOwnedError });
   const base = createOpenAiProvider({ apiKey: "sk-test", transcribeModel: "gpt-transcribe", fetch: mock.fetch });
-  const provider = { ...base, ...providerOverrides };
+  // These are the Phase 4C synthesis tests (text + voice): photo analysis (4D)
+  // is switched off so they keep isolating synthesis; see ai-photo-*.test.mjs.
+  const provider = { ...base, capabilities: { ...base.capabilities, observe: false }, ...providerOverrides };
   const deps = { store, provider, enabled: () => true, readMedia: async () => new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 1, 2, 3]) };
   return { db, request, media, mock, deps };
 }
@@ -38,18 +40,18 @@ async function finalize(s) {
   return { q, w, out: w.results[0] };
 }
 
-test("1 text only → COMPLETED report (scr-1.1), quote from the description, no observations, versions recorded", async () => {
+test("1 text only → COMPLETED report (scr-1.2), quote from the description, no observations, versions recorded", async () => {
   const s = await setup();
   const { out } = await finalize(s);
   assert.equal(out.outcome, "COMPLETED");
   const [rep] = await reports(s);
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1.1");
-  assert.equal(rep.schema_version, "scr-1.1");
-  assert.equal(rep.prompt_version, "openai-report-1");
-  assert.equal(rep.pipeline_version, "4c.1");
+  assert.equal(r.schemaVersion, "scr-1.2");
+  assert.equal(rep.schema_version, "scr-1.2");
+  assert.equal(rep.prompt_version, "openai-report-2");
+  assert.equal(rep.pipeline_version, "4d.1");
   assert.equal(rep.models.report, "gpt-6.1-sol");
-  assert.equal(rep.models.reportPromptVersion, "openai-report-1");
+  assert.equal(rep.models.reportPromptVersion, "openai-report-2");
   assert.match(rep.models.reportPromptHash, /^[0-9a-f]{64}$/);
   assert.deepEqual(r.content.mediaObservations, []);
   assert.equal(r.content.customerReported.statements[0].source.type, "DESCRIPTION");
@@ -321,14 +323,14 @@ test("20 a request processed in 4B qualifies again under 4C versions, reusing it
 test("21 changing the report prompt version never invalidates cached transcripts", async () => {
   const s = await setup({ voice: true });
   await finalize(s);
-  const bumped = { ...s.deps, provider: { ...s.deps.provider, promptVersions: { ...s.deps.provider.promptVersions, report: "openai-report-2" } } };
+  const bumped = { ...s.deps, provider: { ...s.deps.provider, promptVersions: { ...s.deps.provider.promptVersions, report: "openai-report-3" } } };
   assert.equal((await enqueueAiProcessing(s.request.id, "FINALIZE", "customer", bumped)).outcome, "created");
   await runAiWorker(1, bumped);
   assert.equal(s.mock.calls.transcribe.length, 1);
   const [a] = await rows(s.db, "select input_hash from service_media_analyses");
   assert.equal(a.input_hash, mediaInputHash({ mediaId: s.media[0].id, fileSize: 1000, kind: "TRANSCRIPT", provider: "openai", model: "gpt-transcribe", promptVersion: "openai-transcribe-1" }));
   const rs = await runs(s);
-  assert.deepEqual(rs.map((r) => r.prompt_version), ["openai-report-1", "openai-report-2"]);
+  assert.deepEqual(rs.map((r) => r.prompt_version), ["openai-report-2", "openai-report-3"]);
 });
 
 test("22 service request status, updated_at and history untouched (success and failure)", async () => {

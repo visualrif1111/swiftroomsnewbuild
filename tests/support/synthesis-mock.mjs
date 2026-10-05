@@ -55,12 +55,35 @@ export function goodReport(input, opts = {}) {
  *   transcribe(n)          → Response for the n-th transcription call
  *   model({input, correction, body, n}) → content object | Response
  */
-export function openAiMock({ transcribe = () => json({ text: "The sliding door is stuck halfway.", languages: [{ code: "en" }], usage: { type: "duration", seconds: 3 } }), model = ({ input }) => goodReport(input) } = {}) {
-  const calls = { transcribe: [], responses: [] };
+/** Default photo observation (po-1): one hedged, conservative observation. */
+export const goodPhotoObservation = () => ({
+  photo: { quality: "CLEAR", qualityIssues: [], relevance: "RELEVANT", visibleProductTypes: ["window"], visibleTextPresent: false, personalInfoVisible: false },
+  observations: [{ type: "GLASS_CRACK_OR_CHIP", observation: "A thin linear mark resembling a crack appears visible across the glazed area.", certainty: "PROBABLE", location: "upper half of the glazed panel" }],
+  cannotDetermine: ["Whether the mark goes through the glass."],
+});
+
+export function openAiMock({
+  transcribe = () => json({ text: "The sliding door is stuck halfway.", languages: [{ code: "en" }], usage: { type: "duration", seconds: 3 } }),
+  model = ({ input }) => goodReport(input),
+  observe = () => goodPhotoObservation(),
+} = {}) {
+  const calls = { transcribe: [], responses: [], observe: [] };
   const fetch = async (url, init) => {
     if (url.endsWith("/v1/audio/transcriptions")) {
       calls.transcribe.push({ url, form: init.body });
       return transcribe(calls.transcribe.length);
+    }
+    if (url.endsWith("/v1/responses") && JSON.parse(init.body).text?.format?.name === "photo_observation_po_1") {
+      const body = JSON.parse(init.body);
+      const parts = body.input[0].content;
+      const text = parts.find((p) => p.type === "input_text").text;
+      const images = parts.filter((p) => p.type === "input_image");
+      const image = Buffer.from(images[0].image_url.split(",")[1], "base64");
+      const meta = JSON.parse(text.split("\n\nYOUR PREVIOUS OUTPUT")[0]);
+      const call = { url, body, text, images, image, label: meta.photo, correction: text.includes("YOUR PREVIOUS OUTPUT") ? text : null, n: calls.observe.length + 1 };
+      calls.observe.push(call);
+      const out = await observe(call);
+      return out instanceof Response ? out : responseOf(out);
     }
     if (url.endsWith("/v1/responses")) {
       const body = JSON.parse(init.body);

@@ -3,7 +3,7 @@
 // without touching orchestration, storage or validation.
 //
 // Phase 4A ships only the deterministic stub (stub-provider.ts).
-import type { Certainty, EvidenceType, ObservationType } from "./report-schema";
+import type { Certainty, MediaObservation, ObservationType } from "./report-schema";
 import type { ServiceAiInput } from "./input-builder";
 
 /** Token/second counters reported by a provider call (summed per run). */
@@ -31,13 +31,43 @@ export interface TranscribeResult {
   usage: ProviderUsage;
 }
 
-export interface ObserveRequest {
-  /** Images/video given to the model. Customer text is deliberately NOT included. */
-  items: { mediaId: string; label: string; type: Exclude<EvidenceType, "VOICE">; mimeType: string; read: () => Promise<Uint8Array> }[];
+/**
+ * One photo, already normalised (in-memory derivative, no metadata). Phase 4D:
+ * exactly one image per call, so an observation can only ever describe the
+ * photo it is attributed to. Customer text is deliberately NOT included.
+ */
+export interface ObservePhotoRequest {
+  /** Neutral label ("Photo 2") — never the customer's file name. */
+  label: string;
   /** Neutral context only (e.g. "window", "sliding-door"). */
   productCategories: string[];
+  image: NormalisedImage;
+  /** Corrective attempt only: our own rule codes from the previous attempt. */
+  correction?: string[];
 }
 
+export interface ObservePhotoResult {
+  /** Untrusted until validatePhotoObservation() accepts it (po-1). */
+  content: unknown;
+  usage: ProviderUsage;
+  outputIssue?: "incomplete_output" | "malformed_json";
+}
+
+export interface NormalisedImage {
+  bytes: Uint8Array;
+  mimeType: "image/jpeg";
+  width: number;
+  height: number;
+}
+
+export type NormalisedImageResult =
+  | { ok: true; image: NormalisedImage; derivative: { width: number; height: number; bytes: number; sha256: string; normaliser: string } }
+  | { ok: false; outcome: "SKIPPED" | "FAILED"; code: string };
+
+/** Turns original bytes into a privacy-minimised derivative (server/image-normaliser.ts). */
+export type ImageNormaliser = (bytes: Uint8Array, mimeType: string) => Promise<NormalisedImageResult>;
+
+/** A media observation as stored in a report (scr-1.2: written by the server from validated photo analysis). */
 export interface RawObservation {
   mediaId: string;
   frameAtSeconds: number | null;
@@ -46,14 +76,14 @@ export interface RawObservation {
   certainty: Certainty;
 }
 
-export interface ObserveResult {
-  observations: RawObservation[];
-  usage: ProviderUsage;
-}
-
 export interface SynthesisRequest {
   input: ServiceAiInput;
-  observations: (RawObservation & { label: string })[];
+  /**
+   * Validated observations from the per-photo stage, with server-assigned ids
+   * and evidence. The report model may only reference them; it never sees
+   * the photographs.
+   */
+  observations: MediaObservation[];
   /**
    * Corrective attempt only: our own validation rule codes from the previous
    * attempt (paths + codes, never customer content).
@@ -92,8 +122,11 @@ export interface ServiceAiProvider {
   readonly promptVersions: { transcribe: string; observe: string; report: string };
   /** SHA-256 of the exact report instructions + schema, recorded on each report (optional). */
   readonly reportPromptHash?: string;
+  /** SHA-256 of the exact photo-observation instructions + schema (optional). */
+  readonly observePromptHash?: string;
   transcribe(request: TranscribeRequest): Promise<TranscribeResult>;
-  observe(request: ObserveRequest): Promise<ObserveResult>;
+  /** Phase 4D: one normalised photo in, untrusted po-1 JSON out. */
+  observePhoto(request: ObservePhotoRequest): Promise<ObservePhotoResult>;
   synthesiseReport(request: SynthesisRequest): Promise<SynthesisResult>;
 }
 

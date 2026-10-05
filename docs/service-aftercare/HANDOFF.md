@@ -13,8 +13,9 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 3 | Private media evidence uploads (Supabase Storage) | **COMPLETE / APPROVED / CLOSED** |
 | 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | **APPROVED / CLOSED** (`7574a09`) |
 | 4B | Voice transcription (OpenAI) | **APPROVED / CLOSED** (`c28d7d4`) |
-| 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | Implemented: awaiting closure approval |
-| 4D–4F | Photos, video, evaluation | Not started |
+| 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | **APPROVED / CLOSED** (`7e91e03`) |
+| 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | Implemented: awaiting closure approval |
+| 4E–4F | Video, evaluation | Not started |
 
 ### Phase 3
 
@@ -72,6 +73,17 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 - No customer-facing output and no change to the service request lifecycle.
   AI remains off everywhere.
 
+### Phase 4D
+
+- Each supported photo (JPEG, PNG, WebP) is analysed on its own from an
+  in-memory, metadata-free derivative.
+- Observations are validated (`po-1`, fails closed) and injected into the
+  report by the server (`scr-1.2`). Customer/photo conflicts are kept as
+  `EVIDENCE_DISCREPANCY`.
+- HEIC/HEIF is **SKIPPED** (no decoder, by decision).
+- Exact duplicates are analysed once.
+- No derivatives are stored. `sharp` is now a direct dependency.
+
 ## ⛔ Pre-production blockers
 
 Do not link `/service-call` publicly until these are resolved.
@@ -105,7 +117,11 @@ Do not link `/service-call` publicly until these are resolved.
    - **OpenAI data retention:** by default, API data sits in abuse-monitoring
      logs for up to 30 days. Decide on Zero Data Retention or Modified Abuse
      Monitoring (needs OpenAI approval) and disclose AI processing of voice
-     recordings to customers before enabling in Production.
+     recordings **and photos** to customers before enabling in Production.
+     Image inputs may still be retained for abuse review in rare cases, even
+     under Modified Abuse Monitoring.
+   - OpenAI offers **UAE regional processing** for `/v1/responses`; consider it
+     in the data-residency decision (blocker 5).
 8. **AI sweep not scheduled.** `POST /api/service-requests/maintenance/process-ai`
    (admin token) needs a scheduled job (e.g. every 10 min, Production cron),
    as does `cleanup-media`.
@@ -161,4 +177,20 @@ the same, so testers should use that.
   - ffmpeg in a Vercel Function (static binary, larger bundle, cold start);
   - a separate media worker or Vercel Sandbox;
   - narrowing the accepted voice formats.
+- **HEIC/HEIF photos (deferred from 4D):** they are SKIPPED with a notice. A
+  decoder (e.g. libheif via WebAssembly, LGPL) or conversion step is a future
+  media-normalisation enhancement, alongside audio segmentation and
+  conversion. HEIC is real: 6 of 57 uploaded Development photos.
+- **Personal data inside photos** (faces, documents, house numbers) is flagged
+  (`personalInfoVisible`) but not redacted.
+
+### Phase 4F findings (recorded, not changed)
+
+- **Urgency can be over-escalated:** a "small crack in the corner" was rated
+  URGENT (`BROKEN_OR_UNSTABLE_GLASS`). Tune the prompt and indicators.
+- **`CONFLICTING_CUSTOMER_INFORMATION` is used heavily** for product-selection
+  versus description mismatches. Consider separating selection mismatch from
+  contradictory statements.
+- **Cost evaluation:** `gpt-6-luna` for synthesis and vision; transcript
+  completeness threshold.
 

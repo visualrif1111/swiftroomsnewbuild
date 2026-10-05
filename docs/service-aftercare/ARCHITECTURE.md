@@ -100,6 +100,11 @@ Full detail: [AI.md](./AI.md).
   - Verbatim-quote provenance.
   - Photos and video are not analysed (4D/4E).
   - Reports are internal and never customer-facing.
+- **Phase 4D:** photo analysis, one photo per vision call.
+  - What is sent is an in-memory, metadata-free JPEG derivative (≤ 1536 px).
+  - Observations are validated (`po-1`) and injected into the report by the
+    server (`scr-1.2`); the report model never sees photographs.
+  - HEIC/HEIF is skipped (no decoder) and video is not analysed (4E).
 - AI is off (`SERVICE_AI_ENABLED` unset) in every deployed environment.
 
 ```
