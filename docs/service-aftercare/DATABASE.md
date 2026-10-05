@@ -153,7 +153,20 @@ Per-file results cached by `input_hash` (media id, verified size, step,
 provider, model, prompt version). Unique `(media_id, kind, input_hash)`. A
 `COMPLETED` row is never overwritten, so an unchanged file is transcribed or
 analysed once. The 0002 columns on `service_media` (`transcript`,
-`ai_analysis`, …) are not written in 4A.
+`ai_analysis`, …) are not written. `service_media_analyses` is the record.
+
+Phase 4B transcripts use `kind = 'TRANSCRIPT'`:
+
+| column | value |
+|---|---|
+| `transcript_text` | verbatim transcript (empty if no speech) |
+| `language` | primary detected language |
+| `result` | `{ "languages": [...], "noSpeechDetected": bool, "completeness": { "possiblyIncomplete", "signals", "assessed", "durationSeconds", "charsPerSecond" } }` |
+| `provider` / `model` / `prompt_version` | for example `openai` / `gpt-transcribe` / `openai-transcribe-1` |
+| `usage` | token or second counts |
+| `error_code` | for `FAILED`/`SKIPPED` (e.g. `audio_format_not_supported`) |
+
+No schema change was needed for 4B.
 
 ### AI functions (service role only)
 

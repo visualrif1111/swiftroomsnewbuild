@@ -30,6 +30,7 @@ export function createStubServiceAiProvider(options: StubOptions = {}): ServiceA
 
   return {
     id: STUB_PROVIDER_ID,
+    capabilities: { transcribe: true, observe: true, synthesise: true },
     models: { transcribe: "stub-transcribe-1", vision: "stub-vision-1", report: "stub-report-1" },
     promptVersion: "stub-1",
     calls,

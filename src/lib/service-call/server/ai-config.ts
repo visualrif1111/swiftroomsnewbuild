@@ -2,6 +2,7 @@
 import "server-only";
 import type { ServiceAiProvider } from "../ai/provider";
 import { createStubServiceAiProvider } from "../ai/stub-provider";
+import { createOpenAiProvider, DEFAULT_TRANSCRIBE_MODEL } from "./openai-provider";
 
 /**
  * Kill switch. Only an explicit "true"/"1"/"yes"/"on" enables processing;
@@ -15,7 +16,7 @@ export function isServiceAiEnabled(): boolean {
 export const AI_LIMITS = {
   /** Automatic (finalize/sweep) runs per request; MANUAL runs are separate. */
   maxAutoRunsPerRequest: 3,
-  /** Lease per claim; renewed after every step. */
+  /** Lease per claim; renewed before and after every step. */
   leaseSeconds: 300,
   /** Runs one worker invocation processes (sweep/manual endpoint). */
   runsPerInvocation: 3,
@@ -27,11 +28,31 @@ export const AI_LIMITS = {
   maxAgeHours: 72,
 } as const;
 
+export type ProviderResolution =
+  | { ok: true; provider: ServiceAiProvider }
+  | { ok: false; reason: "provider_not_selected" | "openai_key_missing" | "stub_not_allowed_in_production" | "unknown_provider" };
+
 /**
- * Phase 4A has no real AI provider: the deterministic stub is the only
- * implementation. It makes no network calls and its output is labelled
- * "[STUB]". A real provider replaces this in Phase 4B+.
+ * Picks the provider. Fails closed: there is no default, so a missing or
+ * incomplete configuration means AI processing does not run (customers are
+ * unaffected — finalize still answers 202).
+ *
+ *   SERVICE_AI_PROVIDER=openai  requires OPENAI_API_KEY; model from
+ *                               SERVICE_AI_MODEL_TRANSCRIBE (default gpt-transcribe)
+ *   SERVICE_AI_PROVIDER=stub    deterministic placeholder; refused in Production
  */
-export function getServiceAiProvider(): ServiceAiProvider {
-  return createStubServiceAiProvider();
+export function resolveServiceAiProvider(env: NodeJS.ProcessEnv = process.env): ProviderResolution {
+  const choice = env.SERVICE_AI_PROVIDER?.trim().toLowerCase() ?? "";
+  if (!choice) return { ok: false, reason: "provider_not_selected" };
+  if (choice === "stub") {
+    if (env.VERCEL_ENV === "production") return { ok: false, reason: "stub_not_allowed_in_production" };
+    return { ok: true, provider: createStubServiceAiProvider() };
+  }
+  if (choice === "openai") {
+    const apiKey = env.OPENAI_API_KEY?.trim();
+    if (!apiKey) return { ok: false, reason: "openai_key_missing" };
+    const model = env.SERVICE_AI_MODEL_TRANSCRIBE?.trim() || DEFAULT_TRANSCRIBE_MODEL;
+    return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model }) };
+  }
+  return { ok: false, reason: "unknown_provider" };
 }

@@ -16,8 +16,11 @@ import { REPORT_SCHEMA_VERSION, type ServiceCallReport, type UrgencyIndicator } 
 import { validateReportContent, withMandatoryUnknowns, type ValidationContext } from "./report-validation";
 import { RunNotOwnedError, type AiRun, type AiRunStore, type RequestContext } from "./run-store";
 import { detectSafetyFlags } from "./safety";
+import { assessTranscriptCompleteness } from "./transcript-quality";
 
-export const PIPELINE_VERSION = "4a.1";
+export const PIPELINE_VERSION = "4b.1";
+/** Run error code when the provider has no report synthesis yet (see AI.md). */
+export const REPORT_STAGE_UNAVAILABLE = "report_stage_not_available";
 /** Synthesis attempts per run when output fails validation. */
 const SYNTHESIS_ATTEMPTS = 2;
 
@@ -31,6 +34,8 @@ export interface PipelineDeps {
 
 export type RunOutcome =
   | { runId: string; outcome: "COMPLETED" | "PARTIAL"; reportVersion: number }
+  /** The provider can't synthesise reports yet (Phase 4B): evidence was prepared and cached, no report. */
+  | { runId: string; outcome: "EVIDENCE_PREPARED"; errorCode: string }
   | { runId: string; outcome: "FAILED" | "REQUEUED"; errorCode: string }
   | { runId: string; outcome: "LOST_LEASE" };
 
@@ -72,6 +77,16 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       if (step.observations) observations.push(...step.observations.map((o) => ({ ...o, label })));
     }
     await keepLease();
+
+    if (!provider.capabilities.synthesise) {
+      // Phase 4B: transcripts are prepared and cached for when report
+      // synthesis exists (4C). No report is produced; the run ends with an
+      // explicit, non-retryable reason so automatic triggers don't repeat it.
+      const detail = { stage: "report", media: coverage.map((c) => ({ mediaId: c.mediaId, type: c.type, outcome: c.outcome, reasonCode: c.reasonCode })) };
+      const updated = await store.fail({ runId: run.id, worker, errorCode: REPORT_STAGE_UNAVAILABLE, errorDetail: detail, retryable: false, usage });
+      if (!updated) return { runId: run.id, outcome: "LOST_LEASE" };
+      return { runId: run.id, outcome: "EVIDENCE_PREPARED", errorCode: REPORT_STAGE_UNAVAILABLE };
+    }
 
     const analysed = new Set(coverage.filter((c) => c.outcome === "ANALYSED").map((c) => c.mediaId));
     const input = buildServiceAiInput(
@@ -126,6 +141,8 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       // Staff see the transcript as transcribed (not scrubbed) next to the recording.
       transcripts: [...transcriptByMedia.values()].map((t) => ({
         mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, language: t.language, text: t.text, machineGenerated: true as const,
+        noSpeechDetected: t.noSpeechDetected ?? false,
+        possiblyIncomplete: t.possiblyIncomplete ?? false,
       })),
       safetyFlags,
       content,
@@ -176,6 +193,8 @@ async function processMedia(
     // Frame sampling and video audio arrive in Phase 4E.
     return { outcome: "SKIPPED", reasonCode: "video_processing_not_available" };
   }
+  if (media.type === "VOICE" && !provider.capabilities.transcribe) return { outcome: "SKIPPED", reasonCode: "transcription_not_available" };
+  if (media.type === "PHOTO" && !provider.capabilities.observe) return { outcome: "SKIPPED", reasonCode: "image_analysis_not_available" };
   const kind = media.type === "VOICE" ? "TRANSCRIPT" : "IMAGE_OBSERVATIONS";
   const model = media.type === "VOICE" ? provider.models.transcribe : provider.models.vision;
   const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion: provider.promptVersion });
@@ -193,8 +212,15 @@ async function processMedia(
       tally.count("transcribeCalls");
       const res = await provider.transcribe({ mediaId: media.id, label, mimeType: media.mimeType, read });
       tally.addUsage(res.usage);
-      await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result: null, transcriptText: res.text, language: res.language, errorCode: null, usage: res.usage, ...meta });
-      return fromAnalysis(media, res.text, res.language, null);
+      // Duration: as measured by the provider, else as recorded by the browser.
+      const duration = res.usage.openaiTranscribeSeconds ?? media.durationSeconds;
+      const result = {
+        languages: res.languages ?? (res.language ? [res.language] : []),
+        noSpeechDetected: !res.text.trim(),
+        completeness: assessTranscriptCompleteness(res.text, duration),
+      };
+      await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result, transcriptText: res.text, language: res.language, errorCode: null, usage: res.usage, ...meta });
+      return fromAnalysis(media, res.text, res.language, result);
     }
     tally.count("observeCalls");
     const res = await provider.observe({ items: [{ mediaId: media.id, label, type: "PHOTO", mimeType: media.mimeType, read }], productCategories: ctx.request.productCategories });
@@ -204,15 +230,29 @@ async function processMedia(
     return { outcome: "ANALYSED", reasonCode: null, observations: own };
   } catch (err) {
     if (!(err instanceof ServiceAiProviderError)) throw err;
+    // Provider-wide problems (e.g. rejected credentials) stop the run; they say nothing about this file.
+    if (err.scope === "run") throw new RunFailure(err.code, err.retryable);
     if (err.retryable && !tally.lastAttempt) throw new RunFailure(err.code, true);
-    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "FAILED", result: null, transcriptText: null, language: null, errorCode: err.code, usage: {}, ...meta });
-    return { outcome: "FAILED", reasonCode: err.code };
+    const status = err.skipped ? "SKIPPED" : "FAILED";
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status, result: null, transcriptText: null, language: null, errorCode: err.code, usage: {}, ...meta });
+    return { outcome: status, reasonCode: err.code };
   }
 }
 
 function fromAnalysis(media: RequestContext["media"][number], text: string | null, language: string | null, result: Record<string, unknown> | null): MediaStep {
   if (media.type === "VOICE") {
-    return { outcome: "ANALYSED", reasonCode: null, transcript: { mediaId: media.id, kind: "VOICE_NOTE", text: text ?? "", language } };
+    return {
+      outcome: "ANALYSED",
+      reasonCode: null,
+      transcript: {
+        mediaId: media.id,
+        kind: "VOICE_NOTE",
+        text: text ?? "",
+        language,
+        noSpeechDetected: result?.noSpeechDetected === true || !(text ?? "").trim(),
+        possiblyIncomplete: (result?.completeness as { possiblyIncomplete?: unknown } | undefined)?.possiblyIncomplete === true,
+      },
+    };
   }
   const observations = Array.isArray(result?.observations) ? (result.observations as RawObservation[]) : [];
   return { outcome: "ANALYSED", reasonCode: null, observations };

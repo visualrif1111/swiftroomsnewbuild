@@ -90,8 +90,13 @@ create request ──▶ reference + upload token
 
 ## AI processing (Phase 4)
 
-Full detail: [AI.md](./AI.md). **Phase 4A is the foundation only. The provider
-is a deterministic stub, and there are no real AI calls.**
+Full detail: [AI.md](./AI.md).
+- **Phase 4A:** foundation.
+- **Phase 4B:** OpenAI voice transcription. Audio is read server-side from the
+  private bucket and only the bytes and model are sent; transcripts are cached
+  per file.
+- **No report is generated with the real provider until 4C.** AI is off
+  (`SERVICE_AI_ENABLED` unset) in every deployed environment.
 
 ```
 Finish ─▶ POST …/finalize (upload token, fire-and-forget, always 202)

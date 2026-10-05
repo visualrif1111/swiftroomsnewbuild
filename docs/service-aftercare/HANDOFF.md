@@ -11,8 +11,9 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 1 | Service Call wizard UX/UI | Complete |
 | 2 | Supabase backend, real service requests, idempotent submit | Complete |
 | 3 | Private media evidence uploads (Supabase Storage) | **COMPLETE / APPROVED / CLOSED** |
-| 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | Implemented: awaiting approval |
-| 4B–4F | Voice, report synthesis, photos, video, evaluation | Not started |
+| 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | **APPROVED / CLOSED** (`7574a09`) |
+| 4B | Voice transcription (OpenAI) | Implemented: awaiting closure approval |
+| 4C–4F | Report synthesis, photos, video, evaluation | Not started |
 
 ### Phase 3
 
@@ -39,6 +40,23 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
   concurrency) and test data torn down.
 - `SERVICE_AI_ENABLED` is unset everywhere, so processing is off. Finalize still
   returns 202, so customers are unaffected.
+
+### Phase 4B
+
+- OpenAI transcription (`gpt-transcribe` by default) behind the provider
+  interface.
+- Audio is read server-side from the private bucket; only the audio bytes and
+  model are sent.
+- Transcripts are cached in `service_media_analyses`.
+- No report is produced until 4C.
+- **Transcripts are assistive, not authoritative.** The original recording
+  remains the evidence.
+- **Confirmed limitation:** English spoken after Arabic in the same recording
+  was dropped by `gpt-transcribe`; no hint, prompt or alternative OpenAI model
+  fixed it. Mitigation (Option A, approved): a conservative "may be
+  incomplete" flag; nothing is reconstructed. See AI.md.
+- `OPENAI_API_KEY` is set in **Vercel Development only**. Preview and
+  Production have no key, and AI stays disabled everywhere.
 
 ## ⛔ Pre-production blockers
 
@@ -70,6 +88,10 @@ Do not link `/service-call` publicly until these are resolved.
      (PDPL basis, OpenAI data retention: ZDR/MAM) must be in place.
    - Never enable it in Production while the provider is the stub.
    - Apply migration 0003 to the Production project with 0001 and 0002.
+   - **OpenAI data retention:** by default, API data sits in abuse-monitoring
+     logs for up to 30 days. Decide on Zero Data Retention or Modified Abuse
+     Monitoring (needs OpenAI approval) and disclose AI processing of voice
+     recordings to customers before enabling in Production.
 8. **AI sweep not scheduled.** `POST /api/service-requests/maintenance/process-ai`
    (admin token) needs a scheduled job (e.g. every 10 min, Production cron),
    as does `cleanup-media`.
@@ -111,4 +133,18 @@ the same, so testers should use that.
 - The forbidden-claim and safety keyword rules are deterministic and
   English-only. They complement strict schema output and human review; they
   don't replace them.
+- **Future enhancement: audio segmentation and conversion (decided out of 4B).**
+  - Splitting recordings at pauses before transcription would likely recover
+    mixed-language content.
+  - Converting Ogg/Opus, raw AAC and 3GPP would let those be transcribed.
+  - Both need audio decoding (ffmpeg in a Function, a media worker, or Vercel
+    Sandbox) and should be designed together, before real customer audio is
+    processed.
+- **Voice formats not transcribed (SKIPPED in 4B by decision):** uploaded Ogg/Opus
+  (e.g. WhatsApp voice notes), raw AAC and 3GPP are accepted by Phase 3 but not
+  documented by OpenAI. They are SKIPPED, not converted. The in-app recorder
+  (WebM/MP4) and common uploads (m4a, mp3, wav) are covered. Options:
+  - ffmpeg in a Vercel Function (static binary, larger bundle, cold start);
+  - a separate media worker or Vercel Sandbox;
+  - narrowing the accepted voice formats.
 

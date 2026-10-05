@@ -4,7 +4,7 @@
 // to customers.
 import { NextRequest, NextResponse } from "next/server";
 import { deriveAiStatus } from "@/lib/service-call/ai/run-store";
-import { isServiceAiEnabled } from "@/lib/service-call/server/ai-config";
+import { isServiceAiEnabled, resolveServiceAiProvider } from "@/lib/service-call/server/ai-config";
 import { supabaseAiStore } from "@/lib/service-call/server/ai-store";
 import { isAdmin, NO_STORE, REFERENCE_PATTERN, serverFailure } from "@/lib/service-call/server/http";
 
@@ -17,16 +17,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ refe
   try {
     const request = await supabaseAiStore.findRequestByReference(reference);
     if (!request) return notFound();
-    const [runs, reports] = await Promise.all([supabaseAiStore.listRuns(request.id), supabaseAiStore.listReports(request.id)]);
+    const [runs, reports, mediaAnalyses] = await Promise.all([
+      supabaseAiStore.listRuns(request.id),
+      supabaseAiStore.listReports(request.id),
+      supabaseAiStore.listAnalyses(request.id),
+    ]);
+    const provider = resolveServiceAiProvider();
     return NextResponse.json(
       {
         reference: request.reference,
         aiEnabled: isServiceAiEnabled(),
+        // Which provider would run, or why none would (never the key itself).
+        aiProvider: provider.ok ? { id: provider.provider.id, models: provider.provider.models } : { id: null, problem: provider.reason },
         aiStatus: deriveAiStatus(runs),
         latestReportVersion: reports.findLast((r) => !r.supersededAt)?.version ?? null,
         // Lease owners are internal worker ids; not returned.
         runs: runs.map((run) => ({ ...run, leaseOwner: undefined })),
         reports,
+        // Derived per-file results (e.g. transcripts). The original files remain the source records.
+        mediaAnalyses,
       },
       { headers: NO_STORE },
     );

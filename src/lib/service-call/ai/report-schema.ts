@@ -187,7 +187,7 @@ export interface ServiceCallReport {
     mediaCoverage: { mediaId: string; label: string; type: EvidenceType; outcome: MediaCoverageOutcome; reasonCode: string | null }[];
   };
   mediaSummary: { photos: number; videos: number; voiceNotes: number };
-  transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; language: string | null; text: string; machineGenerated: true }[];
+  transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; language: string | null; text: string; machineGenerated: true; noSpeechDetected: boolean; possiblyIncomplete: boolean }[];
   /** Deterministic keyword net over customer text — independent of the AI. */
   safetyFlags: { indicator: UrgencyIndicator; matchedIn: "DESCRIPTION" | "TRANSCRIPT" }[];
   content: ServiceCallReportContent;

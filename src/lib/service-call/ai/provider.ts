@@ -22,8 +22,12 @@ export interface TranscribeRequest {
 }
 
 export interface TranscribeResult {
+  /** What was said, in the original language(s). Empty when no speech was recognised. */
   text: string;
+  /** Primary detected language (e.g. "en", "ar"), if the provider reports one. */
   language: string | null;
+  /** Every detected language, for mixed-language recordings. */
+  languages?: string[];
   usage: ProviderUsage;
 }
 
@@ -59,8 +63,14 @@ export interface SynthesisResult {
 }
 
 export interface ServiceAiProvider {
-  /** Stored on runs and reports, e.g. "stub". */
+  /** Stored on runs and reports, e.g. "stub", "openai". */
   readonly id: string;
+  /**
+   * What this provider can do. The pipeline never calls a step a provider
+   * doesn't offer: unsupported media is reported as SKIPPED, and without
+   * synthesis the run stops after preparing evidence (no report).
+   */
+  readonly capabilities: { transcribe: boolean; observe: boolean; synthesise: boolean };
   readonly models: { transcribe: string; vision: string; report: string };
   /** Identifies prompts/instructions; part of cache keys and run provenance. */
   readonly promptVersion: string;
@@ -70,16 +80,25 @@ export interface ServiceAiProvider {
 }
 
 /**
- * A provider call failed. `retryable` (outage, rate limit, timeout) sends the
- * run back to the queue; otherwise the media item or run fails for good.
- * `code` is an internal identifier — never provider text or customer data.
+ * A provider call failed. `code` is an internal identifier — never provider
+ * text or customer data.
+ *   retryable  outage, rate limit, timeout: the run goes back to the queue
+ *   scope      "media": only this file is affected (FAILED/SKIPPED, others continue)
+ *              "run":   the whole run stops (e.g. provider credentials rejected)
+ *   skipped    the file can't be processed by this provider (e.g. an audio
+ *              format it doesn't accept): reported as SKIPPED, not FAILED
  */
 export class ServiceAiProviderError extends Error {
+  public readonly scope: "media" | "run";
+  public readonly skipped: boolean;
   constructor(
     public readonly code: string,
     public readonly retryable: boolean,
+    options: { scope?: "media" | "run"; skipped?: boolean } = {},
   ) {
     super(`AI provider error: ${code}`);
     this.name = "ServiceAiProviderError";
+    this.scope = options.scope ?? "media";
+    this.skipped = options.skipped ?? false;
   }
 }

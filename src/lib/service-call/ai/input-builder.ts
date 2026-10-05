@@ -41,6 +41,10 @@ export interface TranscriptForAi {
   kind: "VOICE_NOTE" | "VIDEO_AUDIO";
   text: string;
   language: string | null;
+  /** Transcription ran but recognised no speech: preserved, never guessed at. */
+  noSpeechDetected?: boolean;
+  /** Heuristic: the transcript may not contain everything said (transcript-quality.ts). */
+  possiblyIncomplete?: boolean;
 }
 
 export interface ServiceAiInput {
@@ -51,7 +55,7 @@ export interface ServiceAiInput {
     existingCustomer: boolean | null;
   };
   evidence: { mediaId: string; label: string; type: EvidenceType; durationSeconds: number | null }[];
-  transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; text: string; language: string | null }[];
+  transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; text: string; language: string | null; noSpeechDetected: boolean; possiblyIncomplete: boolean }[];
 }
 
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
@@ -99,6 +103,6 @@ export function buildServiceAiInput(
     evidence: media.map((m) => ({ mediaId: m.mediaId, label: labels.get(m.mediaId)!, type: m.type, durationSeconds: m.durationSeconds })),
     transcripts: transcripts
       .filter((t) => labels.has(t.mediaId))
-      .map((t) => ({ mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, text: scrubFreeText(t.text, known), language: t.language })),
+      .map((t) => ({ mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, text: scrubFreeText(t.text, known), language: t.language, noSpeechDetected: t.noSpeechDetected ?? false, possiblyIncomplete: t.possiblyIncomplete ?? false })),
   };
 }

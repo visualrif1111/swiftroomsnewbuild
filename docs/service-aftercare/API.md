@@ -238,6 +238,8 @@ placeholders labelled `[STUB]`.
 - `aiStatus` is `NOT_STARTED` when there are no runs, otherwise the latest run's status.
 - `runs[]`: number, trigger, status, attempts, versions, provider/models, error code and detail, usage, timestamps. Lease owners are omitted.
 - `reports[]`: every version, with `aiReport` (schema `scr-1`), provenance and review fields.
+- `aiProvider`: `{ "id": "openai", "models": { … } }` or `{ "id": null, "problem": "openai_key_missing" }`. Never a key.
+- `mediaAnalyses[]` (Phase 4B): cached per-file results, newest first: `mediaId`, `kind` (`TRANSCRIPT`…), `status`, `provider`, `model`, `promptVersion`, `language`, `transcript`, `result` (`{ languages, noSpeechDetected, completeness }`; `completeness.possiblyIncomplete` means "may be incomplete", AI.md), `errorCode`, `usage`, `inputHash`, `runId`, timestamps. Derived data; the original audio remains the source record.
 
 ### POST /api/service-requests/:reference/ai/reprocess
 
@@ -249,13 +251,16 @@ report version. Cached per-file results are reused.
 | 202 | `{ "outcome": "created", "run": { … } }` (processing starts after the response) |
 | 200 | `{ "outcome": "active_run_exists", "run": { … } }` |
 | 409 | `{ "error": "ai_disabled" }` when `SERVICE_AI_ENABLED` is off |
+| 409 | `{ "error": "ai_not_configured", "reason": "…" }` when enabled without a valid provider configuration |
 
 ### POST /api/service-requests/maintenance/process-ai
 
 The sweep. It queues settled, unprocessed requests (last 72 h), recovers
 expired leases and processes up to 3 runs. Returns
 `{ "enabled", "enqueued": [{ requestId, outcome }], "results": [{ runId, outcome, … }] }`,
-or `{ "enabled": false, … }` when disabled. No report content. **No cron is
+`{ "enabled": false, … }` when disabled, or `{ "enabled": true, "configured": false, … }`
+when misconfigured. In 4B a run with the OpenAI provider reports
+`"outcome": "EVIDENCE_PREPARED"`: transcripts were cached, and no report exists yet. No report content. **No cron is
 configured yet.**
 
 ## Example

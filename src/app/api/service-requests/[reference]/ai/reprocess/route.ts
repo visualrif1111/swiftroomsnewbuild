@@ -22,6 +22,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ref
     const request = await supabaseAiStore.findRequestByReference(reference);
     if (!request) return notFound();
     const result = await enqueueAiProcessing(request.id, "MANUAL", "admin");
+    if (result.outcome === "not_configured") {
+      return NextResponse.json({ error: "ai_not_configured", reason: result.reason }, { status: 409, headers: NO_STORE });
+    }
     if (result.outcome === "created") {
       after(async () => {
         try {

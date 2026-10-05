@@ -78,6 +78,7 @@ export const supabaseAiStore: AiRunStore & {
   findRequestByReference(reference: string): Promise<{ id: string; reference: string } | null>;
   listRuns(requestId: string): Promise<AiRun[]>;
   listReports(requestId: string): Promise<AiReport[]>;
+  listAnalyses(requestId: string): Promise<Record<string, unknown>[]>;
   readMedia(mediaId: string): Promise<Uint8Array>;
 } = {
   async loadRequestContext(requestId) {
@@ -222,6 +223,21 @@ export const supabaseAiStore: AiRunStore & {
   async listReports(requestId) {
     const rows = await supabaseJson<unknown[]>(`/rest/v1/service_ai_reports?service_request_id=${eq(requestId)}&select=*&order=version.asc`);
     return rows.map(toReport);
+  },
+
+  /** Per-file AI results (transcripts etc.) for one request, newest first. Admin read only. */
+  async listAnalyses(requestId) {
+    const media = await supabaseJson<{ id: string }[]>(`/rest/v1/service_media?service_request_id=${eq(requestId)}&select=id`);
+    if (!media.length) return [];
+    const ids = media.map((m) => m.id).join(",");
+    const rows = await supabaseJson<Record<string, unknown>[]>(
+      `/rest/v1/service_media_analyses?media_id=in.(${ids})&select=media_id,kind,status,provider,model,prompt_version,language,transcript_text,result,error_code,usage,input_hash,run_id,created_at,updated_at&order=created_at.desc`,
+    );
+    return rows.map((r) => ({
+      mediaId: r.media_id, kind: r.kind, status: r.status, provider: r.provider, model: r.model, promptVersion: r.prompt_version,
+      language: r.language, transcript: r.transcript_text, result: r.result, errorCode: r.error_code, usage: r.usage,
+      inputHash: r.input_hash, runId: r.run_id, createdAt: r.created_at, updatedAt: r.updated_at,
+    }));
   },
 
   /** Original bytes of an UPLOADED evidence file, read with the service role. Never a URL. */
