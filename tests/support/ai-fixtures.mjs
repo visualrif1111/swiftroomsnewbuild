@@ -5,6 +5,10 @@ export const PHOTO_ID = "11111111-1111-4111-8111-111111111111";
 export const VIDEO_ID = "22222222-2222-4222-8222-222222222222";
 export const VOICE_ID = "33333333-3333-4333-8333-333333333333";
 
+export const DESCRIPTION = "The living room sliding door catches halfway when opening. It started last week.";
+export const VOICE_TEXT = "Hi, the sliding door has been like this since last week and it makes a grinding noise.";
+
+/** Validation context with visual analysis available (4A/stub-style). */
 export const CONTEXT = {
   evidence: [
     { mediaId: PHOTO_ID, type: "PHOTO", analysed: true, durationSeconds: null },
@@ -12,7 +16,26 @@ export const CONTEXT = {
     { mediaId: VOICE_ID, type: "VOICE", analysed: true, durationSeconds: 30 },
   ],
   safetyFlags: [],
+  sources: { description: DESCRIPTION, transcripts: [{ mediaId: VOICE_ID, text: VOICE_TEXT, possiblyIncomplete: false }] },
+  visualAnalysis: true,
+  maxConfidence: "MEDIUM",
 };
+
+/** Phase 4C context: text + voice only, no visual analysis. */
+export const TEXT_ONLY_CONTEXT = {
+  ...CONTEXT,
+  evidence: CONTEXT.evidence.map((e) => (e.type === "VOICE" ? e : { ...e, analysed: false })),
+  visualAnalysis: false,
+};
+
+/** Phase 4C-shaped content: no observations, nothing media-based. */
+export function textOnlyContent() {
+  const c = validContent();
+  c.mediaObservations = [];
+  c.customerReported.reportedSymptoms.forEach((s) => (s.statementRefs = s.statementRefs.filter((r) => r.startsWith("st-"))));
+  c.potentialIssueCategories = [{ category: "OPERATION_STIFF_OR_STUCK", likelihood: "LIKELY", basedOnRefs: ["st-1"] }];
+  return c;
+}
 
 /** A complete, valid report content object (fresh copy each call). */
 export function validContent() {
@@ -20,8 +43,8 @@ export function validContent() {
     issueSummary: "Customer reports the living room sliding door catches halfway when opening.",
     customerReported: {
       statements: [
-        { id: "st-1", text: "The sliding door catches halfway when opening.", source: { type: "DESCRIPTION", mediaId: null } },
-        { id: "st-2", text: "Customer says it started last week and makes a grinding noise.", source: { type: "VOICE_NOTE", mediaId: VOICE_ID } },
+        { id: "st-1", text: "The sliding door catches halfway when opening.", quote: "sliding door catches halfway when opening", source: { type: "DESCRIPTION", mediaId: null } },
+        { id: "st-2", text: "Customer says it started last week and makes a grinding noise.", quote: "it makes a grinding noise", source: { type: "VOICE_NOTE", mediaId: VOICE_ID } },
       ],
       reportedSymptoms: [
         { id: "sy-1", symptom: "Door catches halfway", statementRefs: ["st-1"] },

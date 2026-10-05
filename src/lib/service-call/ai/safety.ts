@@ -13,7 +13,9 @@ export type ForbiddenClaimRule =
   | "WARRANTY_CONFIRMATION"
   | "APPOINTMENT_COMMITMENT"
   | "MEASUREMENT"
-  | "DEFINITIVE_DIAGNOSIS";
+  | "DEFINITIVE_DIAGNOSIS"
+  | "LIABILITY"
+  | "ELIGIBILITY_OR_APPROVAL";
 
 const RULES: { rule: ForbiddenClaimRule; pattern: RegExp }[] = [
   { rule: "PRICE_OR_QUOTE", pattern: /\b(aed|dhs?|dirhams?|usd|eur|gbp)\s?\d|\d[\d,.]*\s?(aed|dhs?|dirhams?|usd)\b|[$€£]\s?\d|\bfree of charge\b|\bat no (extra |additional )?(cost|charge)\b|\b(price|cost|quote|quotation|fee|charge)s?\s+(is|are|will be|would be)\s+(about|around|approximately|roughly|only)?\s*\d/i },
@@ -21,6 +23,8 @@ const RULES: { rule: ForbiddenClaimRule; pattern: RegExp }[] = [
   { rule: "WARRANTY_CONFIRMATION", pattern: /\bcover(s|ed)? (by|under) (the |a |your )?(manufacturer'?s? )?warrant(y|ies)\b|\b(is|are|it's|remains?) (still )?(under|within|in) warranty\b|\bwarranty (covers|applies|will cover|is valid)\b|\b(eligible|qualif(y|ies)) (for|under) (the )?warranty\b/i },
   { rule: "APPOINTMENT_COMMITMENT", pattern: /\b(appointment|visit|inspection)\s+(is|has been|will be)\s+(booked|confirmed|scheduled|arranged)\b|\b(we|an engineer|a technician)\s+will\s+(visit|attend|come)\s+(on|at|tomorrow|today)\b/i },
   { rule: "MEASUREMENT", pattern: /\b\d+(\.\d+)?\s?(mm|cm|m|metres?|meters?|millimet(re|er)s?|centimet(re|er)s?|inch(es)?|ft|feet|foot|kg)\b|\b\d+(\.\d+)?\s?(["″]|°c)/i },
+  { rule: "LIABILITY", pattern: /\b(our|swift rooms'?s?|the installer'?s?|installation|manufacturing|manufacturer'?s?) (fault|error|defect|mistake)\b|\b(you are|the customer is|the homeowner is|the owner is) (responsible|liable|at fault)\b|\b(caused by|due to|result of) (poor|incorrect|improper|faulty|bad|careless) (installation|workmanship|maintenance|use|handling)\b|\bnot (our|swift rooms'?s?) responsibility\b|\b(is|are) liable\b|\bliability (is|lies|rests)\b/i },
+  { rule: "ELIGIBILITY_OR_APPROVAL", pattern: /\b(is|are|will be) (eligible|approved) for\b|\b(qualifies|qualify) for (a |an |the )?(repair|replacement|refund|compensation|free)\b|\b(replacement|repair|refund) (is|has been) (approved|authori[sz]ed)\b|\bwill be replaced (free|at no)\b/i },
   { rule: "DEFINITIVE_DIAGNOSIS", pattern: /\b(has|have) (failed|broken down|worn out)\b|\b(is|are) (faulty|defective|failed)\b|\bthe (root )?cause (is|was)\b|\b(caused by|due to) (a |the )?(faulty|failed|broken|defective)\b|\b(needs?|requires?) (to be )?replac(ed|ing|ement)\b|\bmust be replaced\b|\bdefinitely\b/i },
 ];
 

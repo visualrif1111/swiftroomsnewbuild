@@ -117,9 +117,9 @@ test("transcript is preserved verbatim: no rewriting, only control characters re
   assert.deepEqual(parseTranscription({ text: "x", language: "ur" }).languages, ["ur"], "legacy single language field");
 });
 
-test("observe/synthesise are not offered in 4B", async () => {
+test("image observation is not offered (4D); synthesis is (4C)", async () => {
   const { p, calls } = provider(ok({ text: "x" }));
-  assert.deepEqual(p.capabilities, { transcribe: true, observe: false, synthesise: false });
+  assert.deepEqual(p.capabilities, { transcribe: true, observe: false, synthesise: true });
   await rejectsWith(p.observe({ items: [], productCategories: [] }), { code: "image_analysis_not_available", skipped: true });
   assert.equal(calls.length, 0);
 });

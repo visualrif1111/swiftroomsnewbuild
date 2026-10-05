@@ -12,8 +12,9 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 2 | Supabase backend, real service requests, idempotent submit | Complete |
 | 3 | Private media evidence uploads (Supabase Storage) | **COMPLETE / APPROVED / CLOSED** |
 | 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | **APPROVED / CLOSED** (`7574a09`) |
-| 4B | Voice transcription (OpenAI) | Implemented: awaiting closure approval |
-| 4C–4F | Report synthesis, photos, video, evaluation | Not started |
+| 4B | Voice transcription (OpenAI) | **APPROVED / CLOSED** (`c28d7d4`) |
+| 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | Implemented: awaiting closure approval |
+| 4D–4F | Photos, video, evaluation | Not started |
 
 ### Phase 3
 
@@ -57,6 +58,19 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
   incomplete" flag; nothing is reconstructed. See AI.md.
 - `OPENAI_API_KEY` is set in **Vercel Development only**. Preview and
   Production have no key, and AI stays disabled everywhere.
+
+### Phase 4C
+
+- Internal Service Call Reports (schema `scr-1.1`) synthesised by OpenAI
+  (`gpt-6.1-sol`, Responses API, strict schema, `store:false`) from the
+  customer's text and voice transcripts only. No photo or video analysis.
+- **Fails closed.** A report is stored only if it passes API, structure,
+  verbatim-quote provenance, semantic, forbidden-claim and size validation.
+  Otherwise there is one corrective attempt with our rule codes, then FAILED.
+- Contradictions are preserved (`CONFLICTING_CUSTOMER_INFORMATION`).
+  `possiblyIncomplete` stays advisory. Confidence is never HIGH.
+- No customer-facing output and no change to the service request lifecycle.
+  AI remains off everywhere.
 
 ## ⛔ Pre-production blockers
 

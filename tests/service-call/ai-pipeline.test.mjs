@@ -36,7 +36,7 @@ test("finalize → worker → stub report v1 (photo + voice: COMPLETED)", async 
   assert.equal(rep.provider, "stub");
   assert.equal(rep.review_status, "AWAITING_REVIEW");
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1");
+  assert.equal(r.schemaVersion, "scr-1.1");
   assert.equal(r.processing.status, "COMPLETED");
   assert.deepEqual(r.processing.mediaCoverage.map((c) => [c.label, c.outcome]), [["Photo 1", "ANALYSED"], ["Voice note 1", "ANALYSED"]]);
   assert.deepEqual(r.mediaSummary, { photos: 1, videos: 0, voiceNotes: 1 });

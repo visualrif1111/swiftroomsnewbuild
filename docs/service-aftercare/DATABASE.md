@@ -168,6 +168,12 @@ Phase 4B transcripts use `kind = 'TRANSCRIPT'`:
 
 No schema change was needed for 4B.
 
+**Phase 4C: no database change.**
+- Reports now hold schema `scr-1.1` in `ai_report`.
+- `prompt_version` holds the **report** prompt version (`openai-report-1`).
+- Transcript cache rows keep their own `prompt_version` (`openai-transcribe-1`).
+- `models` records the report model, prompt version and prompt hash.
+
 ### AI functions (service role only)
 
 | function | purpose |

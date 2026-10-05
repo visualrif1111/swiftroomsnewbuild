@@ -8,11 +8,13 @@ customer.
 > **Status:**
 > - **Phase 4A:** foundation (queue, leases, versioned reports, validation, privacy boundary).
 > - **Phase 4B:** voice transcription with OpenAI.
+> - **Phase 4C:** report synthesis from the customer's text and voice
+>   transcripts (OpenAI Responses API, strict schema `scr-1.1`).
 >
-> **No Service Call Report is generated with the real provider yet.** Report
-> synthesis arrives in 4C, and photo/video analysis in 4D/4E. AI is **off in
-> every deployed environment** (`SERVICE_AI_ENABLED` unset). The deterministic
-> stub remains for tests and local work.
+> Photos and video are **not analysed** yet (4D/4E), so reports describe only
+> what the customer said. Reports are internal: nothing is shown to customers.
+> AI is **off in every deployed environment** (`SERVICE_AI_ENABLED` unset).
+> The deterministic stub remains for tests and local work.
 
 ## Pipeline
 
@@ -49,7 +51,7 @@ private voice file (service-evidence) ──service role, server-side──▶ b
 | | |
 |---|---|
 | Provider | `server/openai-provider.ts`, behind `ServiceAiProvider`. Selected only with `SERVICE_AI_PROVIDER=openai` and `OPENAI_API_KEY`. |
-| API | `POST /v1/audio/transcriptions`, `multipart/form-data`, `response_format=json` (returns `text`, detected `languages[]`, `usage`). Called with `fetch`: one endpoint, explicit 90 s timeout, no hidden retries (the run queue retries). The OpenAI SDK will be reassessed for 4C structured output. |
+| API | `POST /v1/audio/transcriptions`, `multipart/form-data`, `response_format=json` (returns `text`, detected `languages[]`, `usage`). Called with `fetch`: one endpoint, explicit 90 s timeout, no hidden retries (the run queue retries). Report synthesis (4C) uses `fetch` too: one Responses call per attempt, with no SDK dependency. |
 | Default model | **`gpt-transcribe`**: OpenAI's recommended model for "transcribing recorded speech in its original language" (docs checked 2026-10-05; $0.0045/min). Override with `SERVICE_AI_MODEL_TRANSCRIBE` (for example `gpt-4o-transcribe` or `gpt-4o-mini-transcribe`). The model is recorded on every cached transcript and run. |
 | Sent | The audio bytes as `voice-note.<ext>`, `model`, `response_format`. **Nothing else**: no prompt, keywords, language hints, customer details, reference, original file name or URL. |
 | Not sent | Photos and videos (skipped), the description, any request metadata |
@@ -164,14 +166,12 @@ its history are never touched, and customers never see provider errors.
 
 Provider error messages are discarded. Only these codes are stored.
 
-### Run outcome in 4B
+### Run outcome in 4B (historical)
 
-The OpenAI provider offers transcription only. After preparing evidence, the
-run ends with status `FAILED` and `error_code = report_stage_not_available`.
-`error_detail` lists each file's outcome, and **no report is created**.
-Automatic triggers won't repeat it (same inputs and versions). When 4C ships
-with new pipeline and prompt versions, requests are processed again and the
-cached transcripts are reused.
+In 4B the OpenAI provider offered transcription only. Runs ended `FAILED` with
+`report_stage_not_available` and no report. Since 4C (pipeline `4c.1`, report
+prompt `openai-report-1`), such requests qualify again. Their cached
+transcripts are reused, not redone.
 
 ### Provider selection (fails closed)
 
@@ -195,6 +195,72 @@ reprocess returns `409 ai_not_configured`, the sweep reports
 - Zero Data Retention or Modified Abuse Monitoring need OpenAI's approval.
 - Customer voice recordings must not be sent in Production until this, and the
   customer disclosure, are decided (HANDOFF.md).
+
+## Report synthesis (Phase 4C)
+
+```
+transcripts (cached) + description + selections
+  └─ no usable text?  → run ends insufficient_text_for_report (no model call)
+  └─ buildServiceAiInput()  (allow-list + scrubbing; photos/videos listed as "not analysed")
+       └─ POST /v1/responses  (strict JSON schema scr-1.1, store:false, reasoning low, ≤ 12k output tokens)
+            └─ validate: API → structure → provenance → semantics → safety → size
+                 ├─ fail → ONE corrective attempt carrying only our rule codes → fail → FAILED (no report)
+                 └─ pass → server envelope (coverage, transcripts, safety flags, evidence notices) → report vN
+```
+
+| | |
+|---|---|
+| Input | **Only** the customer's (scrubbed) description, product selections, "other" product, existing-customer flag, and completed transcripts with their advisory flags. Photos and videos appear only as labels marked `analysedInThisPhase: false`. **No media bytes, contact details, references, tokens, paths or URLs.** |
+| API | `POST https://api.openai.com/v1/responses` with `text.format = {type: "json_schema", name: "service_call_report_scr_1_1", schema, strict: true}`, `store: false`, `reasoning.effort` (default `low`), `max_output_tokens: 12000`, and a static `prompt_cache_key` (`service-report-openai-report-1`). No `user`, `metadata` or `safety_identifier`. |
+| Model | `gpt-6.1-sol` by default (`SERVICE_AI_MODEL_REPORT`). `gpt-6-luna` is to be evaluated in 4F. Reasoning effort: `SERVICE_AI_REPORT_REASONING` (`none`/`low`/`medium`/`high`; Sol doesn't support `none`). |
+| Instructions | `ai/prompts/report-v1.ts`, version **`openai-report-1`**. Each report records the model, `reportPromptVersion` and `reportPromptHash` (SHA-256 of instructions plus schema) in `models`. |
+| Schema | `ai/report-json-schema.ts` (strict mode: all properties required, no extras), kept in step with the validator by a parity test |
+| Prompt versions | **Split per capability**: transcribe `openai-transcribe-1` (part of the transcript cache key), report `openai-report-1` (the run's `prompt_version`). Changing the report prompt never invalidates cached transcripts. |
+
+### Provenance rules (validated, not just requested)
+
+- **Customer statements need a verbatim `quote`** (≤ 200 characters) that
+  occurs in the source the model was given: the scrubbed description or that
+  transcript.
+  - Matching ignores only case, spacing, typographic quote and dash styles,
+    edge punctuation, and Arabic diacritics, tatweel and alef forms.
+  - A missing, empty, invented or misattributed quote is rejected.
+  - `text` is an English rendering for staff; `quote` keeps the original
+    language.
+- **Voice transcripts are customer-reported**, never observations. In 4C
+  `mediaObservations` must be empty, and any `MEDIA_OBSERVED` basis is
+  rejected.
+- **Contradictions are preserved, not resolved.** Both statements are kept, plus
+  an unknown with topic **`CONFLICTING_CUSTOMER_INFORMATION`** (new in scr-1.1).
+- **`possiblyIncomplete` is advisory, never proof:**
+  - the transcript is shown with its flag;
+  - the server adds an evidence notice: "may be incomplete (advisory signal,
+    not proof) … listen to the original recording";
+  - a statement citing that transcript requires at least one unknown beyond the
+    mandatory three;
+  - nothing is reconstructed or inferred.
+- **Confidence is never HIGH in 4C**, because reports rest on customer
+  statements alone.
+
+### Failure behaviour (fails closed)
+
+| Situation | Result |
+|---|---|
+| Schema, provenance, semantic, safety or size failure; malformed JSON; output cut off at the token cap | **One** corrective attempt with our rule codes only, then `FAILED` (`invalid_output` / `incomplete_output`), **no report stored** |
+| Refusal or content filter | `FAILED` (`model_refusal` / `content_filtered`), not retried |
+| 429, 5xx, timeout, network | Run requeued (backoff, up to 3 attempts). Cached transcripts are reused. |
+| 401/403, quota, unknown model | Run-wide error, requeued, then `FAILED` |
+| 400 (request or schema rejected) | `FAILED` (`provider_request_rejected`), not retried (configuration problem) |
+| No usable text (empty description and no usable transcript) | No model call; run ends `insufficient_text_for_report` |
+
+### Evidence notices (server-owned, scr-1.1)
+
+`evidenceNotices[]` carries fixed wording, never AI text:
+- `TRANSCRIPT_MAY_BE_INCOMPLETE`;
+- `NO_SPEECH_DETECTED`;
+- `NOT_ANALYSED`: a photo or video in 4C, or audio that couldn't be transcribed.
+
+A request with photos or video is therefore **PARTIAL** in 4C.
 
 ## Code
 
@@ -298,7 +364,7 @@ When disabled:
 
 It is **unset in every environment** today. Production must stay disabled until the launch decisions in [HANDOFF.md](./HANDOFF.md) are made.
 
-## Service Call Report (`scr-1`)
+## Service Call Report (`scr-1.1`)
 
 Stored as `service_ai_reports.ai_report`. It has two layers:
 
@@ -307,7 +373,8 @@ Stored as `service_ai_reports.ai_report`. It has two layers:
 - `processing.status` and `processing.mediaCoverage[]`;
 - `mediaSummary`;
 - `transcripts[]` (machine-generated, shown with the original recording);
-- `safetyFlags[]`: a deterministic keyword net over the customer's own words, independent of the AI.
+- `safetyFlags[]`: a deterministic keyword net over the customer's own words, independent of the AI;
+- `evidenceNotices[]` (scr-1.1): fixed-wording notices about the evidence.
 
 Version, provider, models, prompt/pipeline versions, fingerprint and timestamps are columns.
 
@@ -316,14 +383,14 @@ Version, provider, models, prompt/pipeline versions, fingerprint and timestamps 
 | Field | Notes |
 |---|---|
 | `issueSummary` | ≤ 400 chars, attributed ("Customer reports…") |
-| `customerReported` | `statements[]` (source: DESCRIPTION / VOICE_NOTE / VIDEO_AUDIO), `reportedSymptoms[]` (must cite statements), `reportedOnset`, `locationInProperty` |
+| `customerReported` | `statements[]` (`text`, verbatim `quote` (scr-1.1), source: DESCRIPTION / VOICE_NOTE / VIDEO_AUDIO), `reportedSymptoms[]` (must cite statements), `reportedOnset`, `locationInProperty` |
 | `mediaObservations[]` | evidence `{mediaId, label, frameAtSeconds}`, hedged `observation`, `type`, `certainty` CLEAR/PROBABLE/UNCERTAIN |
-| `unknownsRequiringInspection[]` | WARRANTY, COST and REPAIR_METHOD are **always** present (added by the server) |
+| `unknownsRequiringInspection[]` | WARRANTY, COST and REPAIR_METHOD are **always** present (added by the server). `CONFLICTING_CUSTOMER_INFORMATION` (scr-1.1) records disagreements. |
 | `affectedProducts[]` | product id plus basis (customer-selected, customer-described or media-observed) |
 | `potentialIssueCategories[]` | likelihood POSSIBLE/LIKELY only. There is no "confirmed". |
 | `urgency` | LOW / NORMAL / HIGH / URGENT, `indicators[]` with basis and evidence references, `reason` |
 | `inspection`, `recommendedNextStep`, `moreInformationNeeded[]` | |
-| `confidence` | LOW / MEDIUM / HIGH plus reason (no fake numeric precision) |
+| `confidence` | LOW / MEDIUM / HIGH plus reason (no fake numeric precision). Never HIGH in 4C. |
 | `limitations[]` | |
 
 ### Validation (every report, before storage)
@@ -344,11 +411,14 @@ Version, provider, models, prompt/pipeline versions, fingerprint and timestamps 
    - warranty confirmation;
    - appointment commitments;
    - measurements;
-   - definitive diagnoses.
+   - definitive diagnoses;
+   - liability or responsibility, and eligibility or approval (added in 4C).
 
    Customer statements are attributed and exempt. Unknowns may *discuss* warranty and replacement, but may not commit to them.
 
-An invalid output gets one retry. If it fails again, the run is `FAILED` with internal validation codes in `error_detail` (no customer text), and **nothing is stored as a report**.
+4. **Provenance** (4C): verbatim quotes. **Phase rules** (4C): no observations or `MEDIA_OBSERVED` without visual analysis; confidence ≤ MEDIUM; an extra unknown when citing a possibly-incomplete transcript. **Size**: serialised content ≤ 30,000 characters.
+
+An invalid output gets one corrective retry (with our rule codes only). If it fails again, the run is `FAILED` with internal validation codes in `error_detail` (no customer text), and **nothing is stored as a report**.
 
 The keyword rules are one layer, not a guarantee. They catch the common phrasings and will miss unusual wording. Strict schema output (4B+) and mandatory human review are the other layers.
 
@@ -406,6 +476,10 @@ There are no review endpoints yet: "reviewer" needs real staff identities, which
 | `ai-input-builder.test.mjs` | PII exclusion and scrubbing |
 | `ai-openai-transcribe.test.mjs` | OpenAI provider with HTTP mocked: exact request fields (audio, model, format only), formats and skips, error mapping, malformed responses, verbatim transcripts and languages, fail-closed selection |
 | `ai-transcript-quality.test.mjs` | Completeness flag, calibrated on the real Development samples; never claims missing content |
+| `ai-report-json-schema.test.mjs` | Strict-schema compliance and parity with the validator; fixtures conform |
+| `ai-synthesis-validation.test.mjs` | Quote provenance, normalisation, text-only phase rules, confidence cap, advisory transcript uncertainty, contradictions, liability/eligibility claims, size |
+| `ai-openai-synthesis.test.mjs` | Responses request (exact fields, strict schema, `store:false`, no PII), corrective message carries rule codes only, parsing (refusal, content filter, incomplete, non-JSON), error mapping, configurable model |
+| `ai-synthesis-pipeline.test.mjs` | End-to-end 4C matrix over real SQL: text, voice, text and voice, possibly incomplete, contradiction, vague, urgent, failed audio, no text, multilingual, prompt injection, hallucination, forbidden claims, refusal/incomplete/non-JSON, timeouts and 429/5xx, 401/400, idempotency, reprocess, 4B upgrade, prompt-version split, lifecycle, PII |
 | `ai-transcription-pipeline.test.mjs` | Transcription through the pipeline and real SQL: caching, repeated finalize, reprocess reuse, retry vs permanent, SKIPPED formats, run-wide errors, no PII sent, request untouched, kill switch, fail-closed |
 
 Multi-connection concurrency (`SKIP LOCKED`, simultaneous enqueue/claim) was
@@ -414,7 +488,7 @@ verified against the Development database. PGlite has one connection.
 ## Next phases
 
 - **4B** ✅ voice transcription.
-- **4C**: report synthesis with strict JSON schema output.
+- **4C** ✅ report synthesis (text and voice).
 - **4D**: photos (HEIC, EXIF stripping, observations).
 - **4E**: video (frames plus audio).
 - **4F**: evaluation set, cost controls and reliability.

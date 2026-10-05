@@ -15,6 +15,8 @@ Names only. **Never commit values.** `.env.local` is git-ignored, and
 | `SERVICE_AI_PROVIDER` | server | when AI is enabled | `openai` or `stub`. **No default**: unset means AI fails closed (nothing processed). `stub` is refused when `VERCEL_ENV=production`. |
 | `OPENAI_API_KEY` | server | with `openai` | OpenAI key for transcription (Phase 4B). Use a project-scoped key with a budget limit. Never `NEXT_PUBLIC_`; never logged; only sent to `api.openai.com`. |
 | `SERVICE_AI_MODEL_TRANSCRIBE` | server | no | Transcription model. Default `gpt-transcribe`. |
+| `SERVICE_AI_MODEL_REPORT` | server | no | Report-synthesis model (Phase 4C). Default `gpt-6.1-sol`. Recorded on every run and report. |
+| `SERVICE_AI_REPORT_REASONING` | server | no | Reasoning effort for synthesis: `none`/`low`/`medium`/`high`. Default `low`; an invalid value falls back to the default. |
 | `NEXT_PUBLIC_SERVICE_CALL_CLIENT` | browser | no | Set to `mock` to run the wizard with no backend (nothing is saved). Unset = real API. |
 
 ¹ One of the two keys is required. Without `SUPABASE_URL` and a key, the API
@@ -25,8 +27,10 @@ Only `server/supabase.ts` reads the Supabase variables (used by `store.ts` and
 `media-store.ts`), and it is guarded by `import "server-only"`, so a client
 import fails the build.
 
-**Phase 4A added `SERVICE_AI_ENABLED`. Phase 4B adds `SERVICE_AI_PROVIDER`,
-`OPENAI_API_KEY` and `SERVICE_AI_MODEL_TRANSCRIBE`.**
+**Phase 4A added `SERVICE_AI_ENABLED`. Phase 4B added `SERVICE_AI_PROVIDER`,
+`OPENAI_API_KEY` and `SERVICE_AI_MODEL_TRANSCRIBE`. Phase 4C adds the optional
+`SERVICE_AI_MODEL_REPORT` and `SERVICE_AI_REPORT_REASONING`. Neither is set
+anywhere; the defaults apply.**
 
 Where they are set:
 - Vercel **Development** only: `OPENAI_API_KEY`, for controlled local verification.

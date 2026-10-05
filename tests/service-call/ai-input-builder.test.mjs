@@ -40,7 +40,7 @@ test("AI input carries only allow-listed fields", () => {
   const input = buildServiceAiInput(fullRow, media, transcripts, known);
   assert.deepEqual(Object.keys(input).sort(), ["evidence", "request", "transcripts"]);
   assert.deepEqual(Object.keys(input.request).sort(), ["description", "existingCustomer", "otherProduct", "productCategories"]);
-  assert.deepEqual(Object.keys(input.evidence[0]).sort(), ["durationSeconds", "label", "mediaId", "type"]);
+  assert.deepEqual(Object.keys(input.evidence[0]).sort(), ["analysedInThisPhase", "durationSeconds", "label", "mediaId", "type"]);
   assert.deepEqual(Object.keys(input.transcripts[0]).sort(), ["kind", "label", "language", "mediaId", "noSpeechDetected", "possiblyIncomplete", "text"]);
   assert.equal(input.request.existingCustomer, true);
   assert.deepEqual(input.request.productCategories, ["sliding-door"]);

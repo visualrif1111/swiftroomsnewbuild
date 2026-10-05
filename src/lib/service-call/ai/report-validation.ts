@@ -1,15 +1,19 @@
-// Server-side validation of AI report content (schema "scr-1").
+// Server-side validation of AI report content (schema "scr-1.1").
 //
 // Runs on every report before it can be stored, whatever the provider
 // promised about structured output:
 //   1. structure  — exact shape, closed enums, lengths (no extra fields)
-//   2. semantics  — every reference resolves; observations cite real visual
-//                   evidence; urgency is explained by indicators
-//   3. safety     — forbidden claims (safety.ts)
+//   2. provenance — every customer statement carries a verbatim quote that
+//                   occurs in the source the model was given
+//   3. semantics  — every reference resolves; observations cite real visual
+//                   evidence (none at all in a text-only phase); urgency is
+//                   explained by indicators; confidence capped
+//   4. safety     — forbidden claims (safety.ts)
+//   5. size       — overall output bounded
 // Anything that fails is not a report. Errors are internal codes/paths, never
 // shown to customers.
 import {
-  CERTAINTIES, CONFIDENCE_LEVELS, INDICATOR_BASES, ISSUE_CATEGORIES, LIKELIHOODS, LIMITS,
+  CERTAINTIES, CONFIDENCE_LEVELS, type ConfidenceLevel, INDICATOR_BASES, ISSUE_CATEGORIES, LIKELIHOODS, LIMITS,
   MANDATORY_UNKNOWN_TOPICS, NEXT_STEPS, OBSERVATION_TYPES, PRODUCT_BASES, PRODUCT_IDS,
   STATEMENT_SOURCES, UNKNOWN_TOPICS, URGENCY_INDICATORS, URGENCY_LEVELS, URGENT_INDICATORS,
   type EvidenceType, type ServiceCallReportContent, type UnknownItem, type UrgencyIndicator,
@@ -21,6 +25,45 @@ export interface ValidationContext {
   evidence: { mediaId: string; type: EvidenceType; analysed: boolean; durationSeconds: number | null }[];
   /** Deterministic safety flags raised from the customer's own words. */
   safetyFlags: UrgencyIndicator[];
+  /**
+   * Exactly the text the model was given (scrubbed), so quotes can be
+   * checked against it. Transcripts carry the Phase 4B advisory flag.
+   */
+  sources: { description: string; transcripts: { mediaId: string; text: string; possiblyIncomplete: boolean }[] };
+  /** False when no image/video analysis exists (Phase 4C): no observations allowed at all. */
+  visualAnalysis: boolean;
+  /** Highest confidence the phase allows. */
+  maxConfidence: ConfidenceLevel;
+}
+
+/** Content larger than this (serialised characters) is rejected as not sane. */
+const MAX_CONTENT_CHARS = 30_000;
+
+/**
+ * Normalises text for quote matching only: Unicode compatibility form,
+ * Arabic diacritics/tatweel and alef variants folded, typographic quotes and
+ * dashes unified, case folded, whitespace collapsed. Never used to rewrite
+ * what is stored.
+ */
+export function normaliseForQuote(s: string): string {
+  return s
+    .normalize("NFKC")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+    .replace(/[\u0622\u0623\u0625\u0671]/g, "\u0627")
+    .replace(/[\u2018\u2019\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201F\u2033]/g, '"')
+    .replace(/[\u2010-\u2015]/g, "-")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Quote edges may differ in surrounding punctuation only. */
+const trimEdges = (s: string) => s.replace(/^[\s"'«»“”.,;:!?،؛…-]+|[\s"'«»“”.,;:!?،؛…-]+$/gu, "");
+
+export function quoteOccursIn(quote: string, source: string): boolean {
+  const q = trimEdges(normaliseForQuote(quote));
+  return q.length > 0 && normaliseForQuote(source).includes(q);
 }
 
 export type ReportValidation = { ok: true; value: ServiceCallReportContent } | { ok: false; errors: string[] };
@@ -79,6 +122,8 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
   c.str(r.issueSummary, "issueSummary", LIMITS.issueSummary);
 
   const statementIds = new Set<string>();
+  /** Statements resting on a transcript flagged possibly incomplete (advisory). */
+  const citedUncertain = new Set<string>();
   const symptomIds = new Set<string>();
   const evidenceById = new Map(ctx.evidence.map((e) => [e.mediaId, e]));
   // Ids are shared across statements, symptoms and observations, so refs are unambiguous.
@@ -93,19 +138,31 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     if (c.arr(cr.statements, "customerReported.statements", LIMITS.listItems)) {
       cr.statements.forEach((s, i) => {
         const p = `customerReported.statements[${i}]`;
-        if (!c.exact(s, p, ["id", "text", "source"])) return;
+        if (!c.exact(s, p, ["id", "text", "quote", "source"])) return;
         if (c.str(s.id, `${p}.id`, 20)) addUnique(statementIds, s.id, `${p}.id`);
         c.str(s.text, `${p}.text`, LIMITS.text);
+        const hasQuote = c.str(s.quote, `${p}.quote`, LIMITS.quote);
         if (c.exact(s.source, `${p}.source`, ["type", "mediaId"]) && c.oneOf(s.source.type, `${p}.source.type`, STATEMENT_SOURCES)) {
           const src = s.source;
+          let sourceText: string | null = null;
           if (src.type === "DESCRIPTION") {
             if (src.mediaId !== null) c.err(`${p}.source.mediaId`, "must_be_null_for_description");
+            sourceText = ctx.sources.description;
+            if (!sourceText.trim()) c.err(`${p}.source.type`, "no_description_given");
           } else {
-            // Voice note or video audio: must point at media whose transcript the AI was given.
+            // Voice note or video audio: must point at media whose (non-empty) transcript the AI was given.
             const ev = typeof src.mediaId === "string" ? evidenceById.get(src.mediaId) : undefined;
             const expected = src.type === "VOICE_NOTE" ? "VOICE" : "VIDEO";
-            if (!ev || ev.type !== expected || !ev.analysed) c.err(`${p}.source.mediaId`, "unknown_or_unprocessed_media");
+            const transcript = ctx.sources.transcripts.find((t) => t.mediaId === src.mediaId);
+            if (!ev || ev.type !== expected || !ev.analysed || !transcript || !transcript.text.trim()) {
+              c.err(`${p}.source.mediaId`, "unknown_or_unprocessed_media");
+            } else {
+              sourceText = transcript.text;
+              if (transcript.possiblyIncomplete && typeof s.id === "string") citedUncertain.add(s.id);
+            }
           }
+          // Provenance: the quote must occur verbatim (after normalisation) in that source.
+          if (hasQuote && sourceText !== null && !quoteOccursIn(s.quote as string, sourceText)) c.err(`${p}.quote`, "quote_not_found_in_source");
         }
       });
     }
@@ -127,6 +184,8 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
   const observationIds = new Set<string>();
   const observationCertainty = new Map<string, string>();
   if (c.arr(r.mediaObservations, "mediaObservations", LIMITS.observations)) {
+    // Text-only phase: nothing was looked at, so nothing can be observed.
+    if (!ctx.visualAnalysis && r.mediaObservations.length) c.err("mediaObservations", "observations_not_allowed_without_visual_analysis");
     r.mediaObservations.forEach((o, i) => {
       const p = `mediaObservations[${i}]`;
       if (!c.exact(o, p, ["id", "evidence", "observation", "type", "certainty", "relatesToSymptomRefs"])) return;
@@ -166,13 +225,17 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     });
   }
   for (const topic of MANDATORY_UNKNOWN_TOPICS) if (!unknownTopics.has(topic)) c.err("unknownsRequiringInspection", `missing_mandatory_topic:${topic}`);
+  // A statement resting on a possibly-incomplete transcript must leave room for
+  // what may be missing: at least one unknown beyond the mandatory three.
+  const extraUnknowns = [...unknownTopics].filter((t) => !(MANDATORY_UNKNOWN_TOPICS as readonly string[]).includes(t));
+  if (citedUncertain.size && !extraUnknowns.length) c.err("unknownsRequiringInspection", "uncertain_transcript_without_unknown");
 
   if (c.arr(r.affectedProducts, "affectedProducts", PRODUCT_IDS.length)) {
     r.affectedProducts.forEach((a, i) => {
       const p = `affectedProducts[${i}]`;
       if (!c.exact(a, p, ["category", "basis"])) return;
       c.oneOf(a.category, `${p}.category`, PRODUCT_IDS);
-      c.oneOf(a.basis, `${p}.basis`, PRODUCT_BASES);
+      if (c.oneOf(a.basis, `${p}.basis`, PRODUCT_BASES) && a.basis === "MEDIA_OBSERVED" && !observationIds.size) c.err(`${p}.basis`, "media_basis_without_observation");
     });
   }
 
@@ -228,7 +291,10 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
   c.oneOf(r.recommendedNextStep, "recommendedNextStep", NEXT_STEPS);
   if (c.arr(r.moreInformationNeeded, "moreInformationNeeded", 10)) r.moreInformationNeeded.forEach((m, i) => c.str(m, `moreInformationNeeded[${i}]`, LIMITS.shortText));
   if (c.exact(r.confidence, "confidence", ["overall", "reason"])) {
-    c.oneOf(r.confidence.overall, "confidence.overall", CONFIDENCE_LEVELS);
+    if (c.oneOf(r.confidence.overall, "confidence.overall", CONFIDENCE_LEVELS)
+      && CONFIDENCE_LEVELS.indexOf(r.confidence.overall as ConfidenceLevel) > CONFIDENCE_LEVELS.indexOf(ctx.maxConfidence)) {
+      c.err("confidence.overall", "confidence_above_phase_maximum");
+    }
     c.str(r.confidence.reason, "confidence.reason", LIMITS.shortText);
   }
   if (c.arr(r.limitations, "limitations", 10)) r.limitations.forEach((m, i) => c.str(m, `limitations[${i}]`, LIMITS.shortText));
@@ -241,19 +307,21 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     const content = input as unknown as ServiceCallReportContent;
     const scan = (text: string, path: string, rules?: ForbiddenClaimRule[]) =>
       scanForbiddenClaims(text, rules).forEach((h) => c.err(path, `forbidden_claim:${h.rule}`));
-    scan(content.issueSummary, "issueSummary", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "DEFINITIVE_DIAGNOSIS"]);
+    scan(content.issueSummary, "issueSummary", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "DEFINITIVE_DIAGNOSIS", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]);
     content.mediaObservations.forEach((o, i) => scan(o.observation, `mediaObservations[${i}].observation`));
     content.unknownsRequiringInspection.forEach((u, i) => {
       const rules: ForbiddenClaimRule[] = ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "APPOINTMENT_COMMITMENT", "MEASUREMENT"];
       scan(u.question, `unknownsRequiringInspection[${i}].question`, rules);
       scan(u.whyUnknown, `unknownsRequiringInspection[${i}].whyUnknown`, rules);
     });
-    scan(content.urgency.reason, "urgency.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "MEASUREMENT", "DEFINITIVE_DIAGNOSIS"]);
-    scan(content.inspection.reason, "inspection.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "MEASUREMENT", "DEFINITIVE_DIAGNOSIS"]);
-    content.moreInformationNeeded.forEach((m, i) => scan(m, `moreInformationNeeded[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT"]));
-    scan(content.confidence.reason, "confidence.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT"]);
-    content.limitations.forEach((m, i) => scan(m, `limitations[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT"]));
+    scan(content.urgency.reason, "urgency.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "MEASUREMENT", "DEFINITIVE_DIAGNOSIS", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]);
+    scan(content.inspection.reason, "inspection.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "MEASUREMENT", "DEFINITIVE_DIAGNOSIS", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]);
+    content.moreInformationNeeded.forEach((m, i) => scan(m, `moreInformationNeeded[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]));
+    scan(content.confidence.reason, "confidence.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]);
+    content.limitations.forEach((m, i) => scan(m, `limitations[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]));
   }
+
+  if (!c.errors.length && JSON.stringify(input).length > MAX_CONTENT_CHARS) c.err("content", "content_too_large");
 
   return c.errors.length ? { ok: false, errors: c.errors } : { ok: true, value: input as unknown as ServiceCallReportContent };
 }

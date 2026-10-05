@@ -237,7 +237,7 @@ placeholders labelled `[STUB]`.
 
 - `aiStatus` is `NOT_STARTED` when there are no runs, otherwise the latest run's status.
 - `runs[]`: number, trigger, status, attempts, versions, provider/models, error code and detail, usage, timestamps. Lease owners are omitted.
-- `reports[]`: every version, with `aiReport` (schema `scr-1`), provenance and review fields.
+- `reports[]`: every version, with `aiReport` (schema `scr-1.1` since 4C, with verbatim statement quotes and `evidenceNotices`), provenance (`models` includes `report`, `reportPromptVersion`, `reportPromptHash`) and review fields.
 - `aiProvider`: `{ "id": "openai", "models": { … } }` or `{ "id": null, "problem": "openai_key_missing" }`. Never a key.
 - `mediaAnalyses[]` (Phase 4B): cached per-file results, newest first: `mediaId`, `kind` (`TRANSCRIPT`…), `status`, `provider`, `model`, `promptVersion`, `language`, `transcript`, `result` (`{ languages, noSpeechDetected, completeness }`; `completeness.possiblyIncomplete` means "may be incomplete", AI.md), `errorCode`, `usage`, `inputHash`, `runId`, timestamps. Derived data; the original audio remains the source record.
 
@@ -259,8 +259,10 @@ The sweep. It queues settled, unprocessed requests (last 72 h), recovers
 expired leases and processes up to 3 runs. Returns
 `{ "enabled", "enqueued": [{ requestId, outcome }], "results": [{ runId, outcome, … }] }`,
 `{ "enabled": false, … }` when disabled, or `{ "enabled": true, "configured": false, … }`
-when misconfigured. In 4B a run with the OpenAI provider reports
-`"outcome": "EVIDENCE_PREPARED"`: transcripts were cached, and no report exists yet. No report content. **No cron is
+when misconfigured. Run outcomes:
+- `COMPLETED` or `PARTIAL`: a report version was stored; PARTIAL when some evidence, such as photos or video in 4C, wasn't analysed.
+- `EVIDENCE_PREPARED`: no report. `errorCode` is `insufficient_text_for_report` (nothing the customer said in words) or `report_stage_not_available`.
+- `FAILED`, `REQUEUED` or `LOST_LEASE`. No report content. **No cron is
 configured yet.**
 
 ## Example

@@ -1,4 +1,9 @@
-// Service Call Report — schema "scr-1" (Phase 4, docs/service-aftercare/AI.md).
+// Service Call Report — schema "scr-1.1" (Phase 4, docs/service-aftercare/AI.md).
+//
+// scr-1.1 (Phase 4C) is scr-1 plus: a verbatim `quote` on every customer
+// statement (checked against the source the model was given), the
+// CONFLICTING_CUSTOMER_INFORMATION unknown topic, and server-owned
+// `evidenceNotices`.
 //
 // A report has two layers:
 //   - server-owned facts (processing coverage, media counts, transcripts,
@@ -13,7 +18,7 @@
 // No vendor types: this file is shared by the pipeline, validators and tests.
 import type { ServiceProductId } from "../types";
 
-export const REPORT_SCHEMA_VERSION = "scr-1";
+export const REPORT_SCHEMA_VERSION = "scr-1.1";
 
 export const PRODUCT_IDS: readonly ServiceProductId[] = [
   "window", "sliding-door", "bi-fold-door", "entrance-door", "glass",
@@ -46,6 +51,8 @@ export const UNKNOWN_TOPICS = [
   "COST",
   "PRODUCT_IDENTIFICATION",
   "SAFETY_CONFIRMATION",
+  /** Customer information disagrees (e.g. typed vs spoken). Never resolved by the AI. */
+  "CONFLICTING_CUSTOMER_INFORMATION",
   "OTHER",
 ] as const;
 
@@ -99,6 +106,9 @@ export const NEXT_STEPS = ["STAFF_CALLBACK", "REQUEST_MORE_INFORMATION", "INSPEC
 
 export const CONFIDENCE_LEVELS = ["LOW", "MEDIUM", "HIGH"] as const;
 
+/** Phase 4C: reports rest on customer statements alone, so confidence is never HIGH. */
+export const MAX_CONFIDENCE_PHASE_4C = "MEDIUM";
+
 export type StatementSource = (typeof STATEMENT_SOURCES)[number];
 export type ObservationType = (typeof OBSERVATION_TYPES)[number];
 export type Certainty = (typeof CERTAINTIES)[number];
@@ -117,6 +127,7 @@ export const LIMITS = {
   issueSummary: 400,
   text: 500,
   shortText: 200,
+  quote: 200,
   listItems: 20,
   observations: 40,
 } as const;
@@ -126,6 +137,12 @@ export const LIMITS = {
 export interface CustomerStatement {
   id: string; // "st-1"
   text: string;
+  /**
+   * Verbatim excerpt (≤ 200 chars) of the source the model was given — the
+   * description or the named transcript — supporting `text`. Checked by the
+   * server; kept in the customer's original language.
+   */
+  quote: string;
   source: { type: StatementSource; mediaId: string | null };
 }
 
@@ -176,6 +193,8 @@ export interface ServiceCallReportContent {
 
 // ─── Server-owned envelope (stored as service_ai_reports.ai_report) ──────────
 
+export type EvidenceNoticeCode = "TRANSCRIPT_MAY_BE_INCOMPLETE" | "NO_SPEECH_DETECTED" | "NOT_ANALYSED";
+
 export type MediaCoverageOutcome = "ANALYSED" | "SKIPPED" | "FAILED";
 export type EvidenceType = "PHOTO" | "VIDEO" | "VOICE";
 
@@ -190,5 +209,11 @@ export interface ServiceCallReport {
   transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; language: string | null; text: string; machineGenerated: true; noSpeechDetected: boolean; possiblyIncomplete: boolean }[];
   /** Deterministic keyword net over customer text — independent of the AI. */
   safetyFlags: { indicator: UrgencyIndicator; matchedIn: "DESCRIPTION" | "TRANSCRIPT" }[];
+  /**
+   * Server-written, fixed-wording notices about the evidence (scr-1.1): a
+   * transcript that may be incomplete, a recording with no recognised speech,
+   * a file not analysed in this phase. Advisory — never proof of anything.
+   */
+  evidenceNotices: { mediaId: string; label: string; code: EvidenceNoticeCode; message: string }[];
   content: ServiceCallReportContent;
 }

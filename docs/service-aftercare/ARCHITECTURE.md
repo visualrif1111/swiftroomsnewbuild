@@ -95,8 +95,12 @@ Full detail: [AI.md](./AI.md).
 - **Phase 4B:** OpenAI voice transcription. Audio is read server-side from the
   private bucket and only the bytes and model are sent; transcripts are cached
   per file.
-- **No report is generated with the real provider until 4C.** AI is off
-  (`SERVICE_AI_ENABLED` unset) in every deployed environment.
+- **Phase 4C:** report synthesis (OpenAI Responses API, strict schema
+  `scr-1.1`) from the customer's text and voice transcripts only.
+  - Verbatim-quote provenance.
+  - Photos and video are not analysed (4D/4E).
+  - Reports are internal and never customer-facing.
+- AI is off (`SERVICE_AI_ENABLED` unset) in every deployed environment.
 
 ```
 Finish ─▶ POST …/finalize (upload token, fire-and-forget, always 202)

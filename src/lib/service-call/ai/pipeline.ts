@@ -12,15 +12,24 @@
 import { computeInputFingerprint, mediaInputHash } from "./fingerprint";
 import { buildServiceAiInput, labelEvidence, type TranscriptForAi } from "./input-builder";
 import { ServiceAiProviderError, type MediaReader, type ProviderUsage, type RawObservation, type ServiceAiProvider } from "./provider";
-import { REPORT_SCHEMA_VERSION, type ServiceCallReport, type UrgencyIndicator } from "./report-schema";
+import { MAX_CONFIDENCE_PHASE_4C, REPORT_SCHEMA_VERSION, type ServiceCallReport, type UrgencyIndicator } from "./report-schema";
 import { validateReportContent, withMandatoryUnknowns, type ValidationContext } from "./report-validation";
 import { RunNotOwnedError, type AiRun, type AiRunStore, type RequestContext } from "./run-store";
 import { detectSafetyFlags } from "./safety";
 import { assessTranscriptCompleteness } from "./transcript-quality";
 
-export const PIPELINE_VERSION = "4b.1";
-/** Run error code when the provider has no report synthesis yet (see AI.md). */
+export const PIPELINE_VERSION = "4c.1";
+/** Run error code when the provider has no report synthesis (see AI.md). */
 export const REPORT_STAGE_UNAVAILABLE = "report_stage_not_available";
+/** Run error code when there is no customer text or usable transcript to report on (no model call). */
+export const INSUFFICIENT_TEXT = "insufficient_text_for_report";
+
+/** Fixed wording for server-written evidence notices (scr-1.1). */
+const NOTICE_TEXT = {
+  TRANSCRIPT_MAY_BE_INCOMPLETE: "The transcript may be incomplete (advisory signal, not proof). Listen to the original recording, which is the authoritative evidence.",
+  NO_SPEECH_DETECTED: "No speech was recognised in this recording. Listen to the original recording.",
+  NOT_ANALYSED: "This file was not analysed in this phase; nothing in the report describes its contents.",
+} as const;
 /** Synthesis attempts per run when output fails validation. */
 const SYNTHESIS_ATTEMPTS = 2;
 
@@ -91,10 +100,19 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
     const analysed = new Set(coverage.filter((c) => c.outcome === "ANALYSED").map((c) => c.mediaId));
     const input = buildServiceAiInput(
       ctx.request,
-      ctx.media.map((m) => ({ mediaId: m.id, type: m.type, durationSeconds: m.durationSeconds })),
+      ctx.media.map((m) => ({ mediaId: m.id, type: m.type, durationSeconds: m.durationSeconds, analysed: analysed.has(m.id) })),
       transcripts,
       ctx.known,
     );
+
+    // D3: nothing the customer said in words → no model call, no report.
+    const usableText = input.request.description.trim().length > 0 || input.transcripts.some((t) => t.text.trim().length > 0);
+    if (!usableText) {
+      const detail = { stage: "report", media: coverage.map((c) => ({ mediaId: c.mediaId, type: c.type, outcome: c.outcome, reasonCode: c.reasonCode })) };
+      const updated = await store.fail({ runId: run.id, worker, errorCode: INSUFFICIENT_TEXT, errorDetail: detail, retryable: false, usage });
+      if (!updated) return { runId: run.id, outcome: "LOST_LEASE" };
+      return { runId: run.id, outcome: "EVIDENCE_PREPARED", errorCode: INSUFFICIENT_TEXT };
+    }
 
     const safetyFlags: ServiceCallReport["safetyFlags"] = [];
     const flag = (indicators: UrgencyIndicator[], matchedIn: "DESCRIPTION" | "TRANSCRIPT") =>
@@ -105,30 +123,55 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
     const validationContext: ValidationContext = {
       evidence: ctx.media.map((m) => ({ mediaId: m.id, type: m.type, analysed: analysed.has(m.id), durationSeconds: m.durationSeconds })),
       safetyFlags: safetyFlags.map((f) => f.indicator),
+      // Quotes are checked against exactly what the model was given.
+      sources: {
+        description: input.request.description,
+        transcripts: input.transcripts.map((t) => ({ mediaId: t.mediaId, text: t.text, possiblyIncomplete: t.possiblyIncomplete })),
+      },
+      visualAnalysis: provider.capabilities.observe,
+      maxConfidence: MAX_CONFIDENCE_PHASE_4C,
     };
 
+    // At most two attempts: the second (D5) carries only our own rule codes.
     let content: ServiceCallReport["content"] | null = null;
     let lastErrors: string[] = [];
+    let lastIssue: "invalid_output" | "incomplete_output" = "invalid_output";
     for (let i = 0; i < SYNTHESIS_ATTEMPTS && !content; i++) {
       count("synthesisCalls");
-      let raw: unknown;
+      if (i > 0) count("synthesisCorrectiveAttempts");
+      let res;
       try {
-        const res = await provider.synthesiseReport({ input, observations });
-        addUsage(res.usage);
-        raw = res.content;
+        res = await provider.synthesiseReport({ input, observations, correction: i > 0 ? lastErrors.slice(0, 20) : undefined });
       } catch (err) {
         if (err instanceof ServiceAiProviderError) throw new RunFailure(err.code, err.retryable);
         throw err;
       }
-      const checked = validateReportContent(withMandatoryUnknowns(raw), validationContext);
-      if (checked.ok) content = checked.value;
-      else lastErrors = checked.errors;
+      addUsage(res.usage);
+      if (res.outputIssue) {
+        lastIssue = res.outputIssue === "incomplete_output" ? "incomplete_output" : "invalid_output";
+        lastErrors = [`response: ${res.outputIssue}`];
+      } else {
+        const checked = validateReportContent(withMandatoryUnknowns(res.content), validationContext);
+        if (checked.ok) content = checked.value;
+        else {
+          lastIssue = "invalid_output";
+          lastErrors = checked.errors;
+        }
+      }
       await keepLease();
     }
-    if (!content) throw new RunFailure("invalid_output", false, { validationErrors: lastErrors.slice(0, 20) });
+    if (!content) throw new RunFailure(lastIssue, false, { validationErrors: lastErrors.slice(0, 20) });
 
     const status = coverage.every((c) => c.outcome === "ANALYSED") ? "COMPLETED" : "PARTIAL";
     const transcriptByMedia = new Map(transcripts.map((t) => [t.mediaId, t]));
+    const evidenceNotices: ServiceCallReport["evidenceNotices"] = [];
+    for (const c of coverage) {
+      const t = transcriptByMedia.get(c.mediaId);
+      const notice = (code: keyof typeof NOTICE_TEXT) => evidenceNotices.push({ mediaId: c.mediaId, label: c.label, code, message: NOTICE_TEXT[code] });
+      if (c.outcome !== "ANALYSED") notice("NOT_ANALYSED");
+      else if (t?.noSpeechDetected) notice("NO_SPEECH_DETECTED");
+      else if (t?.possiblyIncomplete) notice("TRANSCRIPT_MAY_BE_INCOMPLETE");
+    }
     const report: ServiceCallReport = {
       schemaVersion: REPORT_SCHEMA_VERSION,
       serviceReference: ctx.reference,
@@ -145,6 +188,7 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
         possiblyIncomplete: t.possiblyIncomplete ?? false,
       })),
       safetyFlags,
+      evidenceNotices,
       content,
     };
 
@@ -152,7 +196,9 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
     try {
       const saved = await store.complete({
         runId: run.id, worker, status, inputFingerprint,
-        provider: provider.id, models: { ...provider.models }, usage,
+        provider: provider.id,
+        models: { ...provider.models, reportPromptVersion: provider.promptVersions.report, ...(provider.reportPromptHash ? { reportPromptHash: provider.reportPromptHash } : {}) },
+        usage,
         errorDetail: failures.length ? { media: failures } : null,
         report,
       });
@@ -197,8 +243,9 @@ async function processMedia(
   if (media.type === "PHOTO" && !provider.capabilities.observe) return { outcome: "SKIPPED", reasonCode: "image_analysis_not_available" };
   const kind = media.type === "VOICE" ? "TRANSCRIPT" : "IMAGE_OBSERVATIONS";
   const model = media.type === "VOICE" ? provider.models.transcribe : provider.models.vision;
-  const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion: provider.promptVersion });
-  const meta = { provider: provider.id, model, promptVersion: provider.promptVersion, runId: run.id };
+  const promptVersion = media.type === "VOICE" ? provider.promptVersions.transcribe : provider.promptVersions.observe;
+  const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion });
+  const meta = { provider: provider.id, model, promptVersion, runId: run.id };
 
   const cached = await store.getAnalysis(media.id, kind, inputHash);
   if (cached?.status === "COMPLETED") {

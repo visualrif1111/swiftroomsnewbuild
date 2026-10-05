@@ -60,7 +60,8 @@ export async function enqueueAiProcessing(
     trigger,
     inputFingerprint: computeInputFingerprint(ctx.request, ctx.media),
     pipelineVersion: PIPELINE_VERSION,
-    promptVersion: resolved.provider.promptVersion,
+    // The run's prompt version is the report prompt's (AI.md § Versions).
+    promptVersion: resolved.provider.promptVersions.report,
     schemaVersion: REPORT_SCHEMA_VERSION,
     requestedBy,
     maxAutoRuns: AI_LIMITS.maxAutoRunsPerRequest,

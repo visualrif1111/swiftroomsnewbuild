@@ -34,6 +34,8 @@ export interface MediaForAi {
   mediaId: string;
   type: EvidenceType;
   durationSeconds: number | null;
+  /** Whether this file was transcribed/analysed for this run. Unanalysed files say nothing about their content. */
+  analysed?: boolean;
 }
 
 export interface TranscriptForAi {
@@ -54,7 +56,7 @@ export interface ServiceAiInput {
     otherProduct: string | null;
     existingCustomer: boolean | null;
   };
-  evidence: { mediaId: string; label: string; type: EvidenceType; durationSeconds: number | null }[];
+  evidence: { mediaId: string; label: string; type: EvidenceType; durationSeconds: number | null; analysedInThisPhase: boolean }[];
   transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; text: string; language: string | null; noSpeechDetected: boolean; possiblyIncomplete: boolean }[];
 }
 
@@ -100,7 +102,7 @@ export function buildServiceAiInput(
       otherProduct: request.otherProduct ? scrubFreeText(request.otherProduct, known) : null,
       existingCustomer: request.existingCustomer,
     },
-    evidence: media.map((m) => ({ mediaId: m.mediaId, label: labels.get(m.mediaId)!, type: m.type, durationSeconds: m.durationSeconds })),
+    evidence: media.map((m) => ({ mediaId: m.mediaId, label: labels.get(m.mediaId)!, type: m.type, durationSeconds: m.durationSeconds, analysedInThisPhase: m.analysed ?? false })),
     transcripts: transcripts
       .filter((t) => labels.has(t.mediaId))
       .map((t) => ({ mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, text: scrubFreeText(t.text, known), language: t.language, noSpeechDetected: t.noSpeechDetected ?? false, possiblyIncomplete: t.possiblyIncomplete ?? false })),

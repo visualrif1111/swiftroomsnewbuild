@@ -2,7 +2,7 @@
 import "server-only";
 import type { ServiceAiProvider } from "../ai/provider";
 import { createStubServiceAiProvider } from "../ai/stub-provider";
-import { createOpenAiProvider, DEFAULT_TRANSCRIBE_MODEL } from "./openai-provider";
+import { createOpenAiProvider, DEFAULT_TRANSCRIBE_MODEL, REPORT_REASONING_EFFORTS } from "./openai-provider";
 
 /**
  * Kill switch. Only an explicit "true"/"1"/"yes"/"on" enables processing;
@@ -37,8 +37,10 @@ export type ProviderResolution =
  * incomplete configuration means AI processing does not run (customers are
  * unaffected — finalize still answers 202).
  *
- *   SERVICE_AI_PROVIDER=openai  requires OPENAI_API_KEY; model from
- *                               SERVICE_AI_MODEL_TRANSCRIBE (default gpt-transcribe)
+ *   SERVICE_AI_PROVIDER=openai  requires OPENAI_API_KEY; models from
+ *                               SERVICE_AI_MODEL_TRANSCRIBE (default gpt-transcribe) and
+ *                               SERVICE_AI_MODEL_REPORT (default gpt-6.1-sol); reasoning
+ *                               effort SERVICE_AI_REPORT_REASONING (default low)
  *   SERVICE_AI_PROVIDER=stub    deterministic placeholder; refused in Production
  */
 export function resolveServiceAiProvider(env: NodeJS.ProcessEnv = process.env): ProviderResolution {
@@ -52,7 +54,10 @@ export function resolveServiceAiProvider(env: NodeJS.ProcessEnv = process.env): 
     const apiKey = env.OPENAI_API_KEY?.trim();
     if (!apiKey) return { ok: false, reason: "openai_key_missing" };
     const model = env.SERVICE_AI_MODEL_TRANSCRIBE?.trim() || DEFAULT_TRANSCRIBE_MODEL;
-    return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model }) };
+    const reportModel = env.SERVICE_AI_MODEL_REPORT?.trim() || undefined;
+    const effort = env.SERVICE_AI_REPORT_REASONING?.trim().toLowerCase();
+    const reportReasoning = (REPORT_REASONING_EFFORTS as readonly string[]).includes(effort ?? "") ? (effort as (typeof REPORT_REASONING_EFFORTS)[number]) : undefined;
+    return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model, reportModel, reportReasoning }) };
   }
   return { ok: false, reason: "unknown_provider" };
 }

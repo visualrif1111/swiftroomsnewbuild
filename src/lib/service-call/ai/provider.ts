@@ -54,12 +54,23 @@ export interface ObserveResult {
 export interface SynthesisRequest {
   input: ServiceAiInput;
   observations: (RawObservation & { label: string })[];
+  /**
+   * Corrective attempt only: our own validation rule codes from the previous
+   * attempt (paths + codes, never customer content).
+   */
+  correction?: string[];
 }
 
 export interface SynthesisResult {
   /** Untrusted until validateReportContent() accepts it. */
   content: unknown;
   usage: ProviderUsage;
+  /**
+   * The model answered but the output can't be used as-is (cut off at the
+   * token limit, or not JSON). Counts as an invalid attempt, like a
+   * validation failure — never stored.
+   */
+  outputIssue?: "incomplete_output" | "malformed_json";
 }
 
 export interface ServiceAiProvider {
@@ -72,8 +83,15 @@ export interface ServiceAiProvider {
    */
   readonly capabilities: { transcribe: boolean; observe: boolean; synthesise: boolean };
   readonly models: { transcribe: string; vision: string; report: string };
-  /** Identifies prompts/instructions; part of cache keys and run provenance. */
-  readonly promptVersion: string;
+  /**
+   * Prompt/request-parameter version per capability. The transcribe and
+   * observe versions are part of the per-file cache keys; the report version
+   * is the run's prompt_version. Kept separate so changing the report prompt
+   * never invalidates cached transcripts.
+   */
+  readonly promptVersions: { transcribe: string; observe: string; report: string };
+  /** SHA-256 of the exact report instructions + schema, recorded on each report (optional). */
+  readonly reportPromptHash?: string;
   transcribe(request: TranscribeRequest): Promise<TranscribeResult>;
   observe(request: ObserveRequest): Promise<ObserveResult>;
   synthesiseReport(request: SynthesisRequest): Promise<SynthesisResult>;
