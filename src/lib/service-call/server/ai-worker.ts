@@ -9,10 +9,10 @@ import { PIPELINE_VERSION, processRun, type RunOutcome } from "../ai/pipeline";
 import { REPORT_SCHEMA_VERSION } from "../ai/report-schema";
 import type { AiRun, AiRunStore, AiRunTrigger, EnqueueOutcome } from "../ai/run-store";
 import type { ServiceAiProvider } from "../ai/provider";
-import { AI_LIMITS, isServiceAiEnabled, resolveServiceAiProvider, type ProviderResolution } from "./ai-config";
+import { AI_LIMITS, isServiceAiEnabled, resolveServiceAiProvider, resolveVideoWorker, type ProviderResolution } from "./ai-config";
 import { supabaseAiStore } from "./ai-store";
-import { normaliseImage } from "./image-normaliser";
-import type { ImageNormaliser } from "../ai/provider";
+import { NORMALISER_VERSION, normaliseImage, perceptualHash } from "./image-normaliser";
+import type { ImageNormaliser, VideoProcessor } from "../ai/provider";
 
 export interface WorkerDeps {
   store: AiRunStore;
@@ -21,6 +21,11 @@ export interface WorkerDeps {
   readMedia: (mediaId: string) => Promise<Uint8Array>;
   /** Photo derivative builder; defaults to the sharp-based normaliser. */
   normaliseImage?: ImageNormaliser;
+  /**
+   * Phase 4E media worker. Resolved lazily (only when a run is processed);
+   * null = not configured → videos SKIPPED, no sandbox created.
+   */
+  videoProcessor?: () => VideoProcessor | null;
   enabled: () => boolean;
 }
 
@@ -28,6 +33,11 @@ const defaultDeps = (): WorkerDeps => ({
   store: supabaseAiStore,
   provider: resolveServiceAiProvider(),
   readMedia: (id) => supabaseAiStore.readMedia(id),
+  videoProcessor: () => {
+    const w = resolveVideoWorker();
+    if (!w.ok && w.reason === "video_worker_config_invalid") console.error("[service-ai] video worker configuration invalid; videos will be skipped.");
+    return w.ok ? w.processor : null;
+  },
   enabled: isServiceAiEnabled,
 });
 
@@ -81,11 +91,13 @@ export async function runAiWorker(limit: number, deps: WorkerDeps = defaultDeps(
   const worker = `worker-${randomUUID()}`;
   const runs = await deps.store.claim(worker, AI_LIMITS.leaseSeconds, Math.max(0, Math.min(limit, 10)));
   const results: RunOutcome[] = [];
+  const processor = runs.length ? (deps.videoProcessor?.() ?? null) : null;
   for (const run of runs) {
     results.push(
       await processRun(run, {
         store: deps.store, provider: resolved.provider, worker, leaseSeconds: AI_LIMITS.leaseSeconds,
         readMedia: deps.readMedia, normaliseImage: deps.normaliseImage ?? normaliseImage,
+        ...(processor ? { video: { processor, perceptualHash, normaliserVersion: NORMALISER_VERSION } } : {}),
       }),
     );
   }

@@ -21,14 +21,14 @@ export function readRequest(body) {
   return { input: JSON.parse(data), correction: rest.length ? `YOUR PREVIOUS OUTPUT${rest.join("")}` : null, text };
 }
 
-/** Valid scr-1.1 content built from the input the model received. */
+/** Valid report content (scr-1.1+) built from the input the model received. */
 export function goodReport(input, opts = {}) {
   const statements = [];
   if (input.request.description.trim()) {
     statements.push({ id: "st-1", text: "The customer describes the problem in writing.", quote: Array.from(input.request.description.trim()).slice(0, 60).join(""), source: { type: "DESCRIPTION", mediaId: null } });
   }
   for (const t of input.transcripts.filter((x) => x.text.trim())) {
-    statements.push({ id: `st-${statements.length + 1}`, text: "The customer describes the problem in a voice note.", quote: Array.from(t.text.trim()).slice(0, 60).join(""), source: { type: t.kind === "VOICE_NOTE" ? "VOICE_NOTE" : "VIDEO_AUDIO", mediaId: t.mediaId } });
+    statements.push({ id: `st-${statements.length + 1}`, text: t.kind === "VOICE_NOTE" ? "The customer describes the problem in a voice note." : "The customer describes the problem while recording a video.", quote: Array.from(t.text.trim()).slice(0, 60).join(""), source: { type: t.kind === "VOICE_NOTE" ? "VOICE_NOTE" : "VIDEO_AUDIO", mediaId: t.mediaId } });
   }
   const first = statements[0]?.id ?? "st-1";
   return {
@@ -80,7 +80,7 @@ export function openAiMock({
       const images = parts.filter((p) => p.type === "input_image");
       const image = Buffer.from(images[0].image_url.split(",")[1], "base64");
       const meta = JSON.parse(text.split("\n\nYOUR PREVIOUS OUTPUT")[0]);
-      const call = { url, body, text, images, image, label: meta.photo, correction: text.includes("YOUR PREVIOUS OUTPUT") ? text : null, n: calls.observe.length + 1 };
+      const call = { url, body, text, images, image, label: meta.photo ?? meta.frame, frame: "frame" in meta, correction: text.includes("YOUR PREVIOUS OUTPUT") ? text : null, n: calls.observe.length + 1 };
       calls.observe.push(call);
       const out = await observe(call);
       return out instanceof Response ? out : responseOf(out);

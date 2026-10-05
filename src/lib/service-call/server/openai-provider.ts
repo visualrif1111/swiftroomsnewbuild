@@ -2,7 +2,10 @@
 //   Phase 4B — voice transcription
 //   Phase 4C — report synthesis (Responses API, strict structured output)
 //   Phase 4D — photo observation (Responses API, one image per call)
-// Video is not offered (4E).
+//   Phase 4E — video-frame observation: the same call, one sampled still per
+//              call, with the frame instructions (observe-frame-v1). Videos,
+//              frames and audio never reach the report call; video audio is
+//              transcribed like a voice note (extracted by the media worker).
 //
 // Transcription API: POST https://api.openai.com/v1/audio/transcriptions (multipart), model
 // configurable (default "gpt-transcribe": OpenAI's recommended model for
@@ -31,7 +34,8 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { buildObserveUserText, OBSERVE_INSTRUCTIONS, OBSERVE_PROMPT_VERSION } from "../ai/prompts/observe-v1";
-import { buildReportUserMessage, REPORT_INSTRUCTIONS, REPORT_PROMPT_VERSION } from "../ai/prompts/report-v2";
+import { buildObserveFrameUserText, OBSERVE_FRAME_INSTRUCTIONS, OBSERVE_FRAME_PROMPT_VERSION } from "../ai/prompts/observe-frame-v1";
+import { buildReportUserMessage, REPORT_INSTRUCTIONS, REPORT_PROMPT_VERSION } from "../ai/prompts/report-v3";
 import { PHOTO_OBSERVATION_JSON_SCHEMA, PHOTO_OBSERVATION_JSON_SCHEMA_NAME } from "../ai/photo-observation-schema";
 import { ServiceAiProviderError, type ObservePhotoRequest, type ServiceAiProvider, type SynthesisRequest, type TranscribeRequest } from "../ai/provider";
 import { NORMALISER_VERSION } from "./image-normaliser";
@@ -46,6 +50,8 @@ export const OBSERVE_MAX_OUTPUT_TOKENS = 3_000;
 const OBSERVE_TIMEOUT_MS = 120_000;
 /** Identifies the exact photo instructions + schema sent. */
 export const OBSERVE_PROMPT_HASH = createHash("sha256").update(OBSERVE_INSTRUCTIONS).update(JSON.stringify(PHOTO_OBSERVATION_JSON_SCHEMA)).digest("hex");
+/** Identifies the exact video-frame instructions + schema sent. */
+export const OBSERVE_FRAME_PROMPT_HASH = createHash("sha256").update(OBSERVE_FRAME_INSTRUCTIONS).update(JSON.stringify(PHOTO_OBSERVATION_JSON_SCHEMA)).digest("hex");
 export const DEFAULT_REPORT_REASONING = "low";
 export const REPORT_REASONING_EFFORTS = ["none", "low", "medium", "high"] as const;
 const ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
@@ -125,9 +131,15 @@ export function createOpenAiProvider(config: OpenAiProviderConfig): ServiceAiPro
     // parameters and stays fixed so cached transcripts remain valid.
     // The observe version includes the image normaliser's version: a change to
     // either gives a new per-photo cache key.
-    promptVersions: { transcribe: "openai-transcribe-1", observe: `${OBSERVE_PROMPT_VERSION}/${NORMALISER_VERSION}`, report: REPORT_PROMPT_VERSION },
+    promptVersions: {
+      transcribe: "openai-transcribe-1",
+      observe: `${OBSERVE_PROMPT_VERSION}/${NORMALISER_VERSION}`,
+      observeFrame: `${OBSERVE_FRAME_PROMPT_VERSION}/${NORMALISER_VERSION}`,
+      report: REPORT_PROMPT_VERSION,
+    },
     reportPromptHash: REPORT_PROMPT_HASH,
     observePromptHash: OBSERVE_PROMPT_HASH,
+    observeFramePromptHash: OBSERVE_FRAME_PROMPT_HASH,
 
     async transcribe(request: TranscribeRequest) {
       const ext = TRANSCRIBABLE[request.mimeType];
@@ -171,11 +183,11 @@ export function createOpenAiProvider(config: OpenAiProviderConfig): ServiceAiPro
       const json = await respond(
         {
           model: visionModel,
-          instructions: OBSERVE_INSTRUCTIONS,
+          instructions: request.frame ? OBSERVE_FRAME_INSTRUCTIONS : OBSERVE_INSTRUCTIONS,
           input: [{
             role: "user",
             content: [
-              { type: "input_text", text: buildObserveUserText(request.label, request.productCategories, request.correction) },
+              { type: "input_text", text: (request.frame ? buildObserveFrameUserText : buildObserveUserText)(request.label, request.productCategories, request.correction) },
               { type: "input_image", image_url: dataUrl, detail: "high" },
             ],
           }],
@@ -183,7 +195,7 @@ export function createOpenAiProvider(config: OpenAiProviderConfig): ServiceAiPro
           reasoning: { effort: reasoning },
           max_output_tokens: OBSERVE_MAX_OUTPUT_TOKENS,
           store: false,
-          prompt_cache_key: `service-observe-${OBSERVE_PROMPT_VERSION}`,
+          prompt_cache_key: request.frame ? `service-observe-${OBSERVE_FRAME_PROMPT_VERSION}` : `service-observe-${OBSERVE_PROMPT_VERSION}`,
         },
         "observe",
         OBSERVE_TIMEOUT_MS,

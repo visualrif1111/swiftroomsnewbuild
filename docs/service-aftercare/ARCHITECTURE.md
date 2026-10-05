@@ -104,8 +104,22 @@ Full detail: [AI.md](./AI.md).
   - What is sent is an in-memory, metadata-free JPEG derivative (≤ 1536 px).
   - Observations are validated (`po-1`) and injected into the report by the
     server (`scr-1.2`); the report model never sees photographs.
-  - HEIC/HEIF is skipped (no decoder) and video is not analysed (4E).
+  - HEIC/HEIF is skipped (no decoder).
+- **Phase 4E:** video analysis.
+  - Untrusted video is decoded only in an isolated **Vercel Sandbox media
+    worker** (pinned LGPL FFmpeg snapshot, network deny-all, non-persistent,
+    no secrets or identifiers, destroyed per video) — never in the app function.
+  - ≤ 8 deterministic frames per video, each analysed like a photo with a
+    single-frame temporal rule; video speech is transcribed as
+    customer-reported `VIDEO_AUDIO`; `scr-1.3`.
 - AI is off (`SERVICE_AI_ENABLED` unset) in every deployed environment.
+
+```
+app function (holds OpenAI + Supabase credentials)            Vercel Sandbox microVM (holds nothing)
+  read private video (service role) ──── bytes only ────────▶  ffprobe → ffmpeg frames/audio
+  ◀──────────── PNG frames + .m4a (memory) ──────────────────  stop + delete
+  normalise frames → OpenAI vision (one frame/call) · audio → transcription · report synthesis
+```
 
 ```
 Finish ─▶ POST …/finalize (upload token, fire-and-forget, always 202)
@@ -142,6 +156,8 @@ sweep (admin endpoint; no cron yet) ─┘          manual reprocess (admin) ─
 - AI (Phase 4): new tables follow the same rules: RLS with no policies,
   service-role-only functions. Providers receive only allow-listed, scrubbed
   fields (no contact details, references, tokens or URLs). See AI.md.
+- Video (Phase 4E): untrusted media parsing happens in a separate microVM with
+  no network and no credentials; only bytes go in, only frames/audio come out.
 - Media: private bucket with no storage policies; upload token per request;
   per-object signed upload URLs; four validation layers including a content
   sniff; staff access only through 5-minute signed read URLs (see MEDIA.md).

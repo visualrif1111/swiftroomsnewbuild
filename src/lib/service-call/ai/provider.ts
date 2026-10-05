@@ -44,6 +44,12 @@ export interface ObservePhotoRequest {
   image: NormalisedImage;
   /** Corrective attempt only: our own rule codes from the previous attempt. */
   correction?: string[];
+  /**
+   * Phase 4E: the image is one sampled still from a customer video (label
+   * "Video 1 @ 00:04.2"). Uses the frame instructions, which add the
+   * single-frame rule: nothing about movement or behaviour over time.
+   */
+  frame?: boolean;
 }
 
 export interface ObservePhotoResult {
@@ -66,6 +72,46 @@ export type NormalisedImageResult =
 
 /** Turns original bytes into a privacy-minimised derivative (server/image-normaliser.ts). */
 export type ImageNormaliser = (bytes: Uint8Array, mimeType: string) => Promise<NormalisedImageResult>;
+
+/** One frame decoded by the media worker at (or just after) a requested instant. */
+export interface VideoFrame {
+  requestedAt: number;
+  /** Presentation time of the decoded frame, seconds from the start of the video. */
+  at: number;
+  /** Lossless PNG of the frame, upright, SDR; no metadata. Memory-only. */
+  png: Uint8Array;
+}
+
+/**
+ * One isolated worker session over one video's bytes (Phase 4E). The worker
+ * receives the bytes only — under a neutral file name, with no identifiers,
+ * credentials or URLs — and has no network access.
+ */
+export interface VideoWorkerSession {
+  /** ffprobe's JSON (streams + format), or null if the file can't be parsed. */
+  probe(): Promise<unknown | null>;
+  /** Scene-change instants (score ≥ threshold) within the first `maxSeconds`; null if the pass failed. */
+  sceneCandidates(maxSeconds: number): Promise<{ at: number; score: number }[] | null>;
+  extractFrames(timestamps: number[], options: { hdr: boolean }): Promise<VideoFrame[]>;
+  /** Mono 16 kHz AAC (.m4a) of the first audio track, at most `maxSeconds`, no metadata; null if none decodable. */
+  extractAudio(maxSeconds: number): Promise<Uint8Array | null>;
+}
+
+export interface VideoProcessor {
+  /** e.g. "vercel-sandbox", "local-ffmpeg". */
+  readonly id: string;
+  /** Worker identity (build + configuration); part of every video cache key. */
+  readonly version: string;
+  /**
+   * Starts a worker, runs `fn`, and always destroys the worker afterwards —
+   * on success, failure or timeout. Throws ServiceAiProviderError when the
+   * worker can't be started or a step times out.
+   */
+  withSession<T>(source: Uint8Array, fn: (session: VideoWorkerSession) => Promise<T>): Promise<{ value: T; usage: ProviderUsage }>;
+}
+
+/** 64-bit perceptual (difference) hash of an image, as 16 hex characters. */
+export type PerceptualHasher = (image: Uint8Array) => Promise<string>;
 
 /** A media observation as stored in a report (scr-1.2: written by the server from validated photo analysis). */
 export interface RawObservation {
@@ -119,13 +165,15 @@ export interface ServiceAiProvider {
    * is the run's prompt_version. Kept separate so changing the report prompt
    * never invalidates cached transcripts.
    */
-  readonly promptVersions: { transcribe: string; observe: string; report: string };
+  readonly promptVersions: { transcribe: string; observe: string; observeFrame: string; report: string };
   /** SHA-256 of the exact report instructions + schema, recorded on each report (optional). */
   readonly reportPromptHash?: string;
   /** SHA-256 of the exact photo-observation instructions + schema (optional). */
   readonly observePromptHash?: string;
+  /** SHA-256 of the exact video-frame instructions + schema (optional). */
+  readonly observeFramePromptHash?: string;
   transcribe(request: TranscribeRequest): Promise<TranscribeResult>;
-  /** Phase 4D: one normalised photo in, untrusted po-1 JSON out. */
+  /** Phase 4D: one normalised photo (or, 4E, one video frame) in, untrusted po-1 JSON out. */
   observePhoto(request: ObservePhotoRequest): Promise<ObservePhotoResult>;
   synthesiseReport(request: SynthesisRequest): Promise<SynthesisResult>;
 }

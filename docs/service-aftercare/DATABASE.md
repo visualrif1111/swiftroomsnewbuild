@@ -181,6 +181,25 @@ No schema change was needed for 4B.
   is stored.
 - Reports hold `scr-1.2`.
 
+**Phase 4E: no database change.** Video uses the existing kinds, all on the
+video's own media id (unique `(media_id, kind, input_hash)` allows several):
+- `VIDEO_OBSERVATIONS` — preprocessing (`result.schema` `vp-1`): probe summary,
+  sampling decisions, per-frame outcome with derivative SHA-256 and perceptual
+  hash, audio status. `provider` = `vercel-sandbox`, `model` = worker version
+  (`mw-1:<snapshot>`), `prompt_version` = `vs-1/img-1`. SKIPPED/FAILED rows
+  (e.g. `video_codec_not_supported`) cache deterministic outcomes. **No pixels
+  or audio are stored.**
+- `IMAGE_OBSERVATIONS` — one row per analysed frame: `po-1` plus
+  `frame { at, label }` and derivative metadata; `prompt_version`
+  `openai-observe-frame-1/img-1`; the input hash includes the instant and
+  derivative SHA-256.
+- `TRANSCRIPT` — the video's speech; `prompt_version`
+  `openai-transcribe-1/va-1/<worker version>`; `result.audioSeconds` is the
+  transcribed span.
+- Reports hold `scr-1.3` (`videoAssessments`); `models` adds
+  `observeFramePromptVersion`, `observeFramePromptHash`, `videoWorker`,
+  `videoSampling`.
+
 ### AI functions (service role only)
 
 | function | purpose |

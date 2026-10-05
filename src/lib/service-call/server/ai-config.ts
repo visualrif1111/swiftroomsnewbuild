@@ -1,8 +1,9 @@
 // AI processing configuration (server-only). See docs/service-aftercare/AI.md.
 import "server-only";
-import type { ServiceAiProvider } from "../ai/provider";
+import type { ServiceAiProvider, VideoProcessor } from "../ai/provider";
 import { createStubServiceAiProvider } from "../ai/stub-provider";
 import { createOpenAiProvider, DEFAULT_TRANSCRIBE_MODEL, REPORT_REASONING_EFFORTS } from "./openai-provider";
+import { createSandboxVideoProcessor } from "./video-processor";
 
 /**
  * Kill switch. Only an explicit "true"/"1"/"yes"/"on" enables processing;
@@ -62,4 +63,23 @@ export function resolveServiceAiProvider(env: NodeJS.ProcessEnv = process.env): 
     return { ok: true, provider: createOpenAiProvider({ apiKey, transcribeModel: model, reportModel, reportReasoning, visionModel }) };
   }
   return { ok: false, reason: "unknown_provider" };
+}
+
+export type VideoWorkerResolution =
+  | { ok: true; processor: VideoProcessor; region: string }
+  | { ok: false; reason: "video_worker_not_configured" | "video_worker_config_invalid" };
+
+/**
+ * The isolated media worker for video (Phase 4E). Fails closed: without BOTH
+ *   SERVICE_AI_VIDEO_WORKER_SNAPSHOT  the pinned media-worker snapshot (snap_…)
+ *   SERVICE_AI_VIDEO_WORKER_REGION    an explicit Vercel region (no silent default)
+ * videos are SKIPPED (video_processing_not_available) and no sandbox is ever
+ * created. ffmpeg never runs in this function as a fallback.
+ */
+export function resolveVideoWorker(env: NodeJS.ProcessEnv = process.env): VideoWorkerResolution {
+  const snapshotId = env.SERVICE_AI_VIDEO_WORKER_SNAPSHOT?.trim() ?? "";
+  const region = env.SERVICE_AI_VIDEO_WORKER_REGION?.trim().toLowerCase() ?? "";
+  if (!snapshotId && !region) return { ok: false, reason: "video_worker_not_configured" };
+  if (!/^snap_[A-Za-z0-9]{8,64}$/.test(snapshotId) || !/^[a-z]{3}\d$/.test(region)) return { ok: false, reason: "video_worker_config_invalid" };
+  return { ok: true, processor: createSandboxVideoProcessor({ snapshotId, region }), region };
 }

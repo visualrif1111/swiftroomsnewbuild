@@ -36,6 +36,18 @@ export interface MediaForAi {
   durationSeconds: number | null;
   /** Whether this file was transcribed/analysed for this run. Unanalysed files say nothing about their content. */
   analysed?: boolean;
+  /** Phase 4E: for an analysed video, exactly what was looked at and heard. */
+  videoCoverage?: VideoCoverage;
+}
+
+/** What of a video was analysed (scr-1.3) — the model may assume nothing outside it. */
+export interface VideoCoverage {
+  /** Instants of the individually analysed still frames, "mm:ss.s". */
+  framesAnalysedAt: string[];
+  /** End of the transcribed speech ("mm:ss.s"), or null when no speech was transcribed. */
+  speechTranscribedUpTo: string | null;
+  /** The video exceeds the analysis threshold: only part of it was analysed. */
+  partiallyAnalysed: boolean;
 }
 
 export interface TranscriptForAi {
@@ -56,7 +68,7 @@ export interface ServiceAiInput {
     otherProduct: string | null;
     existingCustomer: boolean | null;
   };
-  evidence: { mediaId: string; label: string; type: EvidenceType; durationSeconds: number | null; analysedInThisPhase: boolean }[];
+  evidence: { mediaId: string; label: string; type: EvidenceType; durationSeconds: number | null; analysedInThisPhase: boolean; videoCoverage?: VideoCoverage }[];
   transcripts: { mediaId: string; label: string; kind: "VOICE_NOTE" | "VIDEO_AUDIO"; text: string; language: string | null; noSpeechDetected: boolean; possiblyIncomplete: boolean }[];
 }
 
@@ -102,7 +114,10 @@ export function buildServiceAiInput(
       otherProduct: request.otherProduct ? scrubFreeText(request.otherProduct, known) : null,
       existingCustomer: request.existingCustomer,
     },
-    evidence: media.map((m) => ({ mediaId: m.mediaId, label: labels.get(m.mediaId)!, type: m.type, durationSeconds: m.durationSeconds, analysedInThisPhase: m.analysed ?? false })),
+    evidence: media.map((m) => ({
+      mediaId: m.mediaId, label: labels.get(m.mediaId)!, type: m.type, durationSeconds: m.durationSeconds, analysedInThisPhase: m.analysed ?? false,
+      ...(m.videoCoverage ? { videoCoverage: { ...m.videoCoverage, framesAnalysedAt: [...m.videoCoverage.framesAnalysedAt] } } : {}),
+    })),
     transcripts: transcripts
       .filter((t) => labels.has(t.mediaId))
       .map((t) => ({ mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, text: scrubFreeText(t.text, known), language: t.language, noSpeechDetected: t.noSpeechDetected ?? false, possiblyIncomplete: t.possiblyIncomplete ?? false })),

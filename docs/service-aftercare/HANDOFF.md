@@ -14,8 +14,9 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | **APPROVED / CLOSED** (`7574a09`) |
 | 4B | Voice transcription (OpenAI) | **APPROVED / CLOSED** (`c28d7d4`) |
 | 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | **APPROVED / CLOSED** (`7e91e03`) |
-| 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | Implemented: awaiting closure approval |
-| 4E–4F | Video, evaluation | Not started |
+| 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | **APPROVED / CLOSED** (`dba9b24`) |
+| 4E | Video evidence analysis (isolated Sandbox media worker, frames + video audio, scr-1.3) | Implemented: awaiting closure approval |
+| 4F | Evaluation, cost controls, reliability | Not started |
 
 ### Phase 3
 
@@ -84,6 +85,28 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 - Exact duplicates are analysed once.
 - No derivatives are stored. `sharp` is now a direct dependency.
 
+### Phase 4E
+
+- Untrusted video is parsed/decoded **only** in an isolated **Vercel Sandbox**
+  microVM (pinned snapshot; network deny-all; non-persistent; no env, tags or
+  identifiers; bytes only under a neutral name; destroyed on every path). The
+  application function never runs ffmpeg; without worker configuration videos
+  are SKIPPED.
+- Worker build: **FFmpeg 8.1.3, LGPL-2.1-or-later** (no gpl/nonfree/version3,
+  no external codec libraries) + zimg (WTFPL) — `scripts/media-worker/`.
+  Snapshot built for Development verification:
+  `snap_zh3HQqRCUkdFxxQXT4VClkk7UWWf` (bom1, no expiry). Not configured in any
+  Vercel environment.
+- Proven codecs: H.264 (MP4/MOV), HEVC incl. HLG HDR (MOV), VP8/VP9 (WebM).
+  SKIPPED: AV1, ProRes and other codecs (`VIDEO_NOT_SUPPORTED`).
+- ≤ 8 frames per video, deterministic (`vs-1`), de-duplicated; each analysed
+  alone (`po-1` + single-frame temporal rule). No AI temporal claims; every
+  analysed video gets `BEHAVIOUR_OVER_TIME`.
+- Video speech → 4B transcription → `VIDEO_AUDIO` (customer-reported).
+- > 180 s: PARTIALLY ANALYSED (frames across the video, speech to 03:00).
+- No migration. `@vercel/sandbox` is a new direct dependency (imported lazily,
+  only when a video is processed).
+
 ## ⛔ Pre-production blockers
 
 Do not link `/service-call` publicly until these are resolved.
@@ -104,7 +127,10 @@ Do not link `/service-call` publicly until these are resolved.
    0002 (0002 creates the private bucket).
 5. **Production data-residency/region decision required.** The dev database is
    in US-East (`iad1`, same region as the functions). Decide before storing real
-   customer media.
+   customer media. **Phase 4E adds the media-worker region**
+   (`SERVICE_AI_VIDEO_WORKER_REGION`, explicit, no default): Development
+   verification used `bom1` (Mumbai; Vercel Sandbox has no UAE region). The
+   snapshot exists only in the region it was built in.
 6. **Full-project lint has two pre-existing errors** in
    `scripts/migrate-site-settings-to-sanity.ts` (`no-explicit-any`, lines 85
    and 87). They are unrelated to Service & Aftercare; `eslint src tests` is clean.
@@ -125,6 +151,20 @@ Do not link `/service-call` publicly until these are resolved.
 8. **AI sweep not scheduled.** `POST /api/service-requests/maintenance/process-ai`
    (admin token) needs a scheduled job (e.g. every 10 min, Production cron),
    as does `cleanup-media`.
+9. **Video worker (Phase 4E) before any Production AI:**
+   - Legal sign-off on **H.264/HEVC patent licensing** for server-side decoding
+     (the FFmpeg build's copyright licence is LGPL; patents are separate).
+   - Build the worker snapshot in the Production team/region and set
+     `SERVICE_AI_VIDEO_WORKER_SNAPSHOT` / `SERVICE_AI_VIDEO_WORKER_REGION` there
+     (deliberately unset everywhere today). Rebuild for FFmpeg security releases
+     (`scripts/media-worker/build-snapshot.mjs`; bump nothing else — the new
+     snapshot id changes the worker version and cache keys).
+   - Sandbox usage is billed (≈ 15–35 s of a 2-vCPU microVM per video); add
+     spend monitoring with 4F cost controls.
+   - Long AI runs: a request with several videos can approach the function's
+     300 s default; runs resume from the per-layer caches if cut off, but
+     consider `maxDuration` on the AI routes or a queue (Vercel Queues).
+   - Disclose AI processing of **video and its audio** to customers.
 
 ## Hardening notes (not blocking)
 
@@ -193,4 +233,10 @@ the same, so testers should use that.
   contradictory statements.
 - **Cost evaluation:** `gpt-6-luna` for synthesis and vision; transcript
   completeness threshold.
+- **4E (recorded, not changed):** urgency over-escalation also seen with video
+  speech ("there is a crack in the glass" → URGENT `BROKEN_OR_UNSTABLE_GLASS`,
+  customer-reported); visible PII in video frames is flagged, not redacted;
+  near-duplicate threshold (Hamming ≤ 6) collapses slow pans/zooms to one
+  frame — evaluate against real phone footage; HEIC and mixed-language
+  transcription unchanged; multi-frame temporal comparison deferred.
 

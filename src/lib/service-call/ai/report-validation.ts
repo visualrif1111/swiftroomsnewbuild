@@ -1,4 +1,4 @@
-// Server-side validation of AI report content (schema "scr-1.1").
+// Server-side validation of AI report content (schema "scr-1.3").
 //
 // Runs on every report before it can be stored, whatever the provider
 // promised about structured output:
@@ -19,10 +19,17 @@ import {
   type EvidenceType, type ServiceCallReportContent, type UnknownItem, type UrgencyIndicator,
 } from "./report-schema";
 import { HEDGE, scanForbiddenClaims, type ForbiddenClaimRule } from "./safety";
+import { WHOLE_VIDEO } from "./frame-observation";
+import { ANALYSIS_WINDOW_SECONDS, formatTimestamp, frameLabel } from "./video-sampling";
 
 export interface ValidationContext {
-  /** Media the AI was given, and whether it was actually analysed/transcribed. */
-  evidence: { mediaId: string; type: EvidenceType; analysed: boolean; durationSeconds: number | null }[];
+  /**
+   * Media the AI was given, and whether it was actually analysed/transcribed.
+   * scr-1.3: `label` is the server's evidence label, and for a video
+   * `frameTimes` are the instants of its analysed frames — the only
+   * timestamps an observation from it may carry.
+   */
+  evidence: { mediaId: string; type: EvidenceType; analysed: boolean; durationSeconds: number | null; label?: string; frameTimes?: number[] }[];
   /** Deterministic safety flags raised from the customer's own words. */
   safetyFlags: UrgencyIndicator[];
   /**
@@ -35,6 +42,11 @@ export interface ValidationContext {
   /** Highest confidence the phase allows. */
   maxConfidence: ConfidenceLevel;
 }
+
+/** Issue categories that describe behaviour over time (scr-1.3). */
+const TEMPORAL_CATEGORIES: readonly string[] = ["OPERATION_STIFF_OR_STUCK", "NOISE", "DRAUGHT", "MOTOR_OR_CONTROLS"];
+/** Urgency indicators that need behaviour over time (or the customer's word) to establish (scr-1.3). */
+const TEMPORAL_INDICATORS: readonly UrgencyIndicator[] = ["ACTIVE_WATER_INGRESS", "SIGNIFICANT_LOSS_OF_FUNCTION", "CANNOT_SECURE_PROPERTY", "BLOCKED_EXIT_OR_ACCESS"];
 
 /** Content larger than this (serialised characters) is rejected as not sane. */
 const MAX_CONTENT_CHARS = 30_000;
@@ -182,6 +194,8 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
   }
 
   const observationIds = new Set<string>();
+  /** Observations from single video frames (scr-1.3): never a basis for behaviour over time. */
+  const frameObservationIds = new Set<string>();
   const observationCertainty = new Map<string, string>();
   if (c.arr(r.mediaObservations, "mediaObservations", LIMITS.observations)) {
     // Text-only phase: nothing was looked at, so nothing can be observed.
@@ -204,10 +218,20 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
         else if (ev.type === "VOICE") c.err(`${p}.evidence.mediaId`, "observation_from_audio_not_visual");
         else if (!ev.analysed) c.err(`${p}.evidence.mediaId`, "evidence_not_analysed");
         const t = o.evidence.frameAtSeconds;
-        if (ev?.type === "PHOTO" && t !== null) c.err(`${p}.evidence.frameAtSeconds`, "must_be_null_for_photo");
+        if (ev?.type === "PHOTO") {
+          if (t !== null) c.err(`${p}.evidence.frameAtSeconds`, "must_be_null_for_photo");
+          if (ev.label !== undefined && o.evidence.label !== ev.label) c.err(`${p}.evidence.label`, "label_mismatch");
+        }
         if (ev?.type === "VIDEO") {
           if (typeof t !== "number" || !Number.isFinite(t) || t < 0) c.err(`${p}.evidence.frameAtSeconds`, "required_for_video");
           else if (ev.durationSeconds !== null && t > ev.durationSeconds + 1) c.err(`${p}.evidence.frameAtSeconds`, "beyond_video_duration");
+          else if (ev.frameTimes) {
+            // Exactly one of THIS video's analysed frames — never another video's, never an invented instant.
+            const at = ev.frameTimes.find((x) => Math.abs(x - t) <= 0.05);
+            if (at === undefined) c.err(`${p}.evidence.frameAtSeconds`, "timestamp_not_in_analysed_frames");
+            else if (ev.label !== undefined && o.evidence.label !== frameLabel(ev.label, at)) c.err(`${p}.evidence.label`, "label_mismatch");
+          }
+          if (typeof o.id === "string") frameObservationIds.add(o.id);
         }
       }
       c.ids(o.relatesToSymptomRefs, `${p}.relatesToSymptomRefs`).forEach((ref) => symptomIds.has(ref) || c.err(`${p}.relatesToSymptomRefs`, `unknown_symptom:${ref}`));
@@ -225,6 +249,9 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     });
   }
   for (const topic of MANDATORY_UNKNOWN_TOPICS) if (!unknownTopics.has(topic)) c.err("unknownsRequiringInspection", `missing_mandatory_topic:${topic}`);
+  if (ctx.evidence.some((e) => e.type === "VIDEO" && e.analysed && e.frameTimes?.length) && !unknownTopics.has("BEHAVIOUR_OVER_TIME")) {
+    c.err("unknownsRequiringInspection", "missing_mandatory_topic:BEHAVIOUR_OVER_TIME");
+  }
   // A statement resting on a possibly-incomplete transcript must leave room for
   // what may be missing: at least one unknown beyond the mandatory three.
   const extraUnknowns = [...unknownTopics].filter((t) => !(MANDATORY_UNKNOWN_TOPICS as readonly string[]).includes(t));
@@ -249,6 +276,10 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
       const refs = c.ids(pc.basedOnRefs, `${p}.basedOnRefs`);
       if (!refs.length) c.err(`${p}.basedOnRefs`, "category_without_basis");
       refs.forEach((ref) => isRef(ref) || c.err(`${p}.basedOnRefs`, `unknown_ref:${ref}`));
+      // Operation, noise, draughts and motors play out over time: still frames alone can't support them.
+      if (refs.length && TEMPORAL_CATEGORIES.includes(pc.category as string) && refs.every((ref) => frameObservationIds.has(ref))) {
+        c.err(`${p}.basedOnRefs`, "behaviour_over_time_from_frames_only");
+      }
       // LIKELY needs more than uncertain visual impressions.
       if (pc.likelihood === "LIKELY" && refs.length && refs.every((ref) => observationCertainty.get(ref) === "UNCERTAIN")) {
         c.err(`${p}.likelihood`, "likely_based_only_on_uncertain_observations");
@@ -274,6 +305,9 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
         refs.forEach((ref) => isRef(ref) || c.err(`${p}.refs`, `unknown_ref:${ref}`));
         if ((ind.basis === "CUSTOMER_REPORTED" || ind.basis === "BOTH") && !hasStatement) c.err(`${p}.basis`, "customer_basis_without_statement");
         if ((ind.basis === "MEDIA_OBSERVED" || ind.basis === "BOTH") && !hasObservation) c.err(`${p}.basis`, "media_basis_without_observation");
+        if (TEMPORAL_INDICATORS.includes(ind.indicator as UrgencyIndicator) && !hasStatement && refs.some((ref) => frameObservationIds.has(ref))) {
+          c.err(`${p}.refs`, "behaviour_over_time_from_frames_only");
+        }
         if (okInd) indicators.push(ind.indicator as UrgencyIndicator);
       });
     }
@@ -319,6 +353,15 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     content.moreInformationNeeded.forEach((m, i) => scan(m, `moreInformationNeeded[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]));
     scan(content.confidence.reason, "confidence.reason", ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]);
     content.limitations.forEach((m, i) => scan(m, `limitations[${i}]`, ["PRICE_OR_QUOTE", "REPAIR_COMMITMENT", "WARRANTY_CONFIRMATION", "APPOINTMENT_COMMITMENT", "LIABILITY", "ELIGIBILITY_OR_APPROVAL"]));
+    // Sampled frames never establish what happens across a whole video.
+    const ownVoice: [string, string][] = [
+      ["issueSummary", content.issueSummary], ["urgency.reason", content.urgency.reason], ["inspection.reason", content.inspection.reason],
+      ["confidence.reason", content.confidence.reason],
+      ...content.limitations.map((m, i): [string, string] => [`limitations[${i}]`, m]),
+      ...content.moreInformationNeeded.map((m, i): [string, string] => [`moreInformationNeeded[${i}]`, m]),
+      ...content.mediaObservations.map((o, i): [string, string] => [`mediaObservations[${i}].observation`, o.observation]),
+    ];
+    for (const [path, text] of ownVoice) if (WHOLE_VIDEO.test(text)) c.err(path, "whole_video_claim");
   }
 
   if (!c.errors.length && JSON.stringify(input).length > MAX_CONTENT_CHARS) c.err("content", "content_too_large");
@@ -342,4 +385,37 @@ export function withMandatoryUnknowns(content: unknown): unknown {
   const present = new Set(content.unknownsRequiringInspection.map((u) => (isObj(u) ? u.topic : undefined)));
   const missing = MANDATORY_UNKNOWN_TOPICS.filter((t) => !present.has(t)).map((t) => MANDATORY_UNKNOWNS[t]);
   return { ...content, unknownsRequiringInspection: [...content.unknownsRequiringInspection, ...missing] };
+}
+
+/** An analysed video, as the server describes it to the unknowns below. */
+export interface AnalysedVideo {
+  label: string;
+  durationSeconds: number;
+  partiallyAnalysed: boolean;
+}
+
+/**
+ * scr-1.3: for every analysed video, the server adds a fixed-wording
+ * BEHAVIOUR_OVER_TIME unknown (frames are stills), and for a partially
+ * analysed video an unknown for everything outside what was analysed.
+ */
+export function withVideoUnknowns(content: unknown, videos: AnalysedVideo[]): unknown {
+  if (!isObj(content) || !Array.isArray(content.unknownsRequiringInspection) || !videos.length) return content;
+  const added: UnknownItem[] = [];
+  for (const v of videos) {
+    added.push({
+      topic: "BEHAVIOUR_OVER_TIME",
+      question: `How the product behaves over time in ${v.label} (movement, opening/closing, sticking, intermittent faults, active water entry).`,
+      whyUnknown: "Only individual still frames were analysed; behaviour over time needs the original video or an inspection.",
+    });
+    if (v.partiallyAnalysed) {
+      added.push({
+        topic: "OTHER",
+        question: `What the parts of ${v.label} outside the analysed frames and speech show or say.`,
+        whyUnknown: `${v.label} (${formatTimestamp(v.durationSeconds)}) exceeds the ${formatTimestamp(ANALYSIS_WINDOW_SECONDS)} analysis threshold; it was only partially analysed.`,
+      });
+    }
+  }
+  const existing = new Set(content.unknownsRequiringInspection.map((u) => (isObj(u) ? `${u.topic}|${u.question}` : "")));
+  return { ...content, unknownsRequiringInspection: [...content.unknownsRequiringInspection, ...added.filter((u) => !existing.has(`${u.topic}|${u.question}`))] };
 }

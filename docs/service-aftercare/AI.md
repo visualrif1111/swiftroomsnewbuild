@@ -12,9 +12,13 @@ customer.
 >   transcripts (OpenAI Responses API, strict schema).
 > - **Phase 4D:** photo evidence analysis. One photo per vision call; validated
 >   observations are injected into the report by the server (`scr-1.2`).
+> - **Phase 4E:** video evidence analysis. Untrusted video is decoded only in
+>   an isolated Vercel Sandbox media worker; bounded, deterministic frame
+>   sampling; one frame per vision call; video speech transcribed as
+>   customer-reported `VIDEO_AUDIO`; no temporal claims (`scr-1.3`).
 >
-> Video is **not analysed** yet (4E). HEIC/HEIF photos are skipped (no
-> decoder). Reports are internal: nothing is shown to customers.
+> HEIC/HEIF photos are skipped (no decoder). Reports are internal: nothing is
+> shown to customers.
 > AI is **off in every deployed environment** (`SERVICE_AI_ENABLED` unset).
 > The deterministic stub remains for tests and local work.
 
@@ -30,7 +34,8 @@ enqueue_service_ai_run()      idempotent; one active run per request
 claim_service_ai_runs()       lease per worker; SKIP LOCKED; expired leases recovered
         │
 processRun()  (ai/pipeline.ts)
-   per media, cached by input hash:  VOICE → transcript · PHOTO → observations · VIDEO → skipped until 4E
+   per media, cached by input hash:  VOICE → transcript · PHOTO → observations
+                                     VIDEO → media worker (Sandbox) → frame observations + VIDEO_AUDIO transcript
    buildServiceAiInput()  → privacy boundary (no contact details, references, tokens, URLs)
    provider.synthesiseReport() → validateReportContent()  (schema + semantics + forbidden claims), 1 retry
         │
@@ -340,12 +345,12 @@ completed photos stay cached.
   product types, text and PII flags, `cannotDetermine`.
 - New notices: `PHOTO_LIMITED_QUALITY`, `PHOTO_NOT_RELEVANT`,
   `PHOTO_DUPLICATE`, `PHOTO_BLANK` (plus `NOT_ANALYSED`).
-- Confidence is still ≤ MEDIUM. A request with video is PARTIAL (4E).
+- Confidence is still ≤ MEDIUM. (In 4D a request with video was PARTIAL; 4E analyses video.)
 - A request first reported in 4C (text only) qualifies for an automatic new
   version under 4D versions (within 72 h and the run cap), or a manual
   reprocess. The 4C report stays immutable.
 
-### Residual risks
+### Residual risks (photos)
 
 - Visual hallucination can't be eliminated deterministically. It is mitigated
   by one photo per call, hedging and certainty rules, the no-cause and
@@ -354,6 +359,155 @@ completed photos stay cached.
   flagged, not redacted.
 - Image inputs can be retained by OpenAI for abuse review in rare cases, even
   under Modified Abuse Monitoring (HANDOFF.md).
+
+## Video analysis (Phase 4E)
+
+Architecture decisions V1–V7 (approved): untrusted video is parsed and decoded
+**only** in an isolated **Vercel Sandbox** microVM, never in the application
+function (which holds the OpenAI and Supabase credentials). If the worker is
+not configured, videos are SKIPPED as before — there is no fallback to ffmpeg
+in the function.
+
+```
+per VIDEO (three independent caches, see below):
+  private original (service role) ──bytes only──▶ Sandbox microVM  (server/video-processor.ts)
+      created per video from the pinned snapshot · network "deny-all" · persistent:false · no env · no tags
+      · explicit region · hard VM timeout (180 s) · per-command kill timeout · input at /tmp/mw/input
+      ffprobe (-show_entries: codecs, size, duration, colour transfer; never tags)
+      → assessProbe(): container mov|matroska, video codec h264|hevc|vp8|vp9|mpeg4|h263 — by STREAM,
+        never by extension or declared MIME; else SKIPPED (video_codec_not_supported, …)
+      → scene pass (≤ 180 s videos) → chooseTimestamps() (vs-1) → one PNG per instant
+        (autorotated; HDR PQ/HLG tone-mapped to SDR; -map_metadata -1; bitexact)
+      → audio: first track, ≤ 180 s, mono 16 kHz AAC .m4a, no metadata/chapters
+  ◀── frames + audio (memory only) ── sandbox.stop() + delete() in finally (success, failure, timeout)
+  frames → 4D normaliser (img-1: ≤1536 px JPEG, no metadata) → blank → BLANK · perceptual hash → near-duplicate → DUPLICATE
+  each remaining frame (≤ 8) → ONE vision call: observe-frame-v1 + {"frame":"Video n @ mm:ss.s",…} + input_image
+      → validateFrameObservation(): po-1 rules + the single-frame temporal rule → 1 corrective attempt → else that frame FAILS
+  audio → 4B transcription (gpt-transcribe, verbatim, completeness flag) → transcript kind VIDEO_AUDIO
+report synthesis (scr-1.3): server injects frame observations (evidence {videoId, "Video n @ mm:ss.s", frameAtSeconds});
+  the report model receives structured observations, transcripts and coverage only — never a video, frame or audio.
+```
+
+### The media worker
+
+| | |
+|---|---|
+| Build | **FFmpeg 8.1.3** (source PGP-verified, key `FCF986EA15E6E293A5644F10B4322F04D67658D8`; SHA-256 pinned) + **zimg 3.0.6** (WTFPL, for HDR tone-mapping). `scripts/media-worker/build-ffmpeg.sh` configures `--disable-everything --disable-autodetect --disable-network` and enables only: demuxers `mov`, `matroska`; decoders `h264 hevc vp8 vp9 mpeg4 h263 aac mp3 mp3float opus vorbis amrnb amrwb alac pcm_*`; encoders `png aac wrapped_avframe`; muxers `image2 mp4 ipod null`; protocols `file pipe` only; the filters used. **No `--enable-gpl`, `--enable-nonfree` or `--enable-version3`**: `ffmpeg -L` reports **LGPL-2.1-or-later**. No external codec libraries (no x264/x265/libvpx/libaom/dav1d). |
+| Image | A **Vercel Sandbox snapshot** built by `scripts/media-worker/build-snapshot.mjs` in a separate build VM (network only for `apt`; no customer data), then the toolchain is purged and the default user's sudo removed before snapshotting. The snapshot never expires. Base: Vercel's Ubuntu image (its own OS components are aggregated, not linked into FFmpeg). |
+| Configuration | `SERVICE_AI_VIDEO_WORKER_SNAPSHOT` (`snap_…`) **and** `SERVICE_AI_VIDEO_WORKER_REGION` (explicit — the SDK's `iad1` default is never used by omission). Missing → `video_processing_not_available`; malformed → same, logged. Authentication: the project's Vercel OIDC token (automatic on Vercel; `VERCEL_OIDC_TOKEN` locally). |
+| Isolation | Per video: fresh non-persistent microVM, `networkPolicy: "deny-all"`, **no environment variables, tags or name** passed, unprivileged user without sudo, bytes written under a neutral name. Verified on the real worker: no app secrets in its environment, no identifiers on its disk, TCP (internet and metadata endpoint) blocked, DNS unavailable, ffmpeg has no network protocols. |
+| Termination | `stop()` + `delete()` in `finally` on every path. VM `timeout` 180 s is the platform backstop. The SDK **silently starts a fresh session** if a call reaches a VM the platform already stopped; that VM has none of our files, so the processor records `onResume`, refuses further steps near or after the deadline, and fails the step as `video_processing_timeout` (retryable) — never as "unreadable". |
+| Version | `WORKER_PROTOCOL_VERSION` `mw-1` + snapshot id = `processor.version`, part of every video cache key. Rebuilding the worker (new snapshot) re-analyses videos on their next run. |
+
+### Formats (proven on the pinned build)
+
+| Source | Result |
+|---|---|
+| MP4 / MOV with **H.264** (Android, WhatsApp, iPhone "Most Compatible") | Analysed |
+| MOV with **HEVC** (iPhone "High Efficiency"), including **HLG/PQ HDR** (tone-mapped) | Analysed — LGPL decoder; HEVC/H.264 patent licensing is a legal sign-off item (HANDOFF) |
+| WebM **VP8 / VP9** (+ Opus) — in-app recorder | Analysed |
+| 3GPP (MPEG-4 Part 2 / H.263, AMR audio) | Analysed if the probe accepts it (in the build; not separately exercised) |
+| **AV1**, ProRes, MJPEG, DNxHD, anything else | **SKIPPED** `video_codec_not_supported` (`VIDEO_NOT_SUPPORTED` notice) |
+| Containers other than MOV/MP4/3GP/Matroska/WebM | SKIPPED `video_container_not_supported` |
+| No video stream / cover art only | SKIPPED `video_no_video_stream` |
+| Zero duration · unreadable/corrupt · > 8K | SKIPPED `video_empty` · FAILED `video_unreadable` · SKIPPED `video_resolution_not_supported` |
+| Audio in an unsupported codec | Frames analysed; `VIDEO_NO_AUDIO` |
+
+### Frame sampling (`vs-1`, deterministic)
+
+1. Scene-change candidates (`select='gt(scene,0.30)'` on a 320-px decode), **only for
+   videos ≤ 180 s**; at most 4, spaced ≥ 0.75 s, highest score first. A failed
+   scene pass is recorded (`sceneDetection: "FAILED"`) and the grid alone is used.
+2. Fixed grid over the **video track**: `n = clamp(ceil(d/3 s), 3, 8)` slice centres.
+3. Merged (scene first), dropping instants < 0.75 s from a kept one; capped at
+   **8** by dropping the grid instants nearest a neighbour.
+4. Each instant decoded (`-ss` accurate seek, `-copyts`); its real presentation
+   time (showinfo) minus the container start, rounded to 0.1 s, is the frame's
+   timestamp.
+5. Normalised (img-1); **blank** frames dropped; **near-duplicates** (64-bit
+   difference hash, Hamming ≤ 6, or the same decoded frame) dropped.
+
+Same bytes + worker build + `vs-1` ⇒ same instants and decisions. At most **8
+vision calls per video** (plus at most one corrective attempt each).
+
+### Single-frame (temporal) rule — V3
+
+A frame is one instant. Frame observations are rejected (never softened) if
+they state movement, operation (opens/closes, slides, won't lock…), sticking,
+catching, jamming, sequence (before/after, starts/stops), frequency
+(repeatedly, intermittently, always…), progression (getting worse), active
+leakage (leaking, dripping, water entering) or whole-video behaviour
+(throughout, "the video shows", across all frames). Product names containing
+such words (sliding door, door stop, window catch, door jamb) and visible
+states ("appears open") are allowed. In the report:
+- every analysed video gets a server-written **`BEHAVIOUR_OVER_TIME`** unknown;
+- issue categories about operation, noise, draughts or motors, and urgency
+  indicators for active water entry, loss of function, securing the property
+  or blocked access, **can't rest on frame observations alone**
+  (`behaviour_over_time_from_frames_only`);
+- whole-video wording in the AI's own text is rejected (`whole_video_claim`).
+The multi-frame temporal-comparison model is deferred (not in 4E).
+
+### Video speech — V5
+
+The extracted audio goes through the unchanged 4B transcription path. It is
+**customer-reported**: statements cite it as `VIDEO_AUDIO` with that video's
+media id and a verbatim quote; it is never an observation. Completeness
+(`possiblyIncomplete`), `NO_SPEECH_DETECTED`, languages and the mixed-language
+limitation apply exactly as for voice notes.
+
+### Long videos — V7
+
+Over **180 s**, a video is **PARTIALLY ANALYSED**: the same ≤ 8 frames are
+spread across the whole video track (no scene pass), speech is transcribed for
+the first 180 s only, the report is `PARTIAL`, and it carries
+`VIDEO_LONG_SAMPLED_SPARSELY`, a fixed-wording `analysedPortion`
+("PARTIALLY ANALYSED: Video 1 lasts 05:12.0, beyond the 03:00.0 analysis
+threshold. 8 still frames (at …) analysed individually; speech transcribed
+from 00:00.0 to 03:00.0. Movement and behaviour over time were not
+assessed.") and an `OTHER` unknown for everything outside it. Nothing is
+truncated silently; the original video stays the authoritative evidence.
+
+### Caches (independent)
+
+| Layer | Row (`service_media_analyses`, on the video's media id) | Key covers |
+|---|---|---|
+| Preprocessing | `VIDEO_OBSERVATIONS` — `vp-1`: probe summary, sampling decisions, per-frame outcome + derivative SHA-256 + hash, audio status. **No pixels or audio.** SKIPPED/FAILED (deterministic) outcomes are cached too. | media id, verified size, worker version (`mw-1:<snapshot>`), `vs-1/img-1` |
+| Frame observations | `IMAGE_OBSERVATIONS`, one per frame — `po-1` + `frame {at,label}` + derivative | …, vision model, `openai-observe-frame-1/img-1`, instant + derivative SHA-256 |
+| Video speech | `TRANSCRIPT` | …, transcribe model, `openai-transcribe-1/va-1/<worker version>` |
+| Report | `service_ai_reports` (immutable versions) | — |
+
+Repeated finalize: nothing runs. Manual reprocess with unchanged video: **no
+Sandbox, no vision, no transcription** — synthesis only. A transient failure on
+one frame requeues the run; the retry re-extracts **only** the missing frames
+(plan reused, not re-probed). Changed bytes (new size) miss every layer.
+Transient worker failures are never cached.
+
+### Report integration (`scr-1.3`)
+
+Additive to `scr-1.2`: frame observations in `mediaObservations` (evidence
+`{mediaId: video, label: "Video n @ mm:ss.s", frameAtSeconds}`; photos keep
+`frameAtSeconds: null`); `BEHAVIOUR_OVER_TIME`; server-owned
+`videoAssessments[]` (container, codec, duration, `partiallyAnalysed`,
+`analysedPortion`, sampling counts, per-frame outcome/quality/relevance, audio
+status and transcribed span, text/PII flags, `cannotDetermine`); notices
+`VIDEO_NOT_SUPPORTED`, `VIDEO_LIMITED_QUALITY`, `VIDEO_NO_AUDIO`,
+`VIDEO_LONG_SAMPLED_SPARSELY`, `VIDEO_FRAMES_DEDUPLICATED`. Validation rejects a
+video observation whose timestamp isn't one of **that video's** analysed
+instants, whose label doesn't match, a photo with `frameAtSeconds`, a video
+without it, and any model-written evidence (`must_be_server_provided`). Report
+prompt `openai-report-3`, pipeline `4e.1`. Evidence durations for video are the
+probed ones.
+
+### Residual risks (video)
+
+- Behaviour over time is **deliberately not established**; staff must watch
+  the original video for anything about operation.
+- Visual hallucination per frame: mitigated as for photos.
+- Faces/documents/plates in frames are flagged (`personalInfoVisible`), not
+  redacted (4F/pre-launch).
+- Worker cost and latency: one microVM per video (≈ 15–35 s each in
+  verification). Runs are resumable through the caches if a function times out.
 
 ## Code
 
@@ -367,10 +521,17 @@ completed photos stay cached.
 | `ai/provider.ts` | `ServiceAiProvider` interface (transcribe, observe, synthesiseReport) |
 | `ai/transcript-quality.ts` | Conservative "transcript may be incomplete" heuristic |
 | `ai/stub-provider.ts` | Deterministic stub (tests and local work; refused in Production) |
-| `server/openai-provider.ts` | OpenAI transcription (4B); observation and synthesis not offered yet |
+| `server/openai-provider.ts` | OpenAI transcription (4B), synthesis (4C), photo observation (4D), video-frame observation (4E) |
+| `ai/video-sampling.ts` | Probe assessment (codec by stream), deterministic `vs-1` sampling, timestamps/labels (4E) |
+| `ai/frame-observation.ts` | Single-frame temporal rule on top of `po-1` (4E) |
+| `ai/prompts/observe-frame-v1.ts` | Video-frame instructions `openai-observe-frame-1` (4E) |
+| `ai/prompts/report-v3.ts` | Report instructions `openai-report-3` (4E) |
+| `server/video-processor.ts` | Media worker: Vercel Sandbox implementation, shared ffmpeg/ffprobe command lines, local implementation for tests (4E) |
+| `server/image-normaliser.ts` | Photo/frame derivative (img-1) and perceptual hash (4D/4E) |
+| `scripts/media-worker/` | Pinned worker build (`build-ffmpeg.sh`) and snapshot builder (`build-snapshot.mjs`) — operator tools, not app code |
 | `ai/run-store.ts` | Storage interface the pipeline depends on |
 | `ai/pipeline.ts` | Processes one claimed run |
-| `server/ai-config.ts` | `SERVICE_AI_ENABLED`, limits, fail-closed provider selection (server-only) |
+| `server/ai-config.ts` | `SERVICE_AI_ENABLED`, limits, fail-closed provider and video-worker selection (server-only) |
 | `server/ai-store.ts` | Supabase implementation of the store (server-only) |
 | `server/ai-worker.ts` | `enqueueAiProcessing`, `runAiWorker`, `sweepAi` (server-only) |
 | `supabase/migrations/0003_service_ai.sql` | Tables, functions, triggers, RLS |
@@ -457,7 +618,7 @@ When disabled:
 
 It is **unset in every environment** today. Production must stay disabled until the launch decisions in [HANDOFF.md](./HANDOFF.md) are made.
 
-## Service Call Report (`scr-1.2`)
+## Service Call Report (`scr-1.3`)
 
 Stored as `service_ai_reports.ai_report`. It has two layers:
 
@@ -469,7 +630,8 @@ Stored as `service_ai_reports.ai_report`. It has two layers:
 - `safetyFlags[]`: a deterministic keyword net over the customer's own words, independent of the AI;
 - `evidenceNotices[]` (scr-1.1): fixed-wording notices about the evidence;
 - `photoAssessments[]` (scr-1.2): per analysed photo;
-- `content.mediaObservations` (scr-1.2): written by the server from validated photo analysis.
+- `videoAssessments[]` (scr-1.3): per analysed video — what was, and wasn't, analysed;
+- `content.mediaObservations` (scr-1.2+): written by the server from validated photo and video-frame analysis.
 
 Version, provider, models, prompt/pipeline versions, fingerprint and timestamps are columns.
 
@@ -480,7 +642,7 @@ Version, provider, models, prompt/pipeline versions, fingerprint and timestamps 
 | `issueSummary` | ≤ 400 chars, attributed ("Customer reports…") |
 | `customerReported` | `statements[]` (`text`, verbatim `quote` (scr-1.1), source: DESCRIPTION / VOICE_NOTE / VIDEO_AUDIO), `reportedSymptoms[]` (must cite statements), `reportedOnset`, `locationInProperty` |
 | `mediaObservations[]` | evidence `{mediaId, label, frameAtSeconds}`, hedged `observation`, `type`, `certainty` CLEAR/PROBABLE/UNCERTAIN |
-| `unknownsRequiringInspection[]` | WARRANTY, COST and REPAIR_METHOD are **always** present (added by the server). `CONFLICTING_CUSTOMER_INFORMATION` (scr-1.1) records disagreements. |
+| `unknownsRequiringInspection[]` | WARRANTY, COST and REPAIR_METHOD are **always** present (added by the server); BEHAVIOUR_OVER_TIME for every analysed video (scr-1.3). `CONFLICTING_CUSTOMER_INFORMATION` (scr-1.1) and `EVIDENCE_DISCREPANCY` (scr-1.2) record disagreements. |
 | `affectedProducts[]` | product id plus basis (customer-selected, customer-described or media-observed) |
 | `potentialIssueCategories[]` | likelihood POSSIBLE/LIKELY only. There is no "confirmed". |
 | `urgency` | LOW / NORMAL / HIGH / URGENT, `indicators[]` with basis and evidence references, `reason` |
@@ -579,6 +741,20 @@ There are no review endpoints yet: "reviewer" needs real staff identities, which
 | `ai-photo-pipeline.test.mjs` | End-to-end 4D matrix (30 cases): attribution, one image per call, contradiction (`EVIDENCE_DISCREPANCY`), ambiguous, irrelevant, blank/corrupt/HEIC/bomb (no call), downscale and orientation, no EXIF in what is sent, visible text and PII flags, duplicates, image prompt injection, report can't invent/alter/misattribute observations, no image in report calls, provider failures, cache and reprocess, v2 after a 4C v1, lifecycle, PII, kill switch |
 | `ai-synthesis-pipeline.test.mjs` | End-to-end 4C matrix over real SQL: text, voice, text and voice, possibly incomplete, contradiction, vague, urgent, failed audio, no text, multilingual, prompt injection, hallucination, forbidden claims, refusal/incomplete/non-JSON, timeouts and 429/5xx, 401/400, idempotency, reprocess, 4B upgrade, prompt-version split, lifecycle, PII |
 | `ai-transcription-pipeline.test.mjs` | Transcription through the pipeline and real SQL: caching, repeated finalize, reprocess reuse, retry vs permanent, SKIPPED formats, run-wide errors, no PII sent, request untouched, kill switch, fail-closed |
+| `ai-video-sampling.test.mjs` | Probe assessment by stream (MP4/MOV/WebM, H.264/HEVC/VP8/VP9; ProRes/AV1/unknown skipped; forged container; cover art; zero/unreadable/oversized; audio and HDR), video-track duration, grid, deterministic merge/cap of 8, scene spacing, 180-s boundary, timestamp format, hash distance |
+| `ai-frame-observation.test.mjs` | Single-frame temporal rule: every category rejected (movement, operation, sticking, sequence, frequency, progression, leakage, whole-video); product names and visible states allowed; po-1 rules still apply |
+| `ai-video-worker.test.mjs` | Sandbox processor with the SDK faked at the boundary: exact create params (deny-all, non-persistent, explicit region, pinned snapshot, no env/tags/name), bytes-only upload under a neutral name, no secrets/identifiers/URLs anywhere, destroyed on success/failure/timeout/upload failure, silent-resume and deadline guards, no fallback, command lines (no network, metadata stripped, bounded), log parsers, fail-closed configuration |
+| `ai-video-local.test.mjs` | The worker's exact command lines with a **local ffmpeg test tool** (real decoding): H.264 MP4/MOV, HEVC MOV, VP8/VP9 WebM, ProRes/AV1 skipped, forged extension, corrupt/truncated, display rotation, HLG tone-mapping, scene cut, audio absent/silent/bounded, container metadata absent from frames and audio, temp files removed. Skipped with a stated reason when the tool is absent (see below). |
+| `ai-video-report-validation.test.mjs` | `scr-1.3` provenance: wrong media/video/instant, label mismatch, cross-video attribution, photo with a timestamp, video without one; VIDEO_AUDIO only from that video's transcript; behaviour over time from frames only; whole-video claims; BEHAVIOUR_OVER_TIME mandatory; partial-analysis unknown |
+| `ai-video-pipeline.test.mjs` | End-to-end 4E matrix (26 cases) over real SQL: exact frame attribution, one frame per call with frame instructions, no media in report calls, temporal claim rejected, model can't create evidence, near-duplicate/blank dropping, ≤ 8 frames, unsupported codec cached, no/unsupported audio, silence, 180-s boundary and partial wording, photo + video, two videos, contradictions, visible and spoken prompt injection, caches (finalize, reprocess = synthesis only, changed bytes), partial-frame retry, worker unavailable/timeout, blank-only video, immutability and lifecycle, kill switch / not configured, real local decoding with metadata check, quality/PII/mixed-language/incomplete speech, run-wide 401, failed scene pass, video-track sampling |
+
+**Local ffmpeg test tool (V6).** `ai-video-local` and test 22 of
+`ai-video-pipeline` decode real fixtures with a static ffmpeg **outside the
+repo** (default `~/.cache/swiftrooms-test-tools/ffmpeg-6.1.1/`, or
+`SERVICE_TEST_FFMPEG_DIR`). It is a GPL/nonfree test-only build (eugeneware
+`ffmpeg-static` b6.1.1 release binaries) that is never installed as a
+dependency, never shipped and never distributed; fixtures are generated at test
+time. The production worker is the separate LGPL build above.
 
 Multi-connection concurrency (`SKIP LOCKED`, simultaneous enqueue/claim) was
 verified against the Development database. PGlite has one connection.
@@ -588,7 +764,7 @@ verified against the Development database. PGlite has one connection.
 - **4B** ✅ voice transcription.
 - **4C** ✅ report synthesis (text and voice).
 - **4D** ✅ photo analysis (HEIC deferred).
-- **4E**: video (frames plus audio).
+- **4E** ✅ video (isolated Sandbox worker, frames plus audio).
 - **4F**: evaluation set, cost controls and reliability.
 
 See the approved Phase 4 design for details.

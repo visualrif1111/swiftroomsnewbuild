@@ -78,8 +78,8 @@ test("voice note → real-provider path → transcript cached against the right 
   const [run] = await runs(s.db, s.request.id);
   assert.equal(run.status, "FAILED");
   assert.equal(run.error_code, "report_stage_not_available");
-  assert.equal(run.pipeline_version, "4d.1");
-  assert.equal(run.prompt_version, "openai-report-2", "run prompt version = report prompt (4C split)");
+  assert.equal(run.pipeline_version, "4e.1");
+  assert.equal(run.prompt_version, "openai-report-3", "run prompt version = report prompt (4C split)");
   assert.equal(run.usage.openaiTranscribeInputTokens, 50);
   assert.deepEqual(run.error_detail.media.map((m) => [m.type, m.outcome]), [["VOICE", "ANALYSED"]]);
   assert.equal((await rows(s.db, "select count(*)::int n from service_ai_reports"))[0].n, 0, "no report in 4B");

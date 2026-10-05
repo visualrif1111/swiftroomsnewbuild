@@ -18,6 +18,9 @@ Names only. **Never commit values.** `.env.local` is git-ignored, and
 | `SERVICE_AI_MODEL_REPORT` | server | no | Report-synthesis model (Phase 4C). Default `gpt-6.1-sol`. Recorded on every run and report. |
 | `SERVICE_AI_MODEL_VISION` | server | no | Photo-observation model (Phase 4D). Default `gpt-6.1-sol`. |
 | `SERVICE_AI_REPORT_REASONING` | server | no | Reasoning effort for synthesis: `none`/`low`/`medium`/`high`. Default `low`; an invalid value falls back to the default. |
+| `SERVICE_AI_VIDEO_WORKER_SNAPSHOT` | server | for video | Phase 4E media-worker snapshot id (`snap_…`), built by `scripts/media-worker/build-snapshot.mjs`. With the region below it enables video analysis; without both, videos are SKIPPED and no sandbox is created. |
+| `SERVICE_AI_VIDEO_WORKER_REGION` | server | for video | Vercel region the worker runs in (e.g. `bom1`). **Required explicitly** — the SDK default (`iad1`) is never used by omission. Data-residency decision pending (HANDOFF). |
+| `VERCEL_OIDC_TOKEN` | server | for video | Provided automatically by Vercel to functions; authenticates the Sandbox SDK. Locally it comes from `vercel env pull` (expires after 12 h). Never logged. |
 | `NEXT_PUBLIC_SERVICE_CALL_CLIENT` | browser | no | Set to `mock` to run the wizard with no backend (nothing is saved). Unset = real API. |
 
 ¹ One of the two keys is required. Without `SUPABASE_URL` and a key, the API
@@ -31,8 +34,10 @@ import fails the build.
 **Phase 4A added `SERVICE_AI_ENABLED`. Phase 4B added `SERVICE_AI_PROVIDER`,
 `OPENAI_API_KEY` and `SERVICE_AI_MODEL_TRANSCRIBE`. Phase 4C adds the optional
 `SERVICE_AI_MODEL_REPORT` and `SERVICE_AI_REPORT_REASONING`. Phase 4D adds the
-optional `SERVICE_AI_MODEL_VISION`. None of these is set anywhere; the
-defaults apply.**
+optional `SERVICE_AI_MODEL_VISION`. Phase 4E adds `SERVICE_AI_VIDEO_WORKER_SNAPSHOT`
+and `SERVICE_AI_VIDEO_WORKER_REGION`. None of these is set in any Vercel
+environment; the defaults apply. (4E verification set the worker variables
+only in a local process.)**
 
 Where they are set:
 - Vercel **Development** only: `OPENAI_API_KEY`, for controlled local verification.

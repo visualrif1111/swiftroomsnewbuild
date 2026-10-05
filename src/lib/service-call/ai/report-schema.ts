@@ -8,6 +8,11 @@
 // the server from validated per-photo analysis (the report model may only
 // reference them), the EVIDENCE_DISCREPANCY topic (customer vs photo), the
 // server-owned `photoAssessments`, and photo evidence-notice codes.
+// scr-1.3 (Phase 4E) adds video evidence: observations from individually
+// analysed video frames (evidence label "Video 1 @ 00:04.2" with the exact
+// frameAtSeconds), video speech as VIDEO_AUDIO customer statements, the
+// BEHAVIOUR_OVER_TIME topic (single frames never establish behaviour over
+// time), server-owned `videoAssessments`, and video evidence-notice codes.
 //
 // A report has two layers:
 //   - server-owned facts (processing coverage, media counts, transcripts,
@@ -16,13 +21,13 @@
 //
 // The content keeps three things structurally apart:
 //   customerReported            what the customer said (description, voice, video audio)
-//   mediaObservations           what can be seen in their photos/video frames
+//   mediaObservations           what can be seen in their photos / individual video frames
 //   unknownsRequiringInspection what can't be established without a visit
 //
 // No vendor types: this file is shared by the pipeline, validators and tests.
 import type { ServiceProductId } from "../types";
 
-export const REPORT_SCHEMA_VERSION = "scr-1.2";
+export const REPORT_SCHEMA_VERSION = "scr-1.3";
 
 export const PRODUCT_IDS: readonly ServiceProductId[] = [
   "window", "sliding-door", "bi-fold-door", "entrance-door", "glass",
@@ -60,8 +65,14 @@ export const UNKNOWN_TOPICS = [
   "SAFETY_CONFIRMATION",
   /** Customer information disagrees (e.g. typed vs spoken). Never resolved by the AI. */
   "CONFLICTING_CUSTOMER_INFORMATION",
-  /** Customer-reported information disagrees with a photo observation (scr-1.2). Never resolved by the AI. */
+  /** Customer-reported information disagrees with a photo or video-frame observation (scr-1.2). Never resolved by the AI. */
   "EVIDENCE_DISCREPANCY",
+  /**
+   * How the product behaves over time — movement, opening/closing, sticking,
+   * intermittent faults, active water entry (scr-1.3). Sampled still frames
+   * can't show it: added by the server for every analysed video.
+   */
+  "BEHAVIOUR_OVER_TIME",
   "OTHER",
 ] as const;
 
@@ -209,7 +220,12 @@ export type EvidenceNoticeCode =
   | "PHOTO_LIMITED_QUALITY"
   | "PHOTO_NOT_RELEVANT"
   | "PHOTO_DUPLICATE"
-  | "PHOTO_BLANK";
+  | "PHOTO_BLANK"
+  | "VIDEO_NOT_SUPPORTED"
+  | "VIDEO_LIMITED_QUALITY"
+  | "VIDEO_NO_AUDIO"
+  | "VIDEO_LONG_SAMPLED_SPARSELY"
+  | "VIDEO_FRAMES_DEDUPLICATED";
 
 /** Server-owned summary of one analysed photo (scr-1.2), from its validated po-1 result. */
 export interface PhotoAssessment {
@@ -219,6 +235,37 @@ export interface PhotoAssessment {
   qualityIssues: string[];
   relevance: "RELEVANT" | "UNCLEAR" | "NOT_RELEVANT";
   visibleProductTypes: string[];
+  visibleTextPresent: boolean;
+  personalInfoVisible: boolean;
+  cannotDetermine: string[];
+}
+
+/** Server-owned summary of one analysed video (scr-1.3): what was looked at, and what wasn't. */
+export interface VideoAssessment {
+  mediaId: string;
+  label: string;
+  container: string;
+  videoCodec: string;
+  durationSeconds: number;
+  /** True when the video exceeds the analysis threshold (180 s): only part of it was reviewed. */
+  partiallyAnalysed: boolean;
+  /** Fixed-wording statement of exactly what was analysed. */
+  analysedPortion: string;
+  sampling: { version: string; framesRequested: number; framesAnalysed: number; framesDuplicate: number; framesBlank: number; framesFailed: number };
+  frames: {
+    atSeconds: number;
+    label: string;
+    outcome: "ANALYSED" | "DUPLICATE" | "BLANK" | "FAILED";
+    reasonCode: string | null;
+    quality: "CLEAR" | "LIMITED" | "UNUSABLE" | null;
+    relevance: "RELEVANT" | "UNCLEAR" | "NOT_RELEVANT" | null;
+  }[];
+  audio: {
+    status: "TRANSCRIBED" | "NO_AUDIO" | "NOT_SUPPORTED" | "FAILED" | "NOT_AVAILABLE";
+    /** Transcribed span (seconds from the start), or null when nothing was transcribed. */
+    transcribedSeconds: { from: number; to: number } | null;
+    reasonCode: string | null;
+  };
   visibleTextPresent: boolean;
   personalInfoVisible: boolean;
   cannotDetermine: string[];
@@ -246,5 +293,7 @@ export interface ServiceCallReport {
   evidenceNotices: { mediaId: string; label: string; code: EvidenceNoticeCode; message: string }[];
   /** One entry per analysed photo (scr-1.2). */
   photoAssessments: PhotoAssessment[];
+  /** One entry per analysed video (scr-1.3). */
+  videoAssessments: VideoAssessment[];
   content: ServiceCallReportContent;
 }

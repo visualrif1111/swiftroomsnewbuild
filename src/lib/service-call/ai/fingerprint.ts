@@ -59,6 +59,10 @@ export function computeInputFingerprint(request: FingerprintRequest, media: Fing
   );
 }
 
-export function mediaInputHash(step: { mediaId: string; fileSize: number; kind: string; provider: string; model: string; promptVersion: string }): string {
+/**
+ * `variant` distinguishes several analyses of one file for the same step
+ * (Phase 4E: one entry per video frame); omitted, the hash is unchanged.
+ */
+export function mediaInputHash(step: { mediaId: string; fileSize: number; kind: string; provider: string; model: string; promptVersion: string; variant?: string }): string {
   return sha256(canonicalJson({ v: 1, ...step, mediaId: step.mediaId.toLowerCase() }));
 }

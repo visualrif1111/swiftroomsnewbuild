@@ -14,7 +14,7 @@ export const STUB_PROVIDER_ID = "stub";
 export interface StubOptions {
   /** Media ids whose transcription fails. */
   failMedia?: Record<string, { code: string; retryable: boolean }>;
-  /** Photo labels ("Photo 1") whose observation fails (the photo stage never sees media ids). */
+  /** Photo/frame labels ("Photo 1", "Video 1 @ 00:01.5") whose observation fails (the stage never sees media ids). */
   failPhotos?: Record<string, { code: string; retryable: boolean }>;
   /** Custom po-1 output per photo call (label, call number); default: one hedged NOTHING_NOTABLE_VISIBLE. */
   photoContent?: (label: string, call: number) => unknown;
@@ -36,7 +36,7 @@ export function createStubServiceAiProvider(options: StubOptions = {}): ServiceA
     id: STUB_PROVIDER_ID,
     capabilities: { transcribe: true, observe: true, synthesise: true },
     models: { transcribe: "stub-transcribe-1", vision: "stub-vision-1", report: "stub-report-1" },
-    promptVersions: { transcribe: "stub-1", observe: "stub-1", report: "stub-1" },
+    promptVersions: { transcribe: "stub-1", observe: "stub-1", observeFrame: "stub-frame-1", report: "stub-1" },
     calls,
 
     async transcribe({ mediaId }) {

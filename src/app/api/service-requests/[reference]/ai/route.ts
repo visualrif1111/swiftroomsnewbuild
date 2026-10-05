@@ -4,7 +4,7 @@
 // to customers.
 import { NextRequest, NextResponse } from "next/server";
 import { deriveAiStatus } from "@/lib/service-call/ai/run-store";
-import { isServiceAiEnabled, resolveServiceAiProvider } from "@/lib/service-call/server/ai-config";
+import { isServiceAiEnabled, resolveServiceAiProvider, resolveVideoWorker } from "@/lib/service-call/server/ai-config";
 import { supabaseAiStore } from "@/lib/service-call/server/ai-store";
 import { isAdmin, NO_STORE, REFERENCE_PATTERN, serverFailure } from "@/lib/service-call/server/http";
 
@@ -23,12 +23,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ refe
       supabaseAiStore.listAnalyses(request.id),
     ]);
     const provider = resolveServiceAiProvider();
+    // Resolving creates no sandbox; it only reports whether one could be used.
+    const videoWorker = resolveVideoWorker();
     return NextResponse.json(
       {
         reference: request.reference,
         aiEnabled: isServiceAiEnabled(),
         // Which provider would run, or why none would (never the key itself).
         aiProvider: provider.ok ? { id: provider.provider.id, models: provider.provider.models } : { id: null, problem: provider.reason },
+        videoWorker: videoWorker.ok ? { configured: true, id: videoWorker.processor.id, region: videoWorker.region } : { configured: false, problem: videoWorker.reason },
         aiStatus: deriveAiStatus(runs),
         latestReportVersion: reports.findLast((r) => !r.supersededAt)?.version ?? null,
         // Lease owners are internal worker ids; not returned.

@@ -14,7 +14,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import sharp from "sharp";
-import type { ImageNormaliser, NormalisedImageResult } from "../ai/provider";
+import type { ImageNormaliser, NormalisedImageResult, PerceptualHasher } from "../ai/provider";
 
 export const NORMALISER_VERSION = "img-1";
 /** Long-edge bound: ≤ 48×48 = 2,304 patches of 32 px, under the provider's "high" detail budget. */
@@ -76,4 +76,25 @@ export const normaliseImage: ImageNormaliser = async (bytes, mimeType): Promise<
   } catch {
     return { ok: false, outcome: "FAILED", code: "image_unreadable" };
   }
+};
+
+/**
+ * 64-bit difference hash (Phase 4E near-duplicate frame detection): greyscale,
+ * 9×8, one bit per horizontal neighbour comparison. Deterministic for the
+ * same image bytes and sharp version.
+ */
+export const perceptualHash: PerceptualHasher = async (image) => {
+  const data = await sharp(image).greyscale().resize(9, 8, { fit: "fill" }).raw().toBuffer();
+  let hex = "";
+  for (let y = 0; y < 8; y++) {
+    for (let half = 0; half < 2; half++) {
+      let nibble = 0;
+      for (let k = 0; k < 4; k++) {
+        const x = half * 4 + k;
+        nibble = (nibble << 1) | (data[y * 9 + x] > data[y * 9 + x + 1] ? 1 : 0);
+      }
+      hex += nibble.toString(16);
+    }
+  }
+  return hex;
 };
