@@ -147,6 +147,8 @@ certification "since 2011"). Once confirmed, update the Sanity documents above
 ## ⛔ Service & Aftercare — launch blockers (do not link /service-call publicly yet)
 
 Details: `docs/service-aftercare/ARCHITECTURE.md` § Launch blockers and `MEDIA.md`.
+Phase status, the full blocker list and hardening notes:
+`docs/service-aftercare/HANDOFF.md` (Phase 3 closed).
 
 1. **No rate limiting / bot protection** on `POST /api/service-requests` and the
    media endpoints (`/api/service-requests/*/media*`). Add Vercel Firewall
