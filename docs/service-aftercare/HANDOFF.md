@@ -15,7 +15,7 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 4B | Voice transcription (OpenAI) | **APPROVED / CLOSED** (`c28d7d4`) |
 | 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | **APPROVED / CLOSED** (`7e91e03`) |
 | 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | **APPROVED / CLOSED** (`dba9b24`) |
-| 4E | Video evidence analysis (isolated Sandbox media worker, frames + video audio, scr-1.3) | Implemented: awaiting closure approval |
+| 4E | Video evidence analysis (isolated Sandbox media worker, frames + video audio, scr-1.3) | **APPROVED / CLOSED** (`379b42a`) |
 | 4F | Evaluation, cost controls, reliability | Not started |
 
 ### Phase 3
@@ -223,6 +223,17 @@ the same, so testers should use that.
   conversion. HEIC is real: 6 of 57 uploaded Development photos.
 - **Personal data inside photos** (faces, documents, house numbers) is flagged
   (`personalInfoVisible`) but not redacted.
+
+### Security incident log
+
+- **2026-10-05 — Development Vercel OIDC token displayed (closed).** During
+  Phase 4E verification a shell command printed the Development-scoped Vercel
+  OIDC token (project `swiftrooms-newbuild`, environment `development`) in the
+  local session's tool output. Not the OpenAI or Supabase keys; not committed,
+  logged to any service or sent elsewhere. The token is short-lived (≈ 12 h
+  from issue) and expires on its own; all temporary credential files were
+  deleted and scanned afterwards. Status: closed / expiring. Lesson: print only
+  presence/length checks for secrets, never `${VAR:-…}`-style expansions.
 
 ### Phase 4F findings (recorded, not changed)
 
