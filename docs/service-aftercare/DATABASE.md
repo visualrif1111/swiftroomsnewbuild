@@ -4,14 +4,17 @@ Supabase (Postgres 15+). Schema, applied in order:
 
 1. `supabase/migrations/0001_service_requests.sql`: requests, customers, status history
 2. `supabase/migrations/0002_service_media.sql`: media, upload tokens, private bucket
+3. `supabase/migrations/0003_service_ai.sql`: AI runs, reports, per-media analyses (Phase 4A, additive)
 
 ## Entities
 
 ```
 customers 1 ──< service_requests 1 ──< status_history
                        │
-                       ├──< service_media      (Phase 3 — created)
-                       ├──< ai_reports         (later)
+                       ├──< service_media      (Phase 3)
+                       │       └──< service_media_analyses   (Phase 4A: cached transcripts/observations)
+                       ├──< service_ai_runs    (Phase 4A: processing attempts, queue, leases)
+                       ├──< service_ai_reports (Phase 4A: versioned Service Call Reports)
                        ├──< staff_notes        (later)
                        └──< appointments       (later)
 
@@ -111,6 +114,58 @@ Functions (service role only):
   generates the path.
 - `mark_service_media_uploaded(id, size)` / `mark_service_media_failed(id, reason)`:
   only change `PENDING` rows, so both are idempotent.
+
+### service_ai_runs (Phase 4A)
+
+One row per AI processing attempt. It acts as the queue, the lease and the
+audit record. Its status (`service_ai_run_status`: QUEUED, PROCESSING,
+COMPLETED, PARTIAL, FAILED, CANCELLED) is **separate from
+`service_requests.status`**, which AI never changes.
+
+| column | notes |
+|---|---|
+| run_number | 1, 2, … per request (unique) |
+| trigger | `FINALIZE`, `SWEEP` or `MANUAL` |
+| input_fingerprint | SHA-256 of the inputs used (AI.md § Input fingerprint) |
+| pipeline_version / prompt_version / schema_version | provenance; part of deduplication |
+| provider / models | e.g. `stub`, `{"transcribe": …, "vision": …, "report": …}` |
+| lease_owner / lease_expires_at | set only while PROCESSING (check constraint) |
+| attempts / max_attempts / next_attempt_at | retries with backoff (max 3) |
+| error_code / error_detail | internal codes only: no prompts, customer text or URLs |
+| usage | per-run counters (calls, cache hits, provider usage) |
+| requested_by | `customer`, `system`, `admin` |
+
+A partial unique index allows **one QUEUED/PROCESSING run per request**.
+
+### service_ai_reports (Phase 4A)
+
+One row per report version (`version` unique per request). `ai_report` holds
+the validated report (schema `scr-1`, AI.md). A trigger makes `ai_report` and
+all provenance columns **immutable** and blocks deletes except by cascade from
+the service request. A newer version sets `superseded_at`/`superseded_by` on
+the previous one. Review fields (`review_status`, `reviewed_report`,
+`reviewed_by`, `reviewed_at`, `review_notes`) sit beside the AI output, never
+over it. A check constraint keeps them consistent.
+
+### service_media_analyses (Phase 4A)
+
+Per-file results cached by `input_hash` (media id, verified size, step,
+provider, model, prompt version). Unique `(media_id, kind, input_hash)`. A
+`COMPLETED` row is never overwritten, so an unchanged file is transcribed or
+analysed once. The 0002 columns on `service_media` (`transcript`,
+`ai_analysis`, …) are not written in 4A.
+
+### AI functions (service role only)
+
+| function | purpose |
+|---|---|
+| `enqueue_service_ai_run(...)` | idempotent enqueue; outcomes `created`, `active_run_exists`, `already_processed`, `already_failed`, `auto_run_limit_reached` |
+| `claim_service_ai_runs(worker, lease_seconds, limit)` | `FOR UPDATE SKIP LOCKED`; recovers expired leases; fails exhausted ones |
+| `extend_service_ai_run_lease(run, worker, seconds)` | owner only |
+| `complete_service_ai_run(...)` | owner only; inserts the next report version and supersedes the previous one in one transaction |
+| `fail_service_ai_run(...)` | owner only; retryable → QUEUED with backoff, else FAILED |
+| `find_service_requests_for_ai(limit, idle_minutes, max_age_hours)` | sweep discovery (AI.md § Triggers) |
+| `record_service_media_analysis(...)` | cache write; never replaces a COMPLETED result |
 
 ### status_history
 
@@ -216,6 +271,12 @@ editor, or `psql "$POSTGRES_URL_NON_POOLING" -f <file>`):
 
 1. `supabase/migrations/0001_service_requests.sql`
 2. `supabase/migrations/0002_service_media.sql`: also creates the private bucket
+3. `supabase/migrations/0003_service_ai.sql`: AI processing (additive; no backfill)
 
-Neither is idempotent: they create types and tables, so run each once per
-database. The development database has both applied.
+None is idempotent: they create types and tables, so run each once per
+database. The development database has all three applied (0003 on
+2026-10-05, in one transaction). Production has none yet.
+
+`npm test` applies all three to an in-process Postgres (PGlite) on every run,
+with Supabase's roles and default grants, and checks that 0003 leaves the
+Phase 1–3 schema identical.

@@ -81,6 +81,8 @@ export const mockServiceRequestClient: ServiceRequestClient = {
 
   async removeMedia() {},
 
+  async finalize() {},
+
   async listMedia() {
     return [];
   },

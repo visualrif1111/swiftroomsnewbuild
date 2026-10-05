@@ -2,7 +2,7 @@
 
 Phase status, pre-production blockers and hardening notes for the service-call
 flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
-[MEDIA.md](./MEDIA.md), [API.md](./API.md), [DATABASE.md](./DATABASE.md).
+[MEDIA.md](./MEDIA.md), [AI.md](./AI.md), [API.md](./API.md), [DATABASE.md](./DATABASE.md).
 
 ## Phases
 
@@ -11,6 +11,8 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 1 | Service Call wizard UX/UI | Complete |
 | 2 | Supabase backend, real service requests, idempotent submit | Complete |
 | 3 | Private media evidence uploads (Supabase Storage) | **COMPLETE / APPROVED / CLOSED** |
+| 4A | AI processing foundation (runs, leases, versioned reports, validation, privacy boundary, stub provider) | Implemented: awaiting approval |
+| 4B–4F | Voice, report synthesis, photos, video, evaluation | Not started |
 
 ### Phase 3
 
@@ -27,6 +29,16 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
   test records and objects were removed afterwards.
 - Not run: upload-token expiry (would need a 6-hour wait or a database edit) and
   real-iPhone testing (mobile was verified in emulation).
+
+### Phase 4A
+
+- Foundation only: **no real AI provider and no OpenAI calls**. The deterministic
+  stub labels its output `[STUB]`.
+- Migration `0003_service_ai.sql` is applied to **Development only**, verified
+  (catalog, grants, RLS, Phase 1–3 schema unchanged, multi-connection
+  concurrency) and test data torn down.
+- `SERVICE_AI_ENABLED` is unset everywhere, so processing is off. Finalize still
+  returns 202, so customers are unaffected.
 
 ## ⛔ Pre-production blockers
 
@@ -52,6 +64,15 @@ Do not link `/service-call` publicly until these are resolved.
 6. **Full-project lint has two pre-existing errors** in
    `scripts/migrate-site-settings-to-sanity.ts` (`no-explicit-any`, lines 85
    and 87). They are unrelated to Service & Aftercare; `eslint src tests` is clean.
+7. **AI processing is not production-ready.**
+   - Before enabling `SERVICE_AI_ENABLED` anywhere with real customer data, a
+     real provider must exist (4B+), and customer disclosure and legal sign-off
+     (PDPL basis, OpenAI data retention: ZDR/MAM) must be in place.
+   - Never enable it in Production while the provider is the stub.
+   - Apply migration 0003 to the Production project with 0001 and 0002.
+8. **AI sweep not scheduled.** `POST /api/service-requests/maintenance/process-ai`
+   (admin token) needs a scheduled job (e.g. every 10 min, Production cron),
+   as does `cleanup-media`.
 
 ## Hardening notes (not blocking)
 
@@ -79,3 +100,15 @@ Do not link `/service-call` publicly until these are resolved.
 `SERVICE_REQUESTS_ADMIN_TOKEN` is a Sensitive variable in the Preview
 environment, so `vercel env pull` returns it empty. The Development value is
 the same, so testers should use that.
+
+### AI processing (Phase 4A)
+
+- The sweep can't detect a file **removed** after processing, because a deleted
+  row leaves no timestamp. A new Finish or a manual reprocess handles it.
+  Consider a request-level "evidence changed at" marker later.
+- The finalize worker (`after()`) claims the oldest runnable run, which may not
+  be the one just queued. Fine at current volume; the sweep handles the rest.
+- The forbidden-claim and safety keyword rules are deterministic and
+  English-only. They complement strict schema output and human review; they
+  don't replace them.
+

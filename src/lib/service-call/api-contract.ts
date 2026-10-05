@@ -95,6 +95,7 @@ export function toCreatePayload(draft: ServiceRequestDraft): CreateServiceReques
 // URL; these endpoints only authorise, verify and remove. See MEDIA.md.
 
 export const mediaEndpoint = (reference: string) => `${SERVICE_REQUESTS_ENDPOINT}/${encodeURIComponent(reference)}/media`;
+export const finalizeEndpoint = (reference: string) => `${SERVICE_REQUESTS_ENDPOINT}/${encodeURIComponent(reference)}/finalize`;
 
 export type MediaUploadStatus = "PENDING" | "UPLOADED" | "FAILED";
 
@@ -126,6 +127,14 @@ export interface MediaSummary {
 export interface AuthoriseMediaResponse {
   media: MediaSummary;
   upload: { url: string; method: "PUT"; headers: Record<string, string>; expiresInSeconds: number } | null;
+}
+
+/**
+ * POST …/finalize → 202. The customer has finished adding evidence. Carries no
+ * AI status or content, whatever happens server-side (Phase 4).
+ */
+export interface FinalizeResponse {
+  received: true;
 }
 
 /** POST …/media/:id/complete → 200 when verified. */

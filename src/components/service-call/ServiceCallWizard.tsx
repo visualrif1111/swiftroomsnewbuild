@@ -48,6 +48,16 @@ interface Initial {
   uploadSession: UploadSession | null;
 }
 
+/**
+ * Tells the server the customer is done adding evidence. Fire-and-forget: the
+ * confirmation is already showing, and a failure here (offline, upload window
+ * closed) changes nothing for the customer — the server also finds settled
+ * requests on its own.
+ */
+function finalizeQuietly(receipt: ServiceRequestReceipt) {
+  getServiceRequestClient().finalize(receipt).catch(() => {});
+}
+
 /** What the customer would see if this submit failed. */
 function submitErrorMessage(err: unknown): string {
   const kind = err instanceof ServiceRequestSubmitError ? err.kind : "server";
@@ -206,6 +216,7 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
       } else {
         setMediaResult(null);
         show("done");
+        finalizeQuietly(result);
       }
     } catch (err) {
       setSubmitError(submitErrorMessage(err));
@@ -219,6 +230,8 @@ export default function ServiceCallWizard({ phone, phoneRaw }: { phone: string; 
     setMediaResult(uploads.finish());
     if (!receipt && uploads.receipt) setReceipt(uploads.receipt);
     show("done");
+    const finished = receipt ?? uploads.receipt;
+    if (finished) finalizeQuietly(finished);
   }
 
   function startAnother() {

@@ -11,6 +11,7 @@ Names only. **Never commit values.** `.env.local` is git-ignored, and
 | `SUPABASE_SERVICE_ROLE_KEY` | server | yes¹ | Service-role key. Bypasses RLS, so it must **never** be exposed to the browser or given a `NEXT_PUBLIC_` prefix. |
 | `SUPABASE_SECRET_KEY` | server | alt¹ | Newer-style secret key, used if `SUPABASE_SERVICE_ROLE_KEY` is absent |
 | `SERVICE_REQUESTS_ADMIN_TOKEN` | server | no | Enables `GET /api/service-requests/:reference` for staff/testing. Unset = endpoint disabled. Use a long random value (e.g. `openssl rand -hex 32`). |
+| `SERVICE_AI_ENABLED` | server | no | AI processing kill switch (Phase 4). Only `true`/`1`/`yes`/`on` enables it; unset, empty or `false` disables it. **Unset in every environment today.** Keep Production disabled until the launch decisions in HANDOFF.md are made. No `NEXT_PUBLIC_` equivalent. See AI.md. |
 | `NEXT_PUBLIC_SERVICE_CALL_CLIENT` | browser | no | Set to `mock` to run the wizard with no backend (nothing is saved). Unset = real API. |
 
 ¹ One of the two keys is required. Without `SUPABASE_URL` and a key, the API
@@ -20,6 +21,9 @@ service phone number.
 Only `server/supabase.ts` reads the Supabase variables (used by `store.ts` and
 `media-store.ts`), and it is guarded by `import "server-only"`, so a client
 import fails the build.
+
+**Phase 4A adds only `SERVICE_AI_ENABLED`.** There is no AI provider key yet:
+Phase 4A uses a deterministic stub, and `OPENAI_API_KEY` arrives with Phase 4B.
 
 **Phase 3 added no environment variables.** Media uses the same Supabase URL
 and service-role key, and the bucket name `service-evidence` is a constant in

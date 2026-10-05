@@ -168,6 +168,18 @@ so it's safe to repeat.
 Lists the request's files (`{ "media": MediaSummary[] }`) so the page can
 recover after a refresh. No URLs.
 
+### POST /api/service-requests/:reference/finalize (Phase 4A)
+
+The customer has finished adding evidence. The wizard calls it fire-and-forget
+on **Finish**, or right after submit when there are no files. Same upload-token
+auth as the media endpoints (401 `unauthorised` /
+`upload_authorisation_expired`). No body.
+
+**202** `{ "received": true }`. This is the response whether AI is disabled,
+already queued, already processed, or failed to queue. It carries **no AI
+status or content**, never makes the customer wait for processing, and never
+changes the service request. See [AI.md](./AI.md).
+
 ## GET /api/service-requests/:reference
 
 Reads one request with its customer and status history. For staff and testing
@@ -209,6 +221,42 @@ authentication.
 Admin token only (404 otherwise). Deletes `PENDING`/`FAILED` media untouched
 for `olderThanHours` (default 24), with their storage objects. Returns
 `{ "removed": n }`. Intended for a scheduled job.
+
+## AI processing — admin endpoints (Phase 4A)
+
+All need `Authorization: Bearer <SERVICE_REQUESTS_ADMIN_TOKEN>` (404 otherwise)
+and are for staff/testing. Phase 4A uses the stub provider: reports are
+placeholders labelled `[STUB]`.
+
+### GET /api/service-requests/:reference/ai
+
+```json
+{ "reference": "SR-2026-00042", "aiEnabled": false, "aiStatus": "NOT_STARTED",
+  "latestReportVersion": null, "runs": [], "reports": [] }
+```
+
+- `aiStatus` is `NOT_STARTED` when there are no runs, otherwise the latest run's status.
+- `runs[]`: number, trigger, status, attempts, versions, provider/models, error code and detail, usage, timestamps. Lease owners are omitted.
+- `reports[]`: every version, with `aiReport` (schema `scr-1`), provenance and review fields.
+
+### POST /api/service-requests/:reference/ai/reprocess
+
+Intentional reprocessing. It creates a MANUAL run and, once processed, a new
+report version. Cached per-file results are reused.
+
+| status | body |
+|---|---|
+| 202 | `{ "outcome": "created", "run": { … } }` (processing starts after the response) |
+| 200 | `{ "outcome": "active_run_exists", "run": { … } }` |
+| 409 | `{ "error": "ai_disabled" }` when `SERVICE_AI_ENABLED` is off |
+
+### POST /api/service-requests/maintenance/process-ai
+
+The sweep. It queues settled, unprocessed requests (last 72 h), recovers
+expired leases and processes up to 3 runs. Returns
+`{ "enabled", "enqueued": [{ requestId, outcome }], "results": [{ runId, outcome, … }] }`,
+or `{ "enabled": false, … }` when disabled. No report content. **No cron is
+configured yet.**
 
 ## Example
 

@@ -8,6 +8,7 @@
 import {
   IDEMPOTENCY_HEADER,
   SERVICE_REQUESTS_ENDPOINT,
+  finalizeEndpoint,
   mediaEndpoint,
   toCreatePayload,
   type AuthoriseMediaPayload,
@@ -171,6 +172,12 @@ export const httpServiceRequestClient: ServiceRequestClient = {
       headers: authHeaders(receipt),
     });
     if (!res.ok) throw await mediaError(res);
+  },
+
+  async finalize(receipt) {
+    if (!receipt.upload) return;
+    // keepalive: delivered even if the customer closes the tab straight after Finish.
+    await mediaCall(finalizeEndpoint(receipt.reference), { method: "POST", headers: authHeaders(receipt), keepalive: true });
   },
 
   async listMedia(receipt) {

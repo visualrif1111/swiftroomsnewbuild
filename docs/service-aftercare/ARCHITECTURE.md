@@ -88,13 +88,27 @@ create request ──▶ reference + upload token
   `steps/UploadStep.tsx`, which shows the confirmed reference first. Both reach
   the backend only through `getServiceRequestClient()`.
 
-## AI (later phase)
+## AI processing (Phase 4)
 
-An AI triage step will read the request and its media and write an
-`ai_reports` row, moving the status `SUBMITTED → AI_PROCESSED → AWAITING_REVIEW`
-through status history (`changed_by = 'system'`). It runs **after** the
-customer's request is saved, never inside the submit call, so AI outages can't
-lose a request.
+Full detail: [AI.md](./AI.md). **Phase 4A is the foundation only. The provider
+is a deterministic stub, and there are no real AI calls.**
+
+```
+Finish ─▶ POST …/finalize (upload token, fire-and-forget, always 202)
+              └─ after(): enqueue_service_ai_run ─▶ claim (lease) ─▶ processRun ─▶ complete → report v1, v2, …
+sweep (admin endpoint; no cron yet) ─┘          manual reprocess (admin) ─┘
+```
+
+- Runs **after** the customer's request is saved, never inside submit or
+  upload calls. AI failures can't lose, fail or alter a request.
+- **Does not touch `service_requests.status` or `status_history`.** AI state
+  lives in `service_ai_runs`. The `AI_PROCESSED` / `AWAITING_REVIEW` request
+  statuses stay unused until the staff phase decides transitions with human review.
+- `src/lib/service-call/ai/` is vendor-free: schema, validation, fingerprint,
+  privacy boundary, provider interface and pipeline. `server/ai-*.ts` wires in
+  Supabase and the kill switch (`SERVICE_AI_ENABLED`, off unless set to true).
+- Reports are versioned and their AI content is immutable. The original
+  submission and media remain the source records.
 
 ## Security
 
@@ -111,6 +125,9 @@ lose a request.
 - `/service-call` is `noindex` during development; API responses send
   `X-Robots-Tag: noindex`.
 
+- AI (Phase 4): new tables follow the same rules: RLS with no policies,
+  service-role-only functions. Providers receive only allow-listed, scrubbed
+  fields (no contact details, references, tokens or URLs). See AI.md.
 - Media: private bucket with no storage policies; upload token per request;
   per-object signed upload URLs; four validation layers including a content
   sniff; staff access only through 5-minute signed read URLs (see MEDIA.md).

@@ -205,6 +205,12 @@ export interface ServiceRequestClient {
   uploadMedia(receipt: ServiceRequestReceipt, media: ServiceMedia, options?: UploadMediaOptions): Promise<UploadedMediaResult>;
   /** Removes a registered file (storage object and record). Safe to repeat. */
   removeMedia(receipt: ServiceRequestReceipt, mediaId: string): Promise<void>;
+  /**
+   * Tells the server the customer has finished adding evidence (so automated
+   * triage can start). Best effort: callers ignore failures, and it never
+   * affects the request or what the customer sees.
+   */
+  finalize(receipt: ServiceRequestReceipt): Promise<void>;
   /** The request's files as the server knows them (recovery after a refresh). */
   listMedia(receipt: ServiceRequestReceipt): Promise<{ mediaId: string; clientMediaId: string; status: "PENDING" | "UPLOADED" | "FAILED"; failureReason: string | null; fileName: string | null; kind: ServiceMediaKind; size: number }[]>;
 }

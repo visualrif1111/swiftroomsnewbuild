@@ -1,0 +1,219 @@
+// Processes one claimed run: evidence → per-media steps (cached) → report
+// synthesis → validation → versioned report. Vendor-free: storage and the AI
+// provider are injected (run-store.ts, provider.ts).
+//
+// Guarantees:
+//   - never writes to the service request (the store has no such method);
+//   - the provider sees only buildServiceAiInput() output and media bytes —
+//     never contact details, references, tokens or URLs;
+//   - nothing is stored as a report unless validateReportContent() accepts it;
+//   - one file failing makes the report PARTIAL, not the run FAILED;
+//   - a lost lease abandons the run without writing anything.
+import { computeInputFingerprint, mediaInputHash } from "./fingerprint";
+import { buildServiceAiInput, labelEvidence, type TranscriptForAi } from "./input-builder";
+import { ServiceAiProviderError, type MediaReader, type ProviderUsage, type RawObservation, type ServiceAiProvider } from "./provider";
+import { REPORT_SCHEMA_VERSION, type ServiceCallReport, type UrgencyIndicator } from "./report-schema";
+import { validateReportContent, withMandatoryUnknowns, type ValidationContext } from "./report-validation";
+import { RunNotOwnedError, type AiRun, type AiRunStore, type RequestContext } from "./run-store";
+import { detectSafetyFlags } from "./safety";
+
+export const PIPELINE_VERSION = "4a.1";
+/** Synthesis attempts per run when output fails validation. */
+const SYNTHESIS_ATTEMPTS = 2;
+
+export interface PipelineDeps {
+  store: AiRunStore;
+  provider: ServiceAiProvider;
+  worker: string;
+  leaseSeconds: number;
+  readMedia: MediaReader;
+}
+
+export type RunOutcome =
+  | { runId: string; outcome: "COMPLETED" | "PARTIAL"; reportVersion: number }
+  | { runId: string; outcome: "FAILED" | "REQUEUED"; errorCode: string }
+  | { runId: string; outcome: "LOST_LEASE" };
+
+class LostLease extends Error {}
+class RunFailure extends Error {
+  constructor(public readonly code: string, public readonly retryable: boolean, public readonly detail: Record<string, unknown> | null = null) {
+    super(code);
+  }
+}
+
+export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOutcome> {
+  const { store, provider, worker } = deps;
+  const usage: Record<string, number> = {};
+  const addUsage = (u: ProviderUsage) => Object.entries(u).forEach(([k, v]) => (usage[k] = (usage[k] ?? 0) + (Number.isFinite(v) ? v : 0)));
+  const count = (k: string) => (usage[k] = (usage[k] ?? 0) + 1);
+  const keepLease = async () => {
+    if (!(await store.extendLease(run.id, worker, deps.leaseSeconds))) throw new LostLease();
+  };
+  // On the last allowed attempt a provider outage on one file no longer
+  // blocks the whole report: that file is reported as not processed instead.
+  const lastAttempt = run.attempts >= run.maxAttempts;
+
+  try {
+    const ctx = await store.loadRequestContext(run.serviceRequestId);
+    if (!ctx) throw new RunFailure("request_not_found", false);
+    const inputFingerprint = computeInputFingerprint(ctx.request, ctx.media);
+    const labels = labelEvidence(ctx.media.map((m) => ({ mediaId: m.id, type: m.type, durationSeconds: m.durationSeconds })));
+
+    const coverage: ServiceCallReport["processing"]["mediaCoverage"] = [];
+    const transcripts: TranscriptForAi[] = [];
+    const observations: (RawObservation & { label: string })[] = [];
+
+    for (const media of ctx.media) {
+      await keepLease();
+      const label = labels.get(media.id)!;
+      const step = await processMedia(media, label, ctx, deps, run, { addUsage, count, lastAttempt });
+      coverage.push({ mediaId: media.id, label, type: media.type, outcome: step.outcome, reasonCode: step.reasonCode });
+      if (step.transcript) transcripts.push(step.transcript);
+      if (step.observations) observations.push(...step.observations.map((o) => ({ ...o, label })));
+    }
+    await keepLease();
+
+    const analysed = new Set(coverage.filter((c) => c.outcome === "ANALYSED").map((c) => c.mediaId));
+    const input = buildServiceAiInput(
+      ctx.request,
+      ctx.media.map((m) => ({ mediaId: m.id, type: m.type, durationSeconds: m.durationSeconds })),
+      transcripts,
+      ctx.known,
+    );
+
+    const safetyFlags: ServiceCallReport["safetyFlags"] = [];
+    const flag = (indicators: UrgencyIndicator[], matchedIn: "DESCRIPTION" | "TRANSCRIPT") =>
+      indicators.forEach((indicator) => safetyFlags.some((f) => f.indicator === indicator) || safetyFlags.push({ indicator, matchedIn }));
+    flag(detectSafetyFlags(ctx.request.problemDescription ?? ""), "DESCRIPTION");
+    transcripts.forEach((t) => flag(detectSafetyFlags(t.text), "TRANSCRIPT"));
+
+    const validationContext: ValidationContext = {
+      evidence: ctx.media.map((m) => ({ mediaId: m.id, type: m.type, analysed: analysed.has(m.id), durationSeconds: m.durationSeconds })),
+      safetyFlags: safetyFlags.map((f) => f.indicator),
+    };
+
+    let content: ServiceCallReport["content"] | null = null;
+    let lastErrors: string[] = [];
+    for (let i = 0; i < SYNTHESIS_ATTEMPTS && !content; i++) {
+      count("synthesisCalls");
+      let raw: unknown;
+      try {
+        const res = await provider.synthesiseReport({ input, observations });
+        addUsage(res.usage);
+        raw = res.content;
+      } catch (err) {
+        if (err instanceof ServiceAiProviderError) throw new RunFailure(err.code, err.retryable);
+        throw err;
+      }
+      const checked = validateReportContent(withMandatoryUnknowns(raw), validationContext);
+      if (checked.ok) content = checked.value;
+      else lastErrors = checked.errors;
+      await keepLease();
+    }
+    if (!content) throw new RunFailure("invalid_output", false, { validationErrors: lastErrors.slice(0, 20) });
+
+    const status = coverage.every((c) => c.outcome === "ANALYSED") ? "COMPLETED" : "PARTIAL";
+    const transcriptByMedia = new Map(transcripts.map((t) => [t.mediaId, t]));
+    const report: ServiceCallReport = {
+      schemaVersion: REPORT_SCHEMA_VERSION,
+      serviceReference: ctx.reference,
+      processing: { status, mediaCoverage: coverage },
+      mediaSummary: {
+        photos: ctx.media.filter((m) => m.type === "PHOTO").length,
+        videos: ctx.media.filter((m) => m.type === "VIDEO").length,
+        voiceNotes: ctx.media.filter((m) => m.type === "VOICE").length,
+      },
+      // Staff see the transcript as transcribed (not scrubbed) next to the recording.
+      transcripts: [...transcriptByMedia.values()].map((t) => ({
+        mediaId: t.mediaId, label: labels.get(t.mediaId)!, kind: t.kind, language: t.language, text: t.text, machineGenerated: true as const,
+      })),
+      safetyFlags,
+      content,
+    };
+
+    const failures = coverage.filter((c) => c.outcome !== "ANALYSED").map((c) => ({ mediaId: c.mediaId, outcome: c.outcome, reasonCode: c.reasonCode }));
+    try {
+      const saved = await store.complete({
+        runId: run.id, worker, status, inputFingerprint,
+        provider: provider.id, models: { ...provider.models }, usage,
+        errorDetail: failures.length ? { media: failures } : null,
+        report,
+      });
+      return { runId: run.id, outcome: status, reportVersion: saved.version };
+    } catch (err) {
+      if (err instanceof RunNotOwnedError) throw new LostLease();
+      throw err;
+    }
+  } catch (err) {
+    if (err instanceof LostLease) return { runId: run.id, outcome: "LOST_LEASE" };
+    const failure = err instanceof RunFailure ? err : new RunFailure("internal_error", true);
+    if (!(err instanceof RunFailure)) console.error(`[service-ai] run ${run.id} failed:`, err instanceof Error ? err.message : err);
+    const updated = await store.fail({
+      runId: run.id, worker, errorCode: failure.code, errorDetail: failure.detail, retryable: failure.retryable, usage,
+    });
+    if (!updated) return { runId: run.id, outcome: "LOST_LEASE" };
+    return { runId: run.id, outcome: updated.status === "QUEUED" ? "REQUEUED" : "FAILED", errorCode: failure.code };
+  }
+}
+
+interface MediaStep {
+  outcome: "ANALYSED" | "SKIPPED" | "FAILED";
+  reasonCode: string | null;
+  transcript?: TranscriptForAi;
+  observations?: RawObservation[];
+}
+
+async function processMedia(
+  media: RequestContext["media"][number],
+  label: string,
+  ctx: RequestContext,
+  deps: PipelineDeps,
+  run: AiRun,
+  tally: { addUsage: (u: ProviderUsage) => void; count: (k: string) => void; lastAttempt: boolean },
+): Promise<MediaStep> {
+  const { store, provider } = deps;
+  if (media.type === "VIDEO") {
+    // Frame sampling and video audio arrive in Phase 4E.
+    return { outcome: "SKIPPED", reasonCode: "video_processing_not_available" };
+  }
+  const kind = media.type === "VOICE" ? "TRANSCRIPT" : "IMAGE_OBSERVATIONS";
+  const model = media.type === "VOICE" ? provider.models.transcribe : provider.models.vision;
+  const inputHash = mediaInputHash({ mediaId: media.id, fileSize: media.fileSize, kind, provider: provider.id, model, promptVersion: provider.promptVersion });
+  const meta = { provider: provider.id, model, promptVersion: provider.promptVersion, runId: run.id };
+
+  const cached = await store.getAnalysis(media.id, kind, inputHash);
+  if (cached?.status === "COMPLETED") {
+    tally.count("cacheHits");
+    return fromAnalysis(media, cached.transcriptText, cached.language, cached.result);
+  }
+
+  const read = () => deps.readMedia(media.id);
+  try {
+    if (media.type === "VOICE") {
+      tally.count("transcribeCalls");
+      const res = await provider.transcribe({ mediaId: media.id, label, mimeType: media.mimeType, read });
+      tally.addUsage(res.usage);
+      await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result: null, transcriptText: res.text, language: res.language, errorCode: null, usage: res.usage, ...meta });
+      return fromAnalysis(media, res.text, res.language, null);
+    }
+    tally.count("observeCalls");
+    const res = await provider.observe({ items: [{ mediaId: media.id, label, type: "PHOTO", mimeType: media.mimeType, read }], productCategories: ctx.request.productCategories });
+    tally.addUsage(res.usage);
+    const own = res.observations.filter((o) => o.mediaId === media.id);
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "COMPLETED", result: { observations: own }, transcriptText: null, language: null, errorCode: null, usage: res.usage, ...meta });
+    return { outcome: "ANALYSED", reasonCode: null, observations: own };
+  } catch (err) {
+    if (!(err instanceof ServiceAiProviderError)) throw err;
+    if (err.retryable && !tally.lastAttempt) throw new RunFailure(err.code, true);
+    await store.recordAnalysis({ mediaId: media.id, kind, inputHash, status: "FAILED", result: null, transcriptText: null, language: null, errorCode: err.code, usage: {}, ...meta });
+    return { outcome: "FAILED", reasonCode: err.code };
+  }
+}
+
+function fromAnalysis(media: RequestContext["media"][number], text: string | null, language: string | null, result: Record<string, unknown> | null): MediaStep {
+  if (media.type === "VOICE") {
+    return { outcome: "ANALYSED", reasonCode: null, transcript: { mediaId: media.id, kind: "VOICE_NOTE", text: text ?? "", language } };
+  }
+  const observations = Array.isArray(result?.observations) ? (result.observations as RawObservation[]) : [];
+  return { outcome: "ANALYSED", reasonCode: null, observations };
+}
