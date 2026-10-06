@@ -44,11 +44,11 @@ function strictnessProblems(schema, path = "$") {
 
 test("schema is strict-mode compliant: every object requires all properties and forbids extras", () => {
   assert.deepEqual(strictnessProblems(REPORT_JSON_SCHEMA), []);
-  assert.equal(REPORT_JSON_SCHEMA_NAME, "service_call_report_scr_1_3");
-  assert.equal(REPORT_SCHEMA_VERSION, "scr-1.3");
+  assert.equal(REPORT_JSON_SCHEMA_NAME, "service_call_report_scr_1_4");
+  assert.equal(REPORT_SCHEMA_VERSION, "scr-1.4");
 });
 
-test("model output conforms to the schema sent to the provider; observations must come from the server (scr-1.3)", () => {
+test("model output conforms to the schema sent to the provider; observations must come from the server (scr-1.4)", () => {
   assert.deepEqual(conforms(REPORT_JSON_SCHEMA, textOnlyContent()), []);
   // The model may not return observations of its own: maxItems 0.
   assert.ok(conforms(REPORT_JSON_SCHEMA, validContent()).some((e) => e.includes("mediaObservations: too many items")));

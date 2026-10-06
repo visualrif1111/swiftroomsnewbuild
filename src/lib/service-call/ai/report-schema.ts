@@ -13,6 +13,10 @@
 // frameAtSeconds), video speech as VIDEO_AUDIO customer statements, the
 // BEHAVIOUR_OVER_TIME topic (single frames never establish behaviour over
 // time), server-owned `videoAssessments`, and video evidence-notice codes.
+// scr-1.4 (Phase 4F) adds PRODUCT_SELECTION_MISMATCH (the product selected
+// differs from the product described — not contradictory testimony, which
+// stays CONFLICTING_CUSTOMER_INFORMATION) and the non-urgent CONTAINED_DAMAGE
+// urgency indicator (damage present, no immediate danger established).
 //
 // A report has two layers:
 //   - server-owned facts (processing coverage, media counts, transcripts,
@@ -27,7 +31,7 @@
 // No vendor types: this file is shared by the pipeline, validators and tests.
 import type { ServiceProductId } from "../types";
 
-export const REPORT_SCHEMA_VERSION = "scr-1.3";
+export const REPORT_SCHEMA_VERSION = "scr-1.4";
 
 export const PRODUCT_IDS: readonly ServiceProductId[] = [
   "window", "sliding-door", "bi-fold-door", "entrance-door", "glass",
@@ -63,8 +67,13 @@ export const UNKNOWN_TOPICS = [
   "COST",
   "PRODUCT_IDENTIFICATION",
   "SAFETY_CONFIRMATION",
-  /** Customer information disagrees (e.g. typed vs spoken). Never resolved by the AI. */
+  /** The customer's own statements contradict each other (e.g. typed vs spoken). Never resolved by the AI. */
   "CONFLICTING_CUSTOMER_INFORMATION",
+  /**
+   * The product the customer selected differs from the one they describe
+   * (scr-1.4). A form-filling mismatch, not contradictory testimony.
+   */
+  "PRODUCT_SELECTION_MISMATCH",
   /** Customer-reported information disagrees with a photo or video-frame observation (scr-1.2). Never resolved by the AI. */
   "EVIDENCE_DISCREPANCY",
   /**
@@ -109,6 +118,11 @@ export const URGENCY_INDICATORS = [
   "BLOCKED_EXIT_OR_ACCESS",
   "ELECTRICAL_OR_MOTOR_HAZARD",
   "SIGNIFICANT_LOSS_OF_FUNCTION",
+  /**
+   * Damage is present (e.g. a crack in an intact pane, a detached trim) but
+   * no immediate danger is established (scr-1.4). Never justifies URGENT.
+   */
+  "CONTAINED_DAMAGE",
 ] as const;
 
 /** URGENT is only explainable by one of these. */

@@ -1,6 +1,6 @@
 // Phase 4D end to end: photos → real normaliser (sharp) → per-photo vision
 // call (HTTP mocked) → po-1 validation → cache → server-injected
-// observations → report synthesis (scr-1.3) over the real SQL (PGlite).
+// observations → report synthesis (scr-1.4) over the real SQL (PGlite).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import sharp from "sharp";
@@ -64,7 +64,7 @@ test("1 clear single photo → po-1 cached; observation injected with exact attr
   assert.equal(a.result.derivative.normaliser, "img-1");
   const [rep] = await reports(s);
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1.3");
+  assert.equal(r.schemaVersion, "scr-1.4");
   assert.deepEqual(r.content.mediaObservations, [{
     id: "ob-1", evidence: { mediaId: s.media[0].id, label: "Photo 1", frameAtSeconds: null },
     observation: "upper half of the glazed panel: A thin linear mark resembling a crack appears visible across the glazed area.",

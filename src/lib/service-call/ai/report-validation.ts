@@ -18,7 +18,7 @@ import {
   STATEMENT_SOURCES, UNKNOWN_TOPICS, URGENCY_INDICATORS, URGENCY_LEVELS, URGENT_INDICATORS,
   type EvidenceType, type ServiceCallReportContent, type UnknownItem, type UrgencyIndicator,
 } from "./report-schema";
-import { HEDGE, scanForbiddenClaims, type ForbiddenClaimRule } from "./safety";
+import { disclosesInstructions, HEDGE, scanForbiddenClaims, type ForbiddenClaimRule } from "./safety";
 import { WHOLE_VIDEO } from "./frame-observation";
 import { ANALYSIS_WINDOW_SECONDS, formatTimestamp, frameLabel } from "./video-sampling";
 
@@ -41,6 +41,8 @@ export interface ValidationContext {
   visualAnalysis: boolean;
   /** Highest confidence the phase allows. */
   maxConfidence: ConfidenceLevel;
+  /** The instructions the model was given (Phase 4F): output may never reproduce them. */
+  instructions?: readonly string[];
 }
 
 /** Issue categories that describe behaviour over time (scr-1.3). */
@@ -287,11 +289,14 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
     });
   }
 
+  const safetyQuestionAsked = unknownTopics.has("SAFETY_CONFIRMATION");
   if (c.exact(r.urgency, "urgency", ["level", "indicators", "reason"])) {
     const u = r.urgency;
     c.oneOf(u.level, "urgency.level", URGENCY_LEVELS);
     c.str(u.reason, "urgency.reason", LIMITS.text);
     const indicators: UrgencyIndicator[] = [];
+    /** URGENT needs an urgent indicator backed by the customer's words or a CLEAR observation (scr-1.4). */
+    let urgentStronglySupported = false;
     if (c.arr(u.indicators, "urgency.indicators", URGENCY_INDICATORS.length)) {
       u.indicators.forEach((ind, i) => {
         const p = `urgency.indicators[${i}]`;
@@ -309,10 +314,15 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
           c.err(`${p}.refs`, "behaviour_over_time_from_frames_only");
         }
         if (okInd) indicators.push(ind.indicator as UrgencyIndicator);
+        if (okInd && URGENT_INDICATORS.includes(ind.indicator as UrgencyIndicator) && (hasStatement || refs.some((ref) => observationCertainty.get(ref) === "CLEAR"))) urgentStronglySupported = true;
       });
     }
-    if ((u.level === "HIGH" || u.level === "URGENT") && !indicators.length) c.err("urgency.level", "elevated_urgency_without_indicator");
+    // HIGH needs an indicator, or (scr-1.4) an explicit SAFETY_CONFIRMATION unknown: elevated because danger can't yet be ruled out.
+    if (u.level === "URGENT" && !indicators.length) c.err("urgency.level", "elevated_urgency_without_indicator");
+    if (u.level === "HIGH" && !indicators.length && !safetyQuestionAsked) c.err("urgency.level", "elevated_urgency_without_indicator");
     if (u.level === "URGENT" && !indicators.some((i) => URGENT_INDICATORS.includes(i))) c.err("urgency.level", "urgent_without_urgent_indicator");
+    // A PROBABLE/UNCERTAIN visual impression alone never makes a request URGENT.
+    else if (u.level === "URGENT" && !urgentStronglySupported) c.err("urgency.level", "urgent_from_uncertain_media_only");
     // Conservative: the customer's own words flagged a safety issue, so the
     // AI may not downgrade the case to LOW.
     if (u.level === "LOW" && ctx.safetyFlags.length) c.err("urgency.level", "low_despite_safety_flags");
@@ -362,6 +372,14 @@ export function validateReportContent(input: unknown, ctx: ValidationContext): R
       ...content.mediaObservations.map((o, i): [string, string] => [`mediaObservations[${i}].observation`, o.observation]),
     ];
     for (const [path, text] of ownVoice) if (WHOLE_VIDEO.test(text)) c.err(path, "whole_video_claim");
+    // Phase 4F: never repeat the instructions (customer quotes are exempt: they're verbatim customer words).
+    const disclosureFields: [string, string][] = [
+      ...ownVoice,
+      ...content.customerReported.statements.map((s, i): [string, string] => [`customerReported.statements[${i}].text`, s.text]),
+      ...content.customerReported.reportedSymptoms.map((s, i): [string, string] => [`customerReported.reportedSymptoms[${i}].symptom`, s.symptom]),
+      ...content.unknownsRequiringInspection.flatMap((u, i): [string, string][] => [[`unknownsRequiringInspection[${i}].question`, u.question], [`unknownsRequiringInspection[${i}].whyUnknown`, u.whyUnknown]]),
+    ];
+    for (const [path, text] of disclosureFields) if (disclosesInstructions(text, ctx.instructions)) c.err(path, "instruction_disclosure");
   }
 
   if (!c.errors.length && JSON.stringify(input).length > MAX_CONTENT_CHARS) c.err("content", "content_too_large");

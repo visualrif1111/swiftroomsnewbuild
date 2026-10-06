@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { createOpenAiProvider, parseReportResponse, REPORT_MAX_OUTPUT_TOKENS, REPORT_PROMPT_HASH } from "../../src/lib/service-call/server/openai-provider.ts";
 import { ServiceAiProviderError } from "../../src/lib/service-call/ai/provider.ts";
 import { REPORT_JSON_SCHEMA } from "../../src/lib/service-call/ai/report-json-schema.ts";
-import { REPORT_INSTRUCTIONS } from "../../src/lib/service-call/ai/prompts/report-v3.ts";
+import { REPORT_INSTRUCTIONS } from "../../src/lib/service-call/ai/prompts/report-v4.ts";
 import { resolveServiceAiProvider } from "../../src/lib/service-call/server/ai-config.ts";
 import { goodReport, json, openAiMock, responseOf, USAGE } from "../support/synthesis-mock.mjs";
 
@@ -34,8 +34,8 @@ test("request: Responses API, strict scr-1.1 schema, store:false, low reasoning,
   assert.equal(body.store, false);
   assert.deepEqual(body.reasoning, { effort: "low" });
   assert.equal(body.max_output_tokens, REPORT_MAX_OUTPUT_TOKENS);
-  assert.equal(body.prompt_cache_key, "service-report-openai-report-3");
-  assert.deepEqual(body.text, { format: { type: "json_schema", name: "service_call_report_scr_1_3", schema: REPORT_JSON_SCHEMA, strict: true } });
+  assert.equal(body.prompt_cache_key, "service-report-openai-report-4");
+  assert.deepEqual(body.text, { format: { type: "json_schema", name: "service_call_report_scr_1_4", schema: REPORT_JSON_SCHEMA, strict: true } });
   assert.equal(body.instructions, REPORT_INSTRUCTIONS);
   assert.equal(body.input.length, 1);
   assert.equal(body.input[0].role, "user");
@@ -70,7 +70,7 @@ test("models and reasoning are configurable (e.g. Luna for 4F evaluation)", asyn
 test("provider exposes capabilities, split prompt versions and the prompt hash", () => {
   const p = provider(openAiMock());
   assert.deepEqual(p.capabilities, { transcribe: true, observe: true, synthesise: true });
-  assert.deepEqual(p.promptVersions, { transcribe: "openai-transcribe-1", observe: "openai-observe-1/img-1", observeFrame: "openai-observe-frame-1/img-1", report: "openai-report-3" });
+  assert.deepEqual(p.promptVersions, { transcribe: "openai-transcribe-1", observe: "openai-observe-1/img-1", observeFrame: "openai-observe-frame-1/img-1", report: "openai-report-4" });
   assert.equal(p.reportPromptHash, REPORT_PROMPT_HASH);
   assert.match(REPORT_PROMPT_HASH, /^[0-9a-f]{64}$/);
 });

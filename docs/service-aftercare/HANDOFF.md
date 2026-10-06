@@ -16,7 +16,7 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | **APPROVED / CLOSED** (`7e91e03`) |
 | 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | **APPROVED / CLOSED** (`dba9b24`) |
 | 4E | Video evidence analysis (isolated Sandbox media worker, frames + video audio, scr-1.3) | **APPROVED / CLOSED** (`379b42a`) |
-| 4F | Evaluation, cost controls, reliability | Not started |
+| 4F | AI evaluation, reliability, safety and cost controls (eval-1, scr-1.4) | Implemented: awaiting review ([EVALUATION.md](./EVALUATION.md)) |
 
 ### Phase 3
 
@@ -165,6 +165,16 @@ Do not link `/service-call` publicly until these are resolved.
      300 s default; runs resume from the per-layer caches if cut off, but
      consider `maxDuration` on the AI routes or a queue (Vercel Queues).
    - Disclose AI processing of **video and its audio** to customers.
+10. **AI evaluation follow-ups (Phase 4F) before any Production AI:**
+    - eval-1 is **synthetic** (drawn scenes, TTS speech). Re-run the harness on a
+      small set of **consented real** service cases (photos, phone videos,
+      voice notes) and compare with `tests/service-call/evals/baseline/`.
+    - Decide on **image PII redaction** (design in EVALUATION.md; new
+      dependency) together with OpenAI ZDR/MAM and customer disclosure.
+    - Decide and, if wanted, enforce the proposed **analysis budgets**
+      (e.g. ≤ 3 videos analysed per request) and set spend alerts (OpenAI
+      project budget, Vercel Sandbox usage).
+    - HEIC remains unsupported (many iPhone photos not analysed).
 
 ## Hardening notes (not blocking)
 
@@ -235,19 +245,34 @@ the same, so testers should use that.
   deleted and scanned afterwards. Status: closed / expiring. Lesson: print only
   presence/length checks for secrets, never `${VAR:-…}`-style expansions.
 
-### Phase 4F findings (recorded, not changed)
+### Phase 4F
 
-- **Urgency can be over-escalated:** a "small crack in the corner" was rated
-  URGENT (`BROKEN_OR_UNSTABLE_GLASS`). Tune the prompt and indicators.
-- **`CONFLICTING_CUSTOMER_INFORMATION` is used heavily** for product-selection
-  versus description mismatches. Consider separating selection mismatch from
-  contradictory statements.
-- **Cost evaluation:** `gpt-6-luna` for synthesis and vision; transcript
-  completeness threshold.
+- Evaluation harness and golden set `eval-1` (106 synthetic scenarios),
+  pre-registered thresholds, real Development evaluation, regression
+  baseline, scorecard: [EVALUATION.md](./EVALUATION.md).
+- Fixed from the findings below: urgency over-escalation (false urgent
+  15% → 0% at 100% recall), product-selection mismatch separated
+  (`PRODUCT_SELECTION_MISMATCH`; misfiled 80% → 0%), instruction disclosure
+  rejected, spoken phone numbers/emails scrubbed, frame de-dup `vs-2`, stage
+  timings recorded. No migration; no new dependency.
+- Decisions left open (pre-launch): image PII redaction (design in
+  EVALUATION.md — new dependency), HEIC, explicit per-request analysis
+  budgets (proposed in EVALUATION.md, not enforced), `gpt-6-luna` evaluation.
+
+### Earlier findings carried into 4F (now resolved or measured)
+
+- **Urgency over-escalation** — fixed in 4F (calibrated v4 prompt, CONTAINED_DAMAGE,
+  evidence rule for URGENT); measured.
+- **CONFLICTING_CUSTOMER_INFORMATION overused for product-selection mismatch** —
+  fixed in 4F (PRODUCT_SELECTION_MISMATCH); measured.
+- **Cost evaluation** — measured in 4F ($0.009–0.031 per typical request);
+  `gpt-6-luna` not evaluated (deferred); transcript completeness: 1/19 false flags.
 - **4E (recorded, not changed):** urgency over-escalation also seen with video
   speech ("there is a crack in the glass" → URGENT `BROKEN_OR_UNSTABLE_GLASS`,
   customer-reported); visible PII in video frames is flagged, not redacted;
   near-duplicate threshold (Hamming ≤ 6) collapses slow pans/zooms to one
   frame — evaluate against real phone footage; HEIC and mixed-language
   transcription unchanged; multi-frame temporal comparison deferred.
+  (4F: threshold tuned to 4 on synthetic footage; real phone footage still to be
+  evaluated with consent; mixed-language loss not reproduced; HEIC unchanged.)
 

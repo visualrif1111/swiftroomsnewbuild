@@ -200,6 +200,11 @@ video's own media id (unique `(media_id, kind, input_hash)` allows several):
   `observeFramePromptVersion`, `observeFramePromptHash`, `videoWorker`,
   `videoSampling`.
 
+**Phase 4F: no database change.** Reports hold `scr-1.4` (topic
+`PRODUCT_SELECTION_MISMATCH`, indicator `CONTAINED_DAMAGE`); runs' `usage` adds
+stage timings (`transcribeMs`, `observeMs`, `observeFrameMs`, `synthesisMs`,
+`runMs`); video preprocessing rows use sampling `vs-2`.
+
 ### AI functions (service role only)
 
 | function | purpose |

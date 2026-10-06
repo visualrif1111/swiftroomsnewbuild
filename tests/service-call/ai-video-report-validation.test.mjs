@@ -1,4 +1,4 @@
-// scr-1.3 report validation for video evidence: exact frame provenance,
+// scr-1.4 report validation for video evidence: exact frame provenance,
 // photo/video identities that can't be confused, no behaviour over time from
 // frames, no whole-video claims, BEHAVIOUR_OVER_TIME always present.
 import { test } from "node:test";

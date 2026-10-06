@@ -1,10 +1,10 @@
 // Phase 4E pure logic: probe assessment (codecs by stream, never by
-// extension), deterministic bounded sampling (vs-1), timestamps and labels.
+// extension), deterministic bounded sampling (vs-2), timestamps and labels.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   ANALYSIS_WINDOW_SECONDS, assessProbe, chooseTimestamps, formatTimestamp, frameLabel, gridTimestamps, hammingDistance,
-  MAX_VIDEO_FRAMES, MIN_FRAME_GAP_SECONDS, roundFrameTime, sceneDetectionApplies, SAMPLING_VERSION,
+  MAX_VIDEO_FRAMES, MIN_FRAME_GAP_SECONDS, NEAR_DUPLICATE_MAX_DISTANCE, roundFrameTime, sceneDetectionApplies, SAMPLING_VERSION,
 } from "../../src/lib/service-call/ai/video-sampling.ts";
 import { probeJson } from "../support/videos.mjs";
 
@@ -113,7 +113,8 @@ test("timestamps and labels: mm:ss.s, 0.1 s precision, exact evidence identity",
   assert.equal(formatTimestamp(180), "03:00.0");
   assert.equal(frameLabel("Video 1", 4.2), "Video 1 @ 00:04.2");
   assert.equal(roundFrameTime(4.2333), 4.2);
-  assert.equal(SAMPLING_VERSION, "vs-1");
+  assert.equal(SAMPLING_VERSION, "vs-2");
+  assert.equal(NEAR_DUPLICATE_MAX_DISTANCE, 4, "Phase 4F: tuned on the eval-1 video set (EVALUATION.md)");
 });
 
 test("perceptual-hash distance", () => {

@@ -41,6 +41,38 @@ export function scanForbiddenClaims(text: string, rules: ForbiddenClaimRule[] = 
   return hits;
 }
 
+// ─── Instruction disclosure (Phase 4F) ───────────────────────────────────────
+// A report must never repeat the instructions the model was given (a prompt
+// injection may ask for them). Detected as any run of 14+ consecutive words
+// copied from the instructions (14 — short enough to catch a leak, long enough
+// that legitimately restating a criterion is not mistaken for one), plus fixed canary phrases that exist
+// only in our instructions (kept in sync by a test).
+export const INSTRUCTION_CANARIES = [
+  "internal service call report",
+  "output rules",
+  "the json schema is enforced",
+  "these rules are checked by software",
+  "you examine one customer photograph",
+];
+const SHINGLE = 14;
+const words = (s: string) => s.toLowerCase().normalize("NFKC").replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean);
+const shingles = (w: string[]) => new Set(w.length < SHINGLE ? [] : w.slice(0, w.length - SHINGLE + 1).map((_, i) => w.slice(i, i + SHINGLE).join(" ")));
+const instructionCache = new Map<string, Set<string>>();
+
+/** True when `text` reproduces our instructions (a canary phrase or ≥ 14 consecutive instruction words). */
+export function disclosesInstructions(text: string, instructions: readonly string[] = []): boolean {
+  const lower = text.toLowerCase().replace(/\s+/g, " ");
+  if (INSTRUCTION_CANARIES.some((c) => lower.includes(c))) return true;
+  const out = shingles(words(text));
+  if (!out.size) return false;
+  for (const ins of instructions) {
+    let set = instructionCache.get(ins);
+    if (!set) instructionCache.set(ins, (set = shingles(words(ins))));
+    for (const s of out) if (set.has(s)) return true;
+  }
+  return false;
+}
+
 /** Hedging words expected in any observation that isn't CLEAR. */
 export const HEDGE = /\b(appears?|apparent(ly)?|seems?|looks?( like)?|possibl[ey]|may|might|likely|suggests?|could)\b/i;
 
@@ -49,7 +81,10 @@ export const HEDGE = /\b(appears?|apparent(ly)?|seems?|looks?( like)?|possibl[ey
 // an AI outage or mistake can't hide an obviously urgent report.
 const SAFETY_PATTERNS: { indicator: UrgencyIndicator; pattern: RegExp }[] = [
   { indicator: "CANNOT_SECURE_PROPERTY", pattern: /\b(won'?t|can'?t|cannot|doesn'?t|does not|will not|unable to|not)\s+(lock|close|shut|secure)\b|\b(lock|latch)\s+(is\s+)?(broken|not working)\b/i },
-  { indicator: "BROKEN_OR_UNSTABLE_GLASS", pattern: /\b(shatter(ed|ing)?|smashed)\b|\bbroken glass\b|\bglass\s+(is\s+|has\s+)?(broken|cracked|shattered|loose|falling)\b|\bcrack(ed)?\s+(glass|pane|glazing)\b/i },
+  { indicator: "BROKEN_OR_UNSTABLE_GLASS", pattern: /\b(shatter(ed|ing)?|smashed)\b|\bbroken glass\b|\bglass\s+(is\s+|has\s+)?(broken|shattered|loose|falling)\b|\bsharp (pieces|edges|shards)\b/i },
+  // Phase 4F: a crack alone is damage, not established danger. Still flagged
+  // (so the AI can't rate it LOW), but never as broken/unstable glass.
+  { indicator: "CONTAINED_DAMAGE", pattern: /\bglass\s+(is\s+|has\s+)?(cracked|chipped)\b|\bcrack(ed|s)?\s+(in\s+)?(the\s+)?(glass|pane|glazing)\b|\bcracked\s+(glass|pane|glazing)\b/i },
   { indicator: "ACTIVE_WATER_INGRESS", pattern: /\bwater\s+(is\s+)?(coming|leaking|pouring|getting|dripping|seeping)\s+(in|through)\b|\b(leak(s|ing)?|flood(ed|ing)?)\b/i },
   { indicator: "INJURY_RISK_LOOSE_COMPONENT", pattern: /\b(hanging|falling|fell)\s+(off|down|out)\b|\b(dangerous|unsafe|injur(y|ed)|hurt)\b/i },
   { indicator: "ELECTRICAL_OR_MOTOR_HAZARD", pattern: /\b(spark(s|ing)?|smok(e|ing)|burning smell|electric(al)? shock)\b/i },

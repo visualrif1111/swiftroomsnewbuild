@@ -2,7 +2,7 @@
 // (faked at the processor boundary, or the local ffmpeg implementation) →
 // real normaliser + perceptual de-duplication → per-frame vision calls (HTTP
 // mocked) → video audio → 4B transcription → server-injected frame
-// observations → report synthesis (scr-1.3), caches and failure handling.
+// observations → report synthesis (scr-1.4), caches and failure handling.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import sharp from "sharp";
@@ -102,7 +102,7 @@ test("1 clear video: frames analysed one by one, observations carry the exact vi
   assert.equal(out.outcome, "COMPLETED", JSON.stringify(out));
   const [rep] = await reports(s);
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1.3");
+  assert.equal(r.schemaVersion, "scr-1.4");
   // 6 s video → grid of 3 at 1.0, 3.0, 5.0 (decoded at +0.01 → rounded to 0.1).
   const v = r.videoAssessments[0];
   assert.deepEqual(v.frames.map((f) => [f.label, f.outcome]), [["Video 1 @ 00:01.0", "ANALYSED"], ["Video 1 @ 00:03.0", "ANALYSED"], ["Video 1 @ 00:05.0", "ANALYSED"]]);
@@ -129,11 +129,11 @@ test("1 clear video: frames analysed one by one, observations carry the exact vi
   assert.equal(prep.provider, "fake-worker");
   assert.equal(prep.model, "mw-1:fake");
   const [run] = await runs(s);
-  assert.equal(run.pipeline_version, "4e.1");
+  assert.equal(run.pipeline_version, "4f.1");
   assert.equal(run.usage.videoWorkerSessions, 1);
   assert.equal(run.usage.observeFrameCalls, 3);
   assert.equal(run.usage.transcribeCalls, 1);
-  assert.equal(rep.models.videoSampling, "vs-1");
+  assert.equal(rep.models.videoSampling, "vs-2");
   assert.equal(rep.models.observeFramePromptVersion, "openai-observe-frame-1/img-1");
 });
 

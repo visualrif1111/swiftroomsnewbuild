@@ -1,0 +1,282 @@
+{
+ "evalSet": "eval-1",
+ "recordedAt": "2026-10-06",
+ "provider": "openai",
+ "models": {
+  "transcribe": "gpt-transcribe",
+  "vision": "gpt-6.1-sol",
+  "report": "gpt-6.1-sol"
+ },
+ "promptVersions": {
+  "transcribe": "openai-transcribe-1",
+  "observe": "openai-observe-1/img-1",
+  "observeFrame": "openai-observe-frame-1/img-1",
+  "report": "openai-report-4"
+ },
+ "schemaVersion": "scr-1.4",
+ "pipelineVersion": "4f.1",
+ "samplingVersion": "vs-2",
+ "videoWorker": {
+  "id": "vercel-sandbox",
+  "version": "mw-1:snap_zh3HQqRCUkdFxxQXT4VClkk7UWWf",
+  "region": "bom1"
+ },
+ "note": "Phase 4F baseline. Measure any future model/prompt/schema change against these numbers with tests/service-call/evals/run-*.mjs; thresholds in thresholds.mjs.",
+ "urgency": {
+  "before_openai_report_3": {
+   "counts": {
+    "NORMAL": 20,
+    "URGENT": 10,
+    "AMBIGUOUS": 12,
+    "notReported": []
+   },
+   "matrix": {
+    "AMBIGUOUS": {
+     "URGENT": 4,
+     "NORMAL": 8
+    },
+    "NORMAL": {
+     "URGENT": 3,
+     "NORMAL": 10,
+     "LOW": 7
+    },
+    "URGENT": {
+     "URGENT": 10
+    }
+   },
+   "genuineUrgentRecall": 1,
+   "falseUrgentRate": 0.15,
+   "normalOverEscalation": 0.15,
+   "ambiguousLow": 0,
+   "ambiguousSafetyFollowUp": 1
+  },
+  "after_openai_report_4": {
+   "counts": {
+    "NORMAL": 20,
+    "URGENT": 10,
+    "AMBIGUOUS": 12,
+    "notReported": []
+   },
+   "matrix": {
+    "AMBIGUOUS": {
+     "HIGH": 8,
+     "NORMAL": 3,
+     "URGENT": 1
+    },
+    "NORMAL": {
+     "HIGH": 2,
+     "NORMAL": 18
+    },
+    "URGENT": {
+     "URGENT": 10
+    }
+   },
+   "genuineUrgentRecall": 1,
+   "falseUrgentRate": 0,
+   "normalOverEscalation": 0.1,
+   "ambiguousLow": 0,
+   "ambiguousSafetyFollowUp": 1
+  },
+  "falseUrgentIdsBefore": [
+   "u-n01",
+   "u-n05",
+   "u-n17"
+  ]
+ },
+ "conflicts": {
+  "before_openai_report_3": {
+   "counts": {
+    "SELECTION_MISMATCH": 5,
+    "STATEMENT_CONFLICT": 5,
+    "CONSISTENT": 5
+   },
+   "selectionMismatchAsStatementConflict": 0.8,
+   "selectionMismatchDetected": 0,
+   "statementConflictRecall": 1,
+   "consistentFalseConflict": 0
+  },
+  "after_openai_report_4": {
+   "counts": {
+    "SELECTION_MISMATCH": 5,
+    "STATEMENT_CONFLICT": 5,
+    "CONSISTENT": 5
+   },
+   "selectionMismatchAsStatementConflict": 0,
+   "selectionMismatchDetected": 1,
+   "statementConflictRecall": 1,
+   "consistentFalseConflict": 0
+  }
+ },
+ "multimodal": {
+  "scenarios": 24,
+  "metrics": {
+   "urgency": {
+    "counts": {
+     "NORMAL": 17,
+     "URGENT": 2,
+     "AMBIGUOUS": 5,
+     "notReported": []
+    },
+    "matrix": {
+     "NORMAL": {
+      "HIGH": 3,
+      "NORMAL": 14
+     },
+     "AMBIGUOUS": {
+      "HIGH": 3,
+      "NORMAL": 1,
+      "URGENT": 1
+     },
+     "URGENT": {
+      "URGENT": 2
+     }
+    },
+    "genuineUrgentRecall": 1,
+    "falseUrgentRate": 0,
+    "normalOverEscalation": 0.176,
+    "ambiguousLow": 0,
+    "ambiguousSafetyFollowUp": 1
+   },
+   "evidenceDiscrepancyRecall": "2/2",
+   "statementConflictRecall": "2/2",
+   "expectedObservationFound": "2/3",
+   "expectedRelevance": "1/1",
+   "injectionScenarios": "4/4",
+   "reportPresenceAsExpected": "24/24"
+  },
+  "hardAssertionViolations": 0,
+  "calls": {
+   "report": 24,
+   "reportCorrective": 0,
+   "observe": 39,
+   "observeCorrective": 8,
+   "transcribe": 16
+  },
+  "perCallMs": {
+   "report": {
+    "n": 24,
+    "median": 16362,
+    "max": 37322,
+    "p95": 22074
+   },
+   "observe": {
+    "n": 39,
+    "median": 5868,
+    "max": 8202,
+    "p95": 8084
+   },
+   "transcribe": {
+    "n": 16,
+    "median": 739,
+    "max": 1198
+   }
+  },
+  "requestMs": {
+   "n": 24,
+   "median": 22351,
+   "max": 92981,
+   "p95": 77790
+  },
+  "costUsd": {
+   "openAiUsd": 0.3102,
+   "sandboxUsdUpperBound": 0.00932,
+   "sandboxSessions": 7
+  }
+ },
+ "transcription": {
+  "model": "gpt-transcribe",
+  "samples": 19,
+  "complete": 19,
+  "falseFlags": [
+   "a-en3"
+  ],
+  "mixedLanguage": [
+   "a-mx1(ar→en):complete",
+   "a-mx2(ar→en):complete",
+   "a-mx3(ar→en→ar):complete",
+   "a-mx4(en→ar):complete",
+   "a-mx5(hi→en):complete",
+   "a-mx6(en→ar→en):complete",
+   "a-mx7(ar→en (no pause)):complete",
+   "a-mx8(ar→en (no pause)):complete",
+   "a-mx9(ar→en (mid-sentence)):complete",
+   "a-mx10(ar→en→ar (no pause)):complete",
+   "a-mx11(en→ar (no pause)):complete",
+   "a-mx12(hi→en (no pause)):complete"
+  ],
+  "pauseSplit": {
+   "recovered": [],
+   "extraCalls": 31
+  }
+ },
+ "videoDedup": {
+  "threshold": 4,
+  "byThreshold": {
+   "0": {
+    "retainedFrames": 20,
+    "usefulEvidenceRetention": 1
+   },
+   "2": {
+    "retainedFrames": 20,
+    "usefulEvidenceRetention": 1
+   },
+   "4": {
+    "retainedFrames": 20,
+    "usefulEvidenceRetention": 1
+   },
+   "6": {
+    "retainedFrames": 19,
+    "usefulEvidenceRetention": 0.857
+   },
+   "8": {
+    "retainedFrames": 19,
+    "usefulEvidenceRetention": 0.857
+   },
+   "10": {
+    "retainedFrames": 18,
+    "usefulEvidenceRetention": 0.857
+   },
+   "12": {
+    "retainedFrames": 17,
+    "usefulEvidenceRetention": 0.857
+   }
+  },
+  "videos": {
+   "static scene": {
+    "proposed": 3,
+    "retained": 1,
+    "defectRetained": true
+   },
+   "slow pan": {
+    "proposed": 4,
+    "retained": 4,
+    "defectRetained": true
+   },
+   "fast pan": {
+    "proposed": 3,
+    "retained": 3,
+    "defectRetained": true
+   },
+   "gradual reveal": {
+    "proposed": 6,
+    "retained": 6,
+    "defectRetained": true
+   },
+   "defect moving into frame": {
+    "proposed": 3,
+    "retained": 3,
+    "defectRetained": true
+   },
+   "close-up (zoom in)": {
+    "proposed": 3,
+    "retained": 1,
+    "defectRetained": true
+   },
+   "door/window close-up, defect at the end": {
+    "proposed": 3,
+    "retained": 2,
+    "defectRetained": true
+   }
+  }
+ }
+}

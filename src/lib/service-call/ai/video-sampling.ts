@@ -1,4 +1,4 @@
-// Video evidence: probe validation and deterministic frame sampling — "vs-1"
+// Video evidence: probe validation and deterministic frame sampling — "vs-2"
 // (Phase 4E, docs/service-aftercare/AI.md). Vendor-free and pure: the media
 // worker (server/video-processor.ts) runs ffprobe/ffmpeg; this module decides
 // what is supported and which instants are looked at.
@@ -12,7 +12,7 @@
 // After extraction, frames are de-duplicated by perceptual hash and blank
 // frames are dropped, so at most 8 frames ever reach a vision model.
 
-export const SAMPLING_VERSION = "vs-1";
+export const SAMPLING_VERSION = "vs-2";
 /** Hard ceiling on vision calls per video (V4). */
 export const MAX_VIDEO_FRAMES = 8;
 /** Analysis threshold (V7): longer videos are only partially analysed. */
@@ -22,8 +22,13 @@ export const GRID_SPACING_SECONDS = 3;
 export const SCENE_THRESHOLD = 0.3;
 export const MAX_SCENE_CANDIDATES = 4;
 export const MIN_FRAME_GAP_SECONDS = 0.75;
-/** Two frames whose 64-bit difference hashes differ in ≤ this many bits are near-duplicates. */
-export const NEAR_DUPLICATE_MAX_DISTANCE = 6;
+/**
+ * Two frames whose 64-bit difference hashes differ in ≤ this many bits are
+ * near-duplicates. vs-2 (Phase 4F): 4, down from 6 — on the eval-1 video set a
+ * close-up whose defect appears only at the end differed by exactly 6 bits and
+ * was dropped; at 4 every defect-bearing view is retained for +1 frame in 20.
+ */
+export const NEAR_DUPLICATE_MAX_DISTANCE = 4;
 /** Frames larger than this (pixels) are not decoded: 8K UHD. */
 export const MAX_VIDEO_PIXELS = 7680 * 4320;
 

@@ -172,6 +172,8 @@ export interface ServiceAiProvider {
   readonly observePromptHash?: string;
   /** SHA-256 of the exact video-frame instructions + schema (optional). */
   readonly observeFramePromptHash?: string;
+  /** Every instruction text this provider sends (Phase 4F): reports may never reproduce them. */
+  readonly instructionTexts?: readonly string[];
   transcribe(request: TranscribeRequest): Promise<TranscribeResult>;
   /** Phase 4D: one normalised photo (or, 4E, one video frame) in, untrusted po-1 JSON out. */
   observePhoto(request: ObservePhotoRequest): Promise<ObservePhotoResult>;

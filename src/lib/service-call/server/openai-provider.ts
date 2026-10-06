@@ -35,7 +35,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { buildObserveUserText, OBSERVE_INSTRUCTIONS, OBSERVE_PROMPT_VERSION } from "../ai/prompts/observe-v1";
 import { buildObserveFrameUserText, OBSERVE_FRAME_INSTRUCTIONS, OBSERVE_FRAME_PROMPT_VERSION } from "../ai/prompts/observe-frame-v1";
-import { buildReportUserMessage, REPORT_INSTRUCTIONS, REPORT_PROMPT_VERSION } from "../ai/prompts/report-v3";
+import { buildReportUserMessage, REPORT_INSTRUCTIONS, REPORT_PROMPT_VERSION } from "../ai/prompts/report-v4";
 import { PHOTO_OBSERVATION_JSON_SCHEMA, PHOTO_OBSERVATION_JSON_SCHEMA_NAME } from "../ai/photo-observation-schema";
 import { ServiceAiProviderError, type ObservePhotoRequest, type ServiceAiProvider, type SynthesisRequest, type TranscribeRequest } from "../ai/provider";
 import { NORMALISER_VERSION } from "./image-normaliser";
@@ -140,6 +140,7 @@ export function createOpenAiProvider(config: OpenAiProviderConfig): ServiceAiPro
     reportPromptHash: REPORT_PROMPT_HASH,
     observePromptHash: OBSERVE_PROMPT_HASH,
     observeFramePromptHash: OBSERVE_FRAME_PROMPT_HASH,
+    instructionTexts: [REPORT_INSTRUCTIONS, OBSERVE_INSTRUCTIONS, OBSERVE_FRAME_INSTRUCTIONS],
 
     async transcribe(request: TranscribeRequest) {
       const ext = TRANSCRIBABLE[request.mimeType];

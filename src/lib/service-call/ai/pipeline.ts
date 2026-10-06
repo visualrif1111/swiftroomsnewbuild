@@ -34,7 +34,7 @@ import { RunNotOwnedError, type AiRun, type AiRunStore, type RequestContext } fr
 import { detectSafetyFlags } from "./safety";
 import { assessTranscriptCompleteness } from "./transcript-quality";
 
-export const PIPELINE_VERSION = "4e.1";
+export const PIPELINE_VERSION = "4f.1";
 /** Run error code when the provider has no report synthesis (see AI.md). */
 export const REPORT_STAGE_UNAVAILABLE = "report_stage_not_available";
 /** Run error code when there is no customer text or usable transcript to report on (no model call). */
@@ -94,6 +94,8 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
   const usage: Record<string, number> = {};
   const addUsage = (u: ProviderUsage) => Object.entries(u).forEach(([k, v]) => (usage[k] = (usage[k] ?? 0) + (Number.isFinite(v) ? v : 0)));
   const count = (k: string) => (usage[k] = (usage[k] ?? 0) + 1);
+  // Phase 4F: stage latency, summed per run (ms) — transcribeMs, observeMs, observeFrameMs, synthesisMs, runMs.
+  const runStarted = Date.now();
   const keepLease = async () => {
     if (!(await store.extendLease(run.id, worker, deps.leaseSeconds))) throw new LostLease();
   };
@@ -200,6 +202,7 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       },
       visualAnalysis: provider.capabilities.observe,
       maxConfidence: MAX_CONFIDENCE_PHASE_4C,
+      instructions: provider.instructionTexts ?? [],
     };
 
     // At most two attempts: the second (D5) carries only our own rule codes.
@@ -210,13 +213,14 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
       count("synthesisCalls");
       if (i > 0) count("synthesisCorrectiveAttempts");
       let res;
+      const t0 = Date.now();
       try {
         res = await provider.synthesiseReport({ input, observations, correction: i > 0 ? lastErrors.slice(0, 20) : undefined });
       } catch (err) {
         if (err instanceof ServiceAiProviderError) throw new RunFailure(err.code, err.retryable);
         throw err;
       }
-      addUsage(res.usage);
+      addUsage({ ...res.usage, synthesisMs: Date.now() - t0 });
       if (res.outputIssue) {
         lastIssue = res.outputIssue === "incomplete_output" ? "incomplete_output" : "invalid_output";
         lastErrors = [`response: ${res.outputIssue}`];
@@ -298,6 +302,7 @@ export async function processRun(run: AiRun, deps: PipelineDeps): Promise<RunOut
     };
 
     const failures = coverage.filter((c) => c.outcome !== "ANALYSED").map((c) => ({ mediaId: c.mediaId, outcome: c.outcome, reasonCode: c.reasonCode }));
+    usage.runMs = Date.now() - runStarted;
     try {
       const saved = await store.complete({
         runId: run.id, worker, status, inputFingerprint,
@@ -380,8 +385,9 @@ async function processMedia(
   const read = () => deps.readMedia(media.id);
   try {
     tally.count("transcribeCalls");
+    const t0 = Date.now();
     const res = await provider.transcribe({ mediaId: media.id, label, mimeType: media.mimeType, read });
-    tally.addUsage(res.usage);
+    tally.addUsage({ ...res.usage, transcribeMs: Date.now() - t0 });
     // Duration: as measured by the provider, else as recorded by the browser.
     const duration = res.usage.openaiTranscribeSeconds ?? media.durationSeconds;
     const result = {
@@ -439,12 +445,13 @@ async function processPhoto(media: RequestContext["media"][number], label: strin
     tally.count("observeCalls");
     if (i > 0) tally.count("observeCorrectiveAttempts");
     let res;
+    const t0 = Date.now();
     try {
       res = await provider.observePhoto({ label, productCategories: ctx.request.productCategories, image: normalised.image, correction: i > 0 ? lastErrors.slice(0, 20) : undefined });
     } catch (err) {
       return mediaFailure(err, { media, kind, inputHash, meta, store, tally });
     }
-    tally.addUsage(res.usage);
+    tally.addUsage({ ...res.usage, observeMs: Date.now() - t0 });
     if (res.outputIssue) {
       lastErrors = [`response: ${res.outputIssue}`];
       continue;
@@ -699,8 +706,9 @@ async function processVideo(media: RequestContext["media"][number], label: strin
       const bytes = audioBytes;
       try {
         tally.count("transcribeCalls");
+        const t0 = Date.now();
         const res = await provider.transcribe({ mediaId: media.id, label, mimeType: "audio/mp4", read: async () => bytes });
-        tally.addUsage(res.usage);
+        tally.addUsage({ ...res.usage, transcribeMs: Date.now() - t0 });
         const seconds = res.usage.openaiTranscribeSeconds ?? plan.audio.seconds;
         const result = {
           languages: res.languages ?? (res.language ? [res.language] : []),
@@ -779,13 +787,14 @@ async function observeFrame(
     tally.count("observeFrameCalls");
     if (i > 0) tally.count("observeFrameCorrectiveAttempts");
     let res;
+    const t0 = Date.now();
     try {
       res = await provider.observePhoto({ label, productCategories: ctx.request.productCategories, image: image.image, correction: i > 0 ? lastErrors.slice(0, 20) : undefined, frame: true });
     } catch (err) {
       const step = await mediaFailure(err, { media, kind: "IMAGE_OBSERVATIONS", inputHash, meta, store, tally });
       return { outcome: "FAILED", reasonCode: step.reasonCode };
     }
-    tally.addUsage(res.usage);
+    tally.addUsage({ ...res.usage, observeFrameMs: Date.now() - t0 });
     if (res.outputIssue) {
       lastErrors = [`response: ${res.outputIssue}`];
       continue;

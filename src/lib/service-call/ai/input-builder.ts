@@ -75,11 +75,16 @@ export interface ServiceAiInput {
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 // 7+ digits, allowing spaces, dashes, dots, brackets and a leading +.
 const PHONE = /\+?\(?\d(?:[\s\-.()]*\d){6,}/g;
+// Phase 4F: the same, as transcription may render speech — 7+ spoken digits
+// ("zero five five, oh one two …") or a spoken address ("name dot x at y dot z").
+const DIGIT_WORD = "(?:zero|oh|one|two|three|four|five|six|seven|eight|nine|double\\s+\\w+|triple\\s+\\w+)";
+const SPOKEN_PHONE = new RegExp(`\\b${DIGIT_WORD}(?:[\\s,.-]+${DIGIT_WORD}){6,}\\b`, "gi");
+const SPOKEN_EMAIL = /\b[\p{L}\p{N}_-]+(?:\s+dot\s+[\p{L}\p{N}_-]+)*\s+at\s+[\p{L}\p{N}_-]+(?:\s+[\p{L}\p{N}_-]+)?(?:\s+dot\s+[\p{L}\p{N}_-]+)*\s+dot\s+(?:com|net|org|ae|co|uk|io|me|info|biz|edu|gov|test)\b/giu;
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Removes contact details and the customer's known details from free text. */
 export function scrubFreeText(text: string, known: KnownPersonalData = {}): string {
-  let out = text.replace(EMAIL, "[email removed]").replace(PHONE, "[number removed]");
+  let out = text.replace(EMAIL, "[email removed]").replace(SPOKEN_EMAIL, "[email removed]").replace(PHONE, "[number removed]").replace(SPOKEN_PHONE, "[number removed]");
   const terms = [
     known.email, known.location, known.projectReference, known.fullName,
     // Individual name parts ("Aisha", "Khan"); very short parts are skipped.

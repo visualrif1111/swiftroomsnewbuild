@@ -187,6 +187,9 @@ test("forbidden-claim scanner: known phrasings caught, ordinary hedged text not"
 
 test("safety keyword net flags the obvious customer-reported hazards", () => {
   assert.deepEqual(detectSafetyFlags("The front door won't lock since yesterday"), ["CANNOT_SECURE_PROPERTY"]);
-  assert.deepEqual(detectSafetyFlags("glass is cracked and water is coming in"), ["BROKEN_OR_UNSTABLE_GLASS", "ACTIVE_WATER_INGRESS"]);
+  // Phase 4F: a crack is flagged as damage (still blocks LOW), not as broken/unstable glass.
+  assert.deepEqual(detectSafetyFlags("glass is cracked and water is coming in"), ["CONTAINED_DAMAGE", "ACTIVE_WATER_INGRESS"]);
+  assert.deepEqual(detectSafetyFlags("The pane has shattered"), ["BROKEN_OR_UNSTABLE_GLASS"]);
+  assert.deepEqual(detectSafetyFlags("there are sharp pieces hanging in the frame"), ["BROKEN_OR_UNSTABLE_GLASS"]);
   assert.deepEqual(detectSafetyFlags("The handle is a bit stiff"), []);
 });

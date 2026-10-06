@@ -40,18 +40,18 @@ async function finalize(s) {
   return { q, w, out: w.results[0] };
 }
 
-test("1 text only → COMPLETED report (scr-1.3), quote from the description, no observations, versions recorded", async () => {
+test("1 text only → COMPLETED report (scr-1.4), quote from the description, no observations, versions recorded", async () => {
   const s = await setup();
   const { out } = await finalize(s);
   assert.equal(out.outcome, "COMPLETED");
   const [rep] = await reports(s);
   const r = rep.ai_report;
-  assert.equal(r.schemaVersion, "scr-1.3");
-  assert.equal(rep.schema_version, "scr-1.3");
-  assert.equal(rep.prompt_version, "openai-report-3");
-  assert.equal(rep.pipeline_version, "4e.1");
+  assert.equal(r.schemaVersion, "scr-1.4");
+  assert.equal(rep.schema_version, "scr-1.4");
+  assert.equal(rep.prompt_version, "openai-report-4");
+  assert.equal(rep.pipeline_version, "4f.1");
   assert.equal(rep.models.report, "gpt-6.1-sol");
-  assert.equal(rep.models.reportPromptVersion, "openai-report-3");
+  assert.equal(rep.models.reportPromptVersion, "openai-report-4");
   assert.match(rep.models.reportPromptHash, /^[0-9a-f]{64}$/);
   assert.deepEqual(r.content.mediaObservations, []);
   assert.equal(r.content.customerReported.statements[0].source.type, "DESCRIPTION");
@@ -154,7 +154,7 @@ test("7 urgent/safety wording → LOW is rejected; corrected URGENT with cited i
   assert.match(mock.calls.responses[1].correction, /low_despite_safety_flags/);
   const r = (await reports(s))[0].ai_report;
   assert.equal(r.content.urgency.level, "URGENT");
-  assert.deepEqual(r.safetyFlags.map((f) => f.indicator).sort(), ["BROKEN_OR_UNSTABLE_GLASS", "CANNOT_SECURE_PROPERTY"]);
+  assert.deepEqual(r.safetyFlags.map((f) => f.indicator).sort(), ["CANNOT_SECURE_PROPERTY", "CONTAINED_DAMAGE"]);
 });
 
 test("8 failed/unsupported audio + photo → text-only report, PARTIAL, evidence notices; photo never analysed", async () => {
@@ -323,14 +323,14 @@ test("20 a request processed in 4B qualifies again under 4C versions, reusing it
 test("21 changing the report prompt version never invalidates cached transcripts", async () => {
   const s = await setup({ voice: true });
   await finalize(s);
-  const bumped = { ...s.deps, provider: { ...s.deps.provider, promptVersions: { ...s.deps.provider.promptVersions, report: "openai-report-4" } } };
+  const bumped = { ...s.deps, provider: { ...s.deps.provider, promptVersions: { ...s.deps.provider.promptVersions, report: "openai-report-5" } } };
   assert.equal((await enqueueAiProcessing(s.request.id, "FINALIZE", "customer", bumped)).outcome, "created");
   await runAiWorker(1, bumped);
   assert.equal(s.mock.calls.transcribe.length, 1);
   const [a] = await rows(s.db, "select input_hash from service_media_analyses");
   assert.equal(a.input_hash, mediaInputHash({ mediaId: s.media[0].id, fileSize: 1000, kind: "TRANSCRIPT", provider: "openai", model: "gpt-transcribe", promptVersion: "openai-transcribe-1" }));
   const rs = await runs(s);
-  assert.deepEqual(rs.map((r) => r.prompt_version), ["openai-report-3", "openai-report-4"]);
+  assert.deepEqual(rs.map((r) => r.prompt_version), ["openai-report-4", "openai-report-5"]);
 });
 
 test("22 service request status, updated_at and history untouched (success and failure)", async () => {
