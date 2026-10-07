@@ -21,7 +21,19 @@ const nextConfig: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
       { key: "X-DNS-Prefetch-Control", value: "on" },
     ];
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Staff dashboard: its URLs carry service references and evidence routes,
+      // so nothing is sent as a Referer; never indexed; frames disallowed.
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "X-Frame-Options", value: "DENY" },
+        ],
+      },
+    ];
   },
   // SEO migration — preserve equity from EVERY legacy indexed URL on
   // www.swiftrooms.ae (211 incl. ~146 blog posts) by 301/308-redirecting

@@ -1,6 +1,17 @@
 // Module resolution hooks for tests (see register.mjs).
 export async function resolve(specifier, context, nextResolve) {
   if (specifier === "server-only") return { url: "data:text/javascript,", shortCircuit: true };
+  // The "@/…" path alias (tsconfig) → src/…
+  if (specifier.startsWith("@/")) {
+    const target = new URL(`../../src/${specifier.slice(2)}`, import.meta.url).href;
+    for (const candidate of [target, `${target}.ts`, `${target}.tsx`, `${target}/index.ts`]) {
+      try {
+        return await nextResolve(candidate, context);
+      } catch {
+        // try the next extension
+      }
+    }
+  }
   if (/^\.\.?\//.test(specifier) && !/\.[cm]?[jt]s$/.test(specifier) && context.parentURL?.includes("/src/")) {
     try {
       return await nextResolve(`${specifier}.ts`, context);

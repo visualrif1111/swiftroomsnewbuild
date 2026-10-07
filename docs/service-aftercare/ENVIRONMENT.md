@@ -21,6 +21,7 @@ Names only. **Never commit values.** `.env.local` is git-ignored, and
 | `SERVICE_AI_VIDEO_WORKER_SNAPSHOT` | server | for video | Phase 4E media-worker snapshot id (`snap_…`), built by `scripts/media-worker/build-snapshot.mjs`. With the region below it enables video analysis; without both, videos are SKIPPED and no sandbox is created. |
 | `SERVICE_AI_VIDEO_WORKER_REGION` | server | for video | Vercel region the worker runs in (e.g. `bom1`). **Required explicitly** — the SDK default (`iad1`) is never used by omission. Data-residency decision pending (HANDOFF). |
 | `VERCEL_OIDC_TOKEN` | server | for video | Provided automatically by Vercel to functions; authenticates the Sandbox SDK. Locally it comes from `vercel env pull` (expires after 12 h). Never logged. |
+| `SUPABASE_ANON_KEY` | server | dashboard | Phase 5 staff authentication (Supabase Auth calls, made **server-side only**). Grants no data access (RLS, no grants). `SUPABASE_PUBLISHABLE_KEY` is accepted instead. Without it (and `SUPABASE_URL`), every `/admin` route answers 404. |
 | `NEXT_PUBLIC_SERVICE_CALL_CLIENT` | browser | no | Set to `mock` to run the wizard with no backend (nothing is saved). Unset = real API. |
 
 ¹ One of the two keys is required. Without `SUPABASE_URL` and a key, the API
@@ -51,12 +52,19 @@ and service-role key, and the bucket name `service-evidence` is a constant in
 code and in migration 0002. The browser never receives Supabase credentials:
 it gets only per-object signed upload URLs and the per-request upload token.
 
+**Phase 5 added no new variables.** The dashboard reads `SUPABASE_ANON_KEY`
+(already present in Development and Preview from the Supabase integration)
+server-side for staff Auth; it does not use `SERVICE_REQUESTS_ADMIN_TOKEN`.
+Production has none of these, so `/admin` is absent there. A full
+name/purpose/sensitivity/provider table for handover is in
+[HANDOVER.md](./HANDOVER.md#c-environment-variables).
+
 ## Variables the Supabase integration also adds
 
 The Vercel Marketplace Supabase integration injects further variables
 (Postgres connection strings, the anon key, `NEXT_PUBLIC_SUPABASE_*`). The
-service-request code does not use them. In particular, nothing in the browser
-uses the anon key. Even if it were used, row level security blocks all access.
+service-request code does not use them (except `SUPABASE_ANON_KEY`, server-side,
+for staff Auth since Phase 5). In particular, nothing in the browser uses the anon key. Even if it were used, row level security blocks all access.
 
 `POSTGRES_URL_NON_POOLING` (if present) is the convenient connection string
 for applying migrations with `psql`.

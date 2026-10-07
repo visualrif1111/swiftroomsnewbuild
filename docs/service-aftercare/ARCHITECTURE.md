@@ -138,6 +138,22 @@ sweep (admin endpoint; no cron yet) ─┘          manual reprocess (admin) ─
 - Reports are versioned and their AI content is immutable. The original
   submission and media remain the source records.
 
+## Staff dashboard (Phase 5)
+
+Full detail: [DASHBOARD.md](./DASHBOARD.md); portability: [HANDOVER.md](./HANDOVER.md).
+
+```
+/admin/sign-in ─ email code ─ allow-list ─ TOTP (aal2, ≤ 12 h) ─▶ /admin/service (inbox) ─▶ /admin/service/[reference]
+   every page / action / data function / evidence route: requireStaff()   (proxy.ts only refreshes cookies)
+   status change ─▶ change_service_request_status()  (matrix, role, note, expected status — in SQL)
+   AI review     ─▶ review_service_ai_report()       (original AI report immutable; review history append-only)
+   evidence      ─▶ /admin/service/[ref]/media/[id] ─▶ EvidenceAccess ─▶ 300 s signed URL
+```
+
+Presentation (`src/components/service-dashboard`) ← routes/actions (`src/app/admin`) ←
+domain + auth + data + media modules (`src/lib/service-dashboard`). Supabase Auth
+sits behind `StaffAuthProvider`, storage behind `EvidenceAccess`.
+
 ## Security
 
 - The service-role key lives only in server environment variables and is read

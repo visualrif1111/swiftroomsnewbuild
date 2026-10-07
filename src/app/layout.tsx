@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import LenisProvider from "@/components/layout/LenisProvider";
 import StickyMobileCTA from "@/components/layout/StickyMobileCTA";
 import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
+import PublicChrome from "@/components/layout/PublicChrome";
 import { CTAFormProvider } from "@/components/forms/CTAFormProvider";
 import { SanityLive } from "@/sanity/lib/live";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -149,11 +150,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         <CTAFormProvider>
           <LenisProvider>
-            <Navbar nav={settings.navigation} quoteLabel={settings.cta.quoteLabel} />
+            <PublicChrome>
+              <Navbar nav={settings.navigation} quoteLabel={settings.cta.quoteLabel} />
+            </PublicChrome>
             <main>{children}</main>
-            <Footer />
-            <StickyMobileCTA />
-            <WhatsAppFloat />
+            <PublicChrome>
+              <Footer />
+              <StickyMobileCTA />
+              <WhatsAppFloat />
+            </PublicChrome>
           </LenisProvider>
         </CTAFormProvider>
         {/* Visual Editing overlays + live preview — only mounted in Draft Mode

@@ -16,7 +16,8 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 | 4C | Report synthesis from text and voice (OpenAI, scr-1.1) | **APPROVED / CLOSED** (`7e91e03`) |
 | 4D | Photo evidence analysis (per-photo vision, server-injected observations, scr-1.2) | **APPROVED / CLOSED** (`dba9b24`) |
 | 4E | Video evidence analysis (isolated Sandbox media worker, frames + video audio, scr-1.3) | **APPROVED / CLOSED** (`379b42a`) |
-| 4F | AI evaluation, reliability, safety and cost controls (eval-1, scr-1.4) | Implemented: awaiting review ([EVALUATION.md](./EVALUATION.md)) |
+| 4F | AI evaluation, reliability, safety and cost controls (eval-1, scr-1.4) | **APPROVED / CLOSED** (`8410f19`, merged to `main`) |
+| 5 | Internal service team dashboard (staff auth + MFA, inbox, detail, evidence, AI report, status workflow, AI review) | Implemented: awaiting review ([DASHBOARD.md](./DASHBOARD.md), handover: [HANDOVER.md](./HANDOVER.md)) |
 
 ### Phase 3
 
@@ -107,6 +108,17 @@ flow. Design and behaviour: [ARCHITECTURE.md](./ARCHITECTURE.md),
 - No migration. `@vercel/sandbox` is a new direct dependency (imported lazily,
   only when a video is processed).
 
+### Phase 5
+
+- Migration `0004_service_dashboard.sql` applied to **Development only**
+  (2026-10-07, one transaction). Production: no database, no Auth, no staff;
+  `/admin` answers 404 there.
+- Staff auth: Supabase Auth, email one-time code + mandatory TOTP, `staff_members`
+  allow-list, roles STAFF/ADMIN. Behind `StaffAuthProvider` (replaceable).
+- Testing used one synthetic Auth account (`phase5.synthetic.staff@example.com`),
+  created and removed by the E2E scripts. No real staff exist anywhere.
+- Syspree handover and the UAE Host portability assessment: [HANDOVER.md](./HANDOVER.md).
+
 ## ⛔ Pre-production blockers
 
 Do not link `/service-call` publicly until these are resolved.
@@ -175,6 +187,15 @@ Do not link `/service-call` publicly until these are resolved.
       (e.g. ≤ 3 videos analysed per request) and set spend alerts (OpenAI
       project budget, Vercel Sandbox usage).
     - HEIC remains unsupported (many iPhone photos not analysed).
+
+11. **Staff dashboard before real staff use (Phase 5):** custom SMTP for
+    Supabase Auth (the default sender only reaches project team members and is
+    rate limited) with an email template containing the code (`{{ .Token }}`);
+    real staff accounts via the procedure in DASHBOARD.md; a Production
+    database/auth/storage decision (HANDOVER.md — UAE Host assessment).
+12. **Portability (Syspree / UAE Host):** the Phase 4E video worker depends on
+    Vercel Sandbox and must be replaced off Vercel (HANDOVER.md §F/§G). Nothing
+    else in Service & Aftercare is Vercel-specific.
 
 ## Hardening notes (not blocking)
 

@@ -5,6 +5,10 @@ Supabase (Postgres 15+). Schema, applied in order:
 1. `supabase/migrations/0001_service_requests.sql`: requests, customers, status history
 2. `supabase/migrations/0002_service_media.sql`: media, upload tokens, private bucket
 3. `supabase/migrations/0003_service_ai.sql`: AI runs, reports, per-media analyses (Phase 4A, additive)
+4. `supabase/migrations/0004_service_dashboard.sql`: staff allow-list, status transition matrix, audited status changes, AI review history, inbox query (Phase 5, additive)
+
+The data model is plain PostgreSQL; Supabase-specific parts (role names in
+grants, the storage bucket row) are listed in [HANDOVER.md](./HANDOVER.md#f-portability-matrix).
 
 ## Entities
 
@@ -322,11 +326,34 @@ editor, or `psql "$POSTGRES_URL_NON_POOLING" -f <file>`):
 1. `supabase/migrations/0001_service_requests.sql`
 2. `supabase/migrations/0002_service_media.sql`: also creates the private bucket
 3. `supabase/migrations/0003_service_ai.sql`: AI processing (additive; no backfill)
+4. `supabase/migrations/0004_service_dashboard.sql`: staff dashboard (additive; no backfill)
 
 None is idempotent: they create types and tables, so run each once per
-database. The development database has all three applied (0003 on
-2026-10-05, in one transaction). Production has none yet.
+database. The development database has all four applied (0003 on
+2026-10-05, 0004 on 2026-10-07, each in one transaction). **Production has none.**
 
-`npm test` applies all three to an in-process Postgres (PGlite) on every run,
+`npm test` applies all four to an in-process Postgres (PGlite) on every run,
 with Supabase's roles and default grants, and checks that 0003 leaves the
-Phase 1–3 schema identical.
+Phase 1–3 schema identical and that 0004 only adds the two `status_history`
+audit columns to earlier tables.
+
+## Phase 5: staff dashboard (0004)
+
+| object | purpose |
+|---|---|
+| `staff_role` enum | `STAFF`, `ADMIN` |
+| `staff_members` | allow-list: `auth_user_id` (auth provider user id; **no FK to `auth.users`**, so the auth provider can change), `display_name`, `role`, `active`, `deactivated_at` |
+| `service_status_transitions` | the approved matrix, 28 rows (`from_status`, `to_status`, `min_role`, `note_required`); statement trigger rejects any change |
+| `status_history.actor_staff_id`, `.actor_role` | who changed the status and their role at the time (null for customer/system rows); check: both or neither |
+| `status_history_guard` | history is append-only: no update; delete only by cascade from its request |
+| `service_requests_status_guard` | `status` changes only inside `change_service_request_status` (transaction-local flag `swiftrooms.status_change`) |
+| `change_service_request_status(request, expected_from, to, auth_user_id, note)` | the one way to change status: active staff → row lock → expected status (`status_changed`) → matrix + role (`transition_not_allowed`) → note (`note_required`, `note_invalid`: 3–2,000 chars) → update + history row (`changed_by = staff:<id>`, actor id, role, note) |
+| `service_ai_report_reviews` | append-only review history: status, reviewer id/role, notes, `edited_report` (EDITED only); one current review per report (partial unique index); superseded rows keep `superseded_at/by` |
+| `service_ai_reports_review_guard` | report review columns change only inside `review_service_ai_report` (flag `swiftrooms.review_change`) |
+| `review_service_ai_report(report, expected_status, status, auth_user_id, notes, edited_report)` | APPROVED/EDITED/REJECTED; current version only (`report_superseded`); expected status (`review_changed`); replacing a review is ADMIN-only and needs a note; REJECTED needs a note; mirrors the result onto the report row |
+| `list_service_requests(search, statuses, urgencies, products, from, to, ai_states, sort, limit, offset)` | inbox query with total count; AI state from the latest run, urgency from the current report; LIKE wildcards escaped; limit capped at 100 |
+| `require_active_staff`, `normalise_staff_note` | helpers |
+
+RLS is enabled on the new tables with no policies; `anon`/`authenticated` get
+nothing; every function is `EXECUTE`-able by `service_role` only. Errors raised
+for rule violations use SQLSTATE `P0001` with a short code as the message.

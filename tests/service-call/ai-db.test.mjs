@@ -56,7 +56,8 @@ test("RLS on, no policies, no browser-role privileges; service_role only", async
 
 test("0003 is additive: Phase 1–3 tables, columns, constraints, triggers and functions are identical", async () => {
   const before = await freshDatabase({ upTo: "0002" });
-  const after = await freshDatabase();
+  // 0003 alone; later migrations (0004 audit columns) are checked by their own additivity test.
+  const after = await freshDatabase({ upTo: "0003" });
   const shape = async (db) => ({
     columns: (await db.query("select table_name, column_name, data_type, is_nullable, column_default from information_schema.columns where table_schema = 'public' and table_name in ('customers','service_requests','status_history','service_reference_counters','service_media') order by 1, 2")).rows,
     constraints: (await db.query("select conrelid::regclass::text as t, conname, pg_get_constraintdef(oid) as def from pg_constraint where conrelid::regclass::text in ('customers','service_requests','status_history','service_reference_counters','service_media') order by 1, 2")).rows,
@@ -199,9 +200,23 @@ test("reports: AI content and provenance immutable; review fields settable; no d
   for (const set of ["ai_report = '{\"x\":1}'", "version = 5", "provider = 'other'", "models = '{\"a\":\"b\"}'", "prompt_version = 'p2'", "input_fingerprint = 'x'", "generated_at = now() - interval '1 day'"]) {
     await rejects(db.query(`update service_ai_reports set ${set} where id = $1`, [rep.id]), /immutable/);
   }
-  await rejects(db.query("update service_ai_reports set review_status = 'APPROVED' where id = $1", [rep.id]), /check constraint/);
-  await rejects(db.query("update service_ai_reports set review_status = 'EDITED', reviewed_by = 's', reviewed_at = now() where id = $1", [rep.id]), /check constraint/);
-  await db.query("update service_ai_reports set review_status = 'EDITED', reviewed_by = 'staff-1', reviewed_at = now(), reviewed_report = '{\"content\":{\"edited\":true}}' where id = $1", [rep.id]);
+  // Since 0004 (Phase 5) review fields change only through review_service_ai_report()…
+  await rejects(db.query("update service_ai_reports set review_status = 'APPROVED', reviewed_by = 's', reviewed_at = now() where id = $1", [rep.id]), /review_change_requires_function/);
+  // …and the 0003 check constraints still hold on that path (the function's transaction flag).
+  const asReviewFunction = async (sql) => {
+    await db.exec("begin");
+    try {
+      await db.query("select set_config('swiftrooms.review_change', 'on', true)");
+      await db.query(sql, [rep.id]);
+      await db.exec("commit");
+    } catch (e) {
+      await db.exec("rollback");
+      throw e;
+    }
+  };
+  await rejects(asReviewFunction("update service_ai_reports set review_status = 'APPROVED' where id = $1"), /check constraint/);
+  await rejects(asReviewFunction("update service_ai_reports set review_status = 'EDITED', reviewed_by = 's', reviewed_at = now() where id = $1"), /check constraint/);
+  await asReviewFunction("update service_ai_reports set review_status = 'EDITED', reviewed_by = 'staff-1', reviewed_at = now(), reviewed_report = '{\"content\":{\"edited\":true}}' where id = $1");
   const after = await one(db, "select ai_report, reviewed_report, review_status from service_ai_reports where id = $1", [rep.id]);
   assert.deepEqual(after.ai_report, { content: { n: 1 } }, "original AI output preserved");
   assert.deepEqual(after.reviewed_report, { content: { edited: true } });
@@ -216,9 +231,10 @@ test("deleting a service request cascades to runs, reports and analyses", async 
   const [run] = await claim(db, "w");
   await db.query("select * from record_service_media_analysis($1, 'TRANSCRIPT', $2, 'COMPLETED', 'stub', 'm', 'p', null, 'text', 'en', null, '{}', $3)", [m.id, FP("c"), run.id]);
   await complete(db, run.id, "w");
-  await db.query("delete from status_history where service_request_id = $1", [r.id]);
+  // Since 0004 history is append-only: it goes only with its request (cascade).
+  await rejects(db.query("delete from status_history where service_request_id = $1", [r.id]), /append-only/);
   await db.query("delete from service_requests where id = $1", [r.id]);
-  for (const t of ["service_ai_runs", "service_ai_reports", "service_media_analyses", "service_media"]) {
+  for (const t of ["service_ai_runs", "service_ai_reports", "service_media_analyses", "service_media", "status_history"]) {
     assert.equal((await one(db, `select count(*)::int as n from ${t}`)).n, 0, t);
   }
 });

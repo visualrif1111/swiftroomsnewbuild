@@ -213,8 +213,9 @@ Phase 3 adds `media`: each file with `type`, `mimeType`, `originalFilename`,
 files a **`signedUrl` valid for 300 seconds** (`signedUrlExpiresInSeconds`).
 These are never public URLs.
 
-The staff dashboard (later phase) will replace this with proper staff
-authentication.
+Staff now use the dashboard (Phase 5, [DASHBOARD.md](./DASHBOARD.md)), which has
+its own per-person authentication and does not use this token. This endpoint
+remains for testing only.
 
 ## POST /api/service-requests/maintenance/cleanup-media
 
@@ -265,6 +266,15 @@ when misconfigured. Run outcomes:
 - `EVIDENCE_PREPARED`: no report. `errorCode` is `insufficient_text_for_report` (nothing the customer said in words) or `report_stage_not_available`.
 - `FAILED`, `REQUEUED` or `LOST_LEASE`. No report content. **No cron is
 configured yet.**
+
+## Staff dashboard (Phase 5)
+
+Pages and server actions under `/admin`, authenticated per person (email code +
+mandatory TOTP, `staff_members` allow-list). Not a JSON API: see
+[DASHBOARD.md](./DASHBOARD.md) and the contract table in
+[HANDOVER.md](./HANDOVER.md#b-api-contract). Evidence for staff is served by
+`GET /admin/service/:reference/media/:mediaId` (302 to a 300-second signed URL,
+or 401/404).
 
 ## Example
 

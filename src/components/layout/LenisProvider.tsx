@@ -7,8 +7,11 @@ import Lenis from "lenis";
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
+  // The staff dashboard has its own scroll areas; smooth scrolling would fight them.
+  const disabled = pathname === "/admin" || pathname.startsWith("/admin/");
 
   useEffect(() => {
+    if (disabled) return;
     // Touch devices have native momentum scroll — Lenis fights it and causes glitches
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
@@ -32,7 +35,7 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
       lenisRef.current = null;
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [disabled]);
 
   // Reset scroll to the top on every route change (Lenis otherwise keeps the
   // previous scroll position, and persistent layout prevents the native reset).
